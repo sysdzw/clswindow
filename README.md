@@ -5,8 +5,11 @@ vb6自动化操作窗体程序，可以让你在vb中自由控制其他程序
 
 
 '==============================================================================================
+
 '名    称：windows窗体控制类v2.1
+
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
+
 '使用范例：Dim window As New clsWindow
 '          window.GetWindowByTitle("计算器").closeWindow
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
@@ -47,6 +50,7 @@ vb6自动化操作窗体程序，可以让你在vb中自由控制其他程序
 '               修正函数：GetMatchHwndFromWindow 函数中的一些错误           2014/09/23
 '               增加函数：GetWindowByClassNameEx
 '               增加函数：GetWindowByPID 根据PID取窗口句柄
+
 '               增加函数：GetCaptionByHwnd 根据句柄取得标题
 '               增加函数：SetTop设置窗体置顶，传入参数false则取消           2014/09/24
 '               增加函数：Shake、FadeIn、FadeOut 抖动、淡入、淡出特效
