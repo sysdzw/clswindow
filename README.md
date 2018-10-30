@@ -34,22 +34,13 @@ End If
 v1.9以上版本已经可以使用连写功能。window.GetWindowHwndByTitle("腾讯网迷你版").CloseWindow 这样写是不是很酷呢？
 更多演示案例：
 
-演示程序一（关闭包含“扫雷、蜘蛛纸牌”等系统自带游戏的窗口）：
-http://files.cnblogs.com/sysdzw/clsWindow1.7_demo1.rar
-
-演示程序二（调用系统计算器，点击里面的按钮进行计算）：
-http://files.cnblogs.com/sysdzw/clsWindow1.7_demo2.rar
-
-演示程序三（激活移动外部程序窗口）：
-http://files.cnblogs.com/sysdzw/clsWindow1.7_demo3.rar
-
-演示程序四（调用系统计算器，花样移动出现，效果很好）：
-http://files.cnblogs.com/sysdzw/clsWindow1.7_demo4.rar
-
 类成员以及各个使用方法如下：
 
 
-clsWindow1.7下载地址：
-http://download.csdn.net/detail/sysdzw/5573801
-clsWindow类最新版下载请关注博客：
+clsWindow2.1下载地址：
+https://download.csdn.net/download/sysdzw/10558553
+
+其他一些作品参考：
+https://blog.csdn.net/sysdzw
+
 http://blog.csdn.net/sysdzw/article/details/9083313
