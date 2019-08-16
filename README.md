@@ -13,7 +13,7 @@ clsWindow是VB6环境下使用的一个操作外部程序窗口的类，比如�
 
 ## 使用范例：
 ### 1）关闭腾讯新闻窗口“腾讯网迷你版”。
-``` Vistul Basic
+```vb
 Dim window As New clsWindow
 If window.GetWindowHwndByTitle("腾讯网迷你版") > 0 Then
     window.CloseWindow  '关闭窗口
@@ -29,7 +29,7 @@ If window.GetWindowHwndByTitle("测试.txt - 记事本") > 0 Then
 End If
 ```
 这个看起来也很简单，方法自由还可以使用正则匹配，可以写成下面这样：
-```
+```vb
 Dim window As New clsWindow
 If window.GetWindowHwndByTitleRegExp("测试\.txt.*?") > 0 Then
     MsgBox window.GetElementTextByClassName("Edi", , True)'第三个参数表示是否使用正则，默认为false
@@ -47,7 +47,7 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 
 ## 更新日志
 
-```
+```vb
 '==============================================================================================
 '名    称：windows窗体控制类v2.1
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
