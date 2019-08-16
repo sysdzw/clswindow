@@ -12,25 +12,30 @@ clsWindow是VB6环境下使用的一个操作外部程序窗口的类，比如�
 
 
 
-使用范例：
-1）关闭腾讯新闻窗口“腾讯网迷你版”。
+#使用范例：
+##1）关闭腾讯新闻窗口“腾讯网迷你版”。
+``` Vistul Basic
 Dim window As New clsWindow
 If window.GetWindowHwndByTitle("腾讯网迷你版") > 0 Then
     window.CloseWindow  '关闭窗口
 End If
+```
 以上是不是很简洁呢？
 
-2）获取某个打开的记事本里面的内容。假设记事本标题为“测试.txt - 记事本”，通过SPY等工具查看得知记事本的文本框类名为：Edit，那么我们编写程序如下：
+##2）获取某个打开的记事本里面的内容。假设记事本标题为“测试.txt - 记事本”，通过SPY等工具查看得知记事本的文本框类名为：Edit，那么我们编写程序如下：
+```vb
 Dim window As New clsWindow
 If window.GetWindowHwndByTitle("测试.txt - 记事本") > 0 Then
     MsgBox window.GetElementTextByClassName("Edit")
 End If
+```
 这个看起来也很简单，方法自由还可以使用正则匹配，可以写成下面这样：
+```
 Dim window As New clsWindow
 If window.GetWindowHwndByTitleRegExp("测试\.txt.*?") > 0 Then
     MsgBox window.GetElementTextByClassName("Edi", , True)'第三个参数表示是否使用正则，默认为false
 End If
-
+```
 v1.9以上版本已经可以使用连写功能。window.GetWindowHwndByTitle("腾讯网迷你版").CloseWindow 这样写是不是很酷呢？
 更多演示案例：
 
