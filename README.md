@@ -15,7 +15,7 @@ clsWindow是VB6环境下使用的一个操作外部程序窗口的类，比如�
 ### 1）关闭腾讯新闻窗口“腾讯网迷你版”。
 ```vb
 Dim window As New clsWindow
-If window.GetWindowHwndByTitle("腾讯网迷你版") > 0 Then
+If window.GetWindowHwndByTitle("腾讯网迷你版").hwnd > 0 Then
     window.CloseWindow  '关闭窗口
 End If
 ```
@@ -24,14 +24,14 @@ End If
 ### 2）获取某个打开的记事本里面的内容。假设记事本标题为“测试.txt - 记事本”，通过SPY等工具查看得知记事本的文本框类名为：Edit，那么我们编写程序如下：
 ```vb
 Dim window As New clsWindow
-If window.GetWindowHwndByTitle("测试.txt - 记事本") > 0 Then
+If window.GetWindowHwndByTitle("测试.txt - 记事本").hwnd > 0 Then
     MsgBox window.GetElementTextByClassName("Edit")
 End If
 ```
 这个看起来也很简单，方法自由还可以使用正则匹配，可以写成下面这样：
 ```vb
 Dim window As New clsWindow
-If window.GetWindowHwndByTitleRegExp("测试\.txt.*?") > 0 Then
+If window.GetWindowHwndByTitleRegExp("测试\.txt.*?").hwnd > 0 Then
     MsgBox window.GetElementTextByClassName("Edi", , True)'第三个参数表示是否使用正则，默认为false
 End If
 ```
