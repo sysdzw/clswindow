@@ -587,7 +587,7 @@ Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
@@ -606,7 +606,7 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewTe
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
@@ -631,7 +631,7 @@ Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal in
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
@@ -678,7 +678,7 @@ Public Function GetElementHwndByClassName(ByVal strClassName$, Optional ByVal in
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        GetElementHwndByClassName = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
+        GetElementHwndByClassName = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         GetElementHwndByClassName = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
@@ -694,7 +694,7 @@ Public Function GetElementHwndByText(ByVal strText$, Optional ByVal intIndex = 1
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        GetElementHwndByText = GetMatchHwndFromWindow("^(\d+)\s+\d+\s.*?\s" & strText & "$", intIndex)
+        GetElementHwndByText = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
         GetElementHwndByText = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
@@ -706,7 +706,7 @@ Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s.*?\s" & strText & "$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
@@ -739,7 +739,7 @@ Public Function ClickElementByClassName(ByVal strClassName$, Optional ByVal intI
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
@@ -753,7 +753,7 @@ Public Function ClickElementByText(ByVal strText$, Optional ByVal intIndex = 1, 
     Dim lngControlsHwnd As Long
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s.*?\s" & strText & "$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
@@ -781,14 +781,14 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
     reg.MultiLine = True
     
     If Not UseRegExp Then
-        reg.Pattern = Pattern ' "^(\d+)\s+\d+\s+.*?" & strClassName & "$"
+        reg.Pattern = Pattern ' "^(\d+)\s+[\-\d]+\s+.*?" & strClassName & "$"
         Set matchs = reg.Execute(strControlsInfo)
         If matchs.Count >= intIndex Then
             GetMatchHwndFromWindow = CLng(matchs(intIndex - 1).SubMatches(0))
         End If
     Else '每行结构为="43452836    0   ToolbarWindow32 缩放级别”
         reg.Pattern = "^(\d+)\t\d+\t(.*?)\t(.*?)$" '默认检索获得“ToolbarWindow32”
-        If Not isUseClass Then reg.Pattern = "^(\d+)\t\d+\t.*?\t(.*?)$" '如果不是类名那么就用文本内容进行正则检索“缩放级别”
+        If Not isUseClass Then reg.Pattern = "^(\d+)\t[\-\d]+\t.*?\t(.*?)$" '如果不是类名那么就用文本内容进行正则检索“缩放级别”
         Set matchs = reg.Execute(strControlsInfo)
         For Each match In matchs
             If regTest(match.SubMatches(1), Pattern) Then '匹配的
