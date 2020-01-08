@@ -1,16 +1,3 @@
-VERSION 1.0 CLASS
-BEGIN
-  MultiUse = -1  'True
-  Persistable = 0  'NotPersistable
-  DataBindingBehavior = 0  'vbNone
-  DataSourceBehavior  = 0  'vbNone
-  MTSTransactionMode  = 0  'NotAnMTSObject
-END
-Attribute VB_Name = "clsWindow"
-Attribute VB_GlobalNameSpace = False
-Attribute VB_Creatable = True
-Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
 '==============================================================================================
 '名    称：windows窗体控制类v2.1
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
@@ -22,22 +9,22 @@ Attribute VB_Exposed = False
 '          http://blog.csdn.net/sysdzw
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
-'版    本：V1.0 初版                                                        2012/12/03
-'          V1.1 修正了几个正则相关的函数，调整了部分类结构                  2013/05/28
-'          V1.2 增加属性Caption，可以获取或设置当前标题栏                   2013/05/29
-'          V1.3 增加了方法Focus，可以激活当前窗口                           2013/06/01
+'版    本：V1.0 初版                                                           2012/12/03
+'          V1.1 修正了几个正则相关的函数，调整了部分类结构                       2013/05/28
+'          V1.2 增加属性Caption，可以获取或设置当前标题栏                        2013/05/29
+'          V1.3 增加了方法Focus，可以激活当前窗口                               2013/06/01
 '               增加了方法Left,Top,Width,Height,Move，处理窗口位置等
-'          V1.4 增加了窗口位置调整的几个函数                                2013/06/04
+'          V1.4 增加了窗口位置调整的几个函数                                    2013/06/04
 '               增加了得到应用程序路径的函数AppName
 '               增加了得到应用程序启动参数的函数AppCommandLine
-'          V1.5 增加了窗口最大最小化，隐藏显示正常的几个函数                2013/06/06
+'          V1.5 增加了窗口最大最小化，隐藏显示正常的几个函数                     2013/06/06
 '               增加了获取控件相关函数是否使用正则的参数UseRegExp默认F
-'          V1.6 将Left，Top函数改为属性，可获得可设置                       2013/06/10
-'          V1.7 增加函数：CloseApp 结束进程                                 2013/06/13
+'          V1.6 将Left，Top函数改为属性，可获得可设置                           2013/06/10
+'          V1.7 增加函数：CloseApp 结束进程                                    2013/06/13
 '               修正了部分跟正则匹配相关的函数
 '               增加函数：GetElementTextByText
 '               增加函数：GetElementHwndByText
-'          V1.8 增加函数：GetWindowByClassName                              2013/06/26
+'          V1.8 增加函数：GetWindowByClassName                                 2013/06/26
 '               增加函数：GetWindowByClassNameEx
 '               增加函数：GetWindowByAppName
 '               增加私有变量hWnd_
@@ -50,23 +37,25 @@ Attribute VB_Exposed = False
 '                 CheckWindow, Load, WindowState, Visible, hDC, ZOrder
 '                 AlphaBlend, Enabled, Refresh, TransparentColor
 '               采纳wwb网友的部分意见，将句柄变量改为hWnd_，但是hWnd作为公共属性
-'          V1.9 修正函数：GetMatchHwndFromWindow 正则表达式的错误           2013/08/07
-'               修正函数：GetMatchHwndFromWindow 函数中的一些错误           2014/09/23
+'          V1.9 修正函数：GetMatchHwndFromWindow 正则表达式的错误               2013/08/07
+'               修正函数：GetMatchHwndFromWindow 函数中的一些错误               2014/09/23
 '               增加函数：GetWindowByClassNameEx
 '               增加函数：GetWindowByPID 根据PID取窗口句柄
 '               增加函数：GetCaptionByHwnd 根据句柄取得标题
-'               增加函数：SetTop设置窗体置顶，传入参数false则取消           2014/09/24
+'               增加函数：SetTop设置窗体置顶，传入参数false则取消                2014/09/24
 '               增加函数：Shake、FadeIn、FadeOut 抖动、淡入、淡出特效
-'          V2.0 修正函数：GetWindowByPID 遍历窗体Win7下有一些问题           2015/09/29
+'          V2.0 修正函数：GetWindowByPID 遍历窗体Win7下有一些问题               2015/09/29
 '               修正函数：GetWindowByAppName 遍历窗体Win7下有一些问题
 '               修正函数：GetWindowByAppNameEx 遍历窗体Win7下有一些问题
-'          V2.1 修正函数：ClickPoint 增加位置模式参数相对和绝对，默认相对   2018/06/05
+'          V2.1 修正函数：ClickPoint 增加位置模式参数相对和绝对，默认相对        2018/06/05
 '               增加函数：SelectComboBoxIndex 根据指定的index选择下拉框中的项
 '                         上述方法得到网友Chen8013的不少帮助，特此感谢
-'               增加函数：GetWindowByHwnd 根据指定的句柄确定窗口            2018/07/22
+'               增加函数：GetWindowByHwnd 根据指定的句柄确定窗口                2018/07/22
 '               增加函数：GetWindowByCursorPos 根据当前光标获取窗口（控件）
 '               增加函数：GetWindowByPoint 根据指定的位置获取窗口（控件）
-'               升级ClickPoint函数，支持点击前后分别延时，默认延时为0       2018/07/23
+'               升级ClickPoint函数，支持点击前后分别延时，默认延时为0            2018/07/23
+'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了正则       2020/02/08
+
 '==============================================================================================
 Option Explicit
 
@@ -98,7 +87,7 @@ End Property
 '得到窗口的Left位置
 Public Property Get Left() As Long
     Dim rect As rect
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         GetWindowRect hWnd_, rect
         Left = rect.Left
     Else
@@ -112,7 +101,7 @@ End Property
 '得到窗口的Top位置
 Public Property Get Top() As Long
     Dim rect As rect
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         GetWindowRect hWnd_, rect
         Top = rect.Top
     Else
@@ -126,7 +115,7 @@ End Property
 '得到窗口的Width大小
 Public Property Get Width() As Long
     Dim rect As rect
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         GetWindowRect hWnd_, rect
         Width = rect.Right - rect.Left
     Else
@@ -140,7 +129,7 @@ End Property
 '得到窗口的Height大小
 Public Property Get Height() As Long
     Dim rect As rect
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         GetWindowRect hWnd_, rect
         Height = rect.Bottom - rect.Top
     Else
@@ -153,37 +142,37 @@ Public Property Let Height(ByVal lngHeight As Long)
 End Property
 '窗口置前
 Public Function SetPosFront() As Long
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         SetPosFront = SetWindowPos(hWnd_, -1, 0, 0, 0, 0, 3)
     End If
 End Function
 '窗口置后
 Public Function SetPosBottom() As Long
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         SetPosBottom = SetWindowPos(hWnd_, 1, 0, 0, 0, 0, 3)
     End If
 End Function
 '设置窗口位置正常
 Public Function SetPosNormal() As Long
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         SetPosNormal = SetWindowPos(hWnd_, -2, 0, 0, 0, 0, 3)
     End If
 End Function
 '设置窗口最小化
 Public Function Minimized() As Long
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         Minimized = ShowWindow(hWnd_, SW_SHOWMINIMIZED)
     End If
 End Function
 '设置窗口最大化
 Public Function Maximized() As Long
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         Maximized = ShowWindow(hWnd_, SW_SHOWMAXIMIZED)
     End If
 End Function
 '设置窗口位置隐藏
 Public Function Hide() As Long
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         Hide = ShowWindow(hWnd_, SW_HIDE)
     End If
 End Function
@@ -196,13 +185,13 @@ End Function
 'Public Const SW_NORMAL = 1
 'Public Const SW_SHOWNORMAL = 1
 Public Function Show(Optional ByVal ShowStatus As VbAppWinStyle = 5) As Long '默认是5，直接显示
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         Show = ShowWindow(hWnd_, ShowStatus)
     End If
 End Function
 '设置窗口正常显示
 Public Function Normal() As Long
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         Normal = ShowWindow(hWnd_, SW_NORMAL)
     End If
 End Function
@@ -229,7 +218,7 @@ End Sub
 Public Function ProcessID(Optional ByVal my_hWnd) As Long
     Dim l&
     If IsMissing(my_hWnd) Then
-        If hWnd_ > 0 Then GetWindowThreadProcessId hWnd_, l
+        If hWnd_ <> 0 Then GetWindowThreadProcessId hWnd_, l
     Else
         GetWindowThreadProcessId my_hWnd, l
     End If
@@ -240,7 +229,7 @@ Public Function AppPath(Optional ByVal hwn1) As String
     Dim dwProcessID As Long, hProcess As Long, hModule As Long
     Dim nSize As Long
     If IsMissing(hwn1) Then '如果没写则表示处理当前存储的句柄
-        If hWnd_ > 0 Then dwProcessID = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
+        If hWnd_ <> 0 Then dwProcessID = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
     Else
         dwProcessID = ProcessID(hwn1)
     End If
@@ -255,7 +244,7 @@ Public Function AppName(Optional ByVal hwnd1) As String
     Dim v
     Static i%
     If IsMissing(hwnd1) Then
-        If hWnd_ > 0 Then v = Split(AppPath, "\")
+        If hWnd_ <> 0 Then v = Split(AppPath, "\")
     Else
         v = Split(AppPath(hwnd1), "\")
     End If
@@ -264,7 +253,7 @@ Public Function AppName(Optional ByVal hwnd1) As String
 End Function
 '得到exe文件的启动参数
 Public Function AppCommandLine(Optional ByVal strAppName) As String
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         Dim objWMIService As Object
         Dim colProcessList As Object
         Dim objProcess As Object
@@ -302,7 +291,7 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
             
     Do
         hWnd_ = FindWindow(vbNullString, strTitle)
-        If hWnd_ > 0 Then Exit Do
+        If hWnd_ <> 0 Then Exit Do
 
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '未发现关键字为 strTitle
@@ -370,7 +359,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
             
     Do
         hWnd_ = FindWindow(strClassName, vbNullString)
-        If hWnd_ > 0 Then Exit Do
+        If hWnd_ <> 0 Then Exit Do
 
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strClassName
@@ -461,7 +450,7 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
             DoEvents
         Loop
-        If hWnd_ > 0 Then Exit Do
+        If hWnd_ <> 0 Then Exit Do
 
         WAIT DelayOneTime
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
@@ -587,12 +576,12 @@ Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
     
-    If lngControlsHwnd > 0 Then
+    If lngControlsHwnd <> 0 Then
         SendMessage lngControlsHwnd, WM_SETTEXT, 0&, ByVal strNewText
         SetElementTextByClassName = True
     Else
@@ -606,12 +595,12 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewTe
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
     
-    If lngControlsHwnd > 0 Then
+    If lngControlsHwnd <> 0 Then
 '    MsgBox GetElementTextByClassName(strClassName, intIndex, UseRegExp)
         strNewText = RTrim(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strNewText
         writeToFile "xxxx.txt", strNewText & vbCrLf & RTrim(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strNewText
@@ -631,12 +620,12 @@ Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal in
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
     
-    If lngControlsHwnd > 0 Then
+    If lngControlsHwnd <> 0 Then
         SendMessage lngControlsHwnd, &HD, 64000, Txt(0)
         GetElementTextByClassName = StrConv(Txt, vbUnicode)
         GetElementTextByClassName = Left(GetElementTextByClassName, InStr(GetElementTextByClassName, Chr(0)) - 1)
@@ -655,12 +644,12 @@ Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
     
-    If lngControlsHwnd > 0 Then
+    If lngControlsHwnd <> 0 Then
         SendMessage lngControlsHwnd, &HD, 64000, Txt(0)
         GetElementTextByText = StrConv(Txt, vbUnicode)
     Else
@@ -678,7 +667,7 @@ Public Function GetElementHwndByClassName(ByVal strClassName$, Optional ByVal in
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        GetElementHwndByClassName = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
+        GetElementHwndByClassName = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         GetElementHwndByClassName = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
@@ -694,7 +683,7 @@ Public Function GetElementHwndByText(ByVal strText$, Optional ByVal intIndex = 1
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        GetElementHwndByText = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
+        GetElementHwndByText = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
         GetElementHwndByText = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
@@ -706,11 +695,11 @@ Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
-    If lngControlsHwnd > 0 Then
+    If lngControlsHwnd <> 0 Then
         SendMessage lngControlsHwnd, WM_SETTEXT, 0&, ByVal strNewText
         SetElementTextByText = True
     Else
@@ -720,17 +709,22 @@ End Function
 
 '设置当前窗口的标题栏文字
 Public Property Let Caption(ByVal strNewText As String)
-    If hWnd_ > 0 Then
+    If hWnd_ <> 0 Then
         SendMessage hWnd_, WM_SETTEXT, 0&, ByVal strNewText
     End If
 End Property
 '得到当前窗口的标题栏文字
 Public Property Get Caption() As String
-    Dim l&, strCaption$
-    l = GetWindowTextLength(hWnd_)
-    strCaption = Space(l)
-    GetWindowText hWnd_, strCaption, l + 1
-    Caption = strCaption
+'    Dim l&, strCaption$
+'    l = GetWindowTextLength(hWnd_)
+'    strCaption = Space(l)
+'    GetWindowText hWnd_, strCaption, l + 1
+'    Caption = strCaption
+    
+    Dim Txt2(64000) As Byte, strCaption As String
+    SendMessage hWnd_, WM_GETTEXT, 64000, Txt2(0)
+    strCaption = StrConv(Txt2, vbUnicode)
+    Caption = Left$(strCaption, InStr(strCaption, Chr$(0)) - 1)
 End Property
 
 '根据控件的类名点击控件
@@ -739,13 +733,12 @@ Public Function ClickElementByClassName(ByVal strClassName$, Optional ByVal intI
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s" & strClassName & "\s.*?$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s" & strClassName & "\s.*?$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
-    If lngControlsHwnd > 0 Then
+    If lngControlsHwnd <> 0 Then
         ClickElementByClassName = PostMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
-'        ClickElementByClassName = SendMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
     End If
 End Function
 '根据控件的显示文字点击控件
@@ -753,11 +746,11 @@ Public Function ClickElementByText(ByVal strText$, Optional ByVal intIndex = 1, 
     Dim lngControlsHwnd As Long
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^([-\d]+)\s+[-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
-    If lngControlsHwnd > 0 Then
+    If lngControlsHwnd <> 0 Then
         ClickElementByText = PostMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
     Else
         ClickElementByText = 0
@@ -781,14 +774,14 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
     reg.MultiLine = True
     
     If Not UseRegExp Then
-        reg.Pattern = Pattern ' "^(\d+)\s+[\-\d]+\s+.*?" & strClassName & "$"
+        reg.Pattern = Pattern
         Set matchs = reg.Execute(strControlsInfo)
         If matchs.Count >= intIndex Then
             GetMatchHwndFromWindow = CLng(matchs(intIndex - 1).SubMatches(0))
         End If
     Else '每行结构为="43452836    0   ToolbarWindow32 缩放级别”
-        reg.Pattern = "^(\d+)\t\d+\t(.*?)\t(.*?)$" '默认检索获得“ToolbarWindow32”
-        If Not isUseClass Then reg.Pattern = "^(\d+)\t[\-\d]+\t.*?\t(.*?)$" '如果不是类名那么就用文本内容进行正则检索“缩放级别”
+        reg.Pattern = "^([-\d]+)\t[-\d]+\t(.*?)\t(.*?)$" '默认检索获得“ToolbarWindow32”
+        If Not isUseClass Then reg.Pattern = "^([-\d]+)\t[-\d]+\t.*?\t(.*?)$" '如果不是类名那么就用文本内容进行正则检索“缩放级别”
         Set matchs = reg.Execute(strControlsInfo)
         For Each match In matchs
             If regTest(match.SubMatches(1), Pattern) Then '匹配的
@@ -835,6 +828,11 @@ Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enum
         WAIT delayMilliSecondsAfter
         clickTimes = clickTimes - 1
     Loop
+End Sub
+
+Public Sub ClickPoint2()
+    mouse_event MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0
+    mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
 End Sub
 '以下是几个特效的方法
 '特效1：窗体抖动
