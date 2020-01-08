@@ -12,68 +12,68 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '==============================================================================================
-'Ãû    ³Æ£ºwindows´°Ìå¿ØÖÆÀàv2.1
-'Ãè    Êö£ºÒ»¸ö²Ù×÷windows´°¿ÚµÄÀà£¬¿É¶Ô´°¿Ú½øĞĞºÜ¶à³£ÓÃµÄ²Ù×÷(ÀàÃûÎªclsWindow)
-'Ê¹ÓÃ·¶Àı£ºDim window As New clsWindow
-'          window.GetWindowByTitle("¼ÆËãÆ÷").closeWindow
-'±à    ³Ì£ºsysdzw Ô­´´¿ª·¢£¬Èç¹ûÓĞĞèÒª¶ÔÄ£¿éÀ©³ä»ò¸üĞÂµÄ»°ÇëÓÊÏä·¢ÎÒÒ»·İ£¬¹²Í¬Î¬»¤
-'·¢²¼ÈÕÆÚ£º2013/06/01
-'²©    ¿Í£ºhttp://blog.163.com/sysdzw
+'å    ç§°ï¼šwindowsçª—ä½“æ§åˆ¶ç±»v2.1
+'æ    è¿°ï¼šä¸€ä¸ªæ“ä½œwindowsçª—å£çš„ç±»ï¼Œå¯å¯¹çª—å£è¿›è¡Œå¾ˆå¤šå¸¸ç”¨çš„æ“ä½œ(ç±»åä¸ºclsWindow)
+'ä½¿ç”¨èŒƒä¾‹ï¼šDim window As New clsWindow
+'          window.GetWindowByTitle("è®¡ç®—å™¨").closeWindow
+'ç¼–    ç¨‹ï¼šsysdzw åŸåˆ›å¼€å‘ï¼Œå¦‚æœæœ‰éœ€è¦å¯¹æ¨¡å—æ‰©å……æˆ–æ›´æ–°çš„è¯è¯·é‚®ç®±å‘æˆ‘ä¸€ä»½ï¼Œå…±åŒç»´æŠ¤
+'å‘å¸ƒæ—¥æœŸï¼š2013/06/01
+'åš    å®¢ï¼šhttp://blog.163.com/sysdzw
 '          http://blog.csdn.net/sysdzw
-'Email   £ºsysdzw@163.com
-'QQ      £º171977759
-'°æ    ±¾£ºV1.0 ³õ°æ                                                        2012/12/03
-'          V1.1 ĞŞÕıÁË¼¸¸öÕıÔòÏà¹ØµÄº¯Êı£¬µ÷ÕûÁË²¿·ÖÀà½á¹¹                  2013/05/28
-'          V1.2 Ôö¼ÓÊôĞÔCaption£¬¿ÉÒÔ»ñÈ¡»òÉèÖÃµ±Ç°±êÌâÀ¸                   2013/05/29
-'          V1.3 Ôö¼ÓÁË·½·¨Focus£¬¿ÉÒÔ¼¤»îµ±Ç°´°¿Ú                           2013/06/01
-'               Ôö¼ÓÁË·½·¨Left,Top,Width,Height,Move£¬´¦Àí´°¿ÚÎ»ÖÃµÈ
-'          V1.4 Ôö¼ÓÁË´°¿ÚÎ»ÖÃµ÷ÕûµÄ¼¸¸öº¯Êı                                2013/06/04
-'               Ôö¼ÓÁËµÃµ½Ó¦ÓÃ³ÌĞòÂ·¾¶µÄº¯ÊıAppName
-'               Ôö¼ÓÁËµÃµ½Ó¦ÓÃ³ÌĞòÆô¶¯²ÎÊıµÄº¯ÊıAppCommandLine
-'          V1.5 Ôö¼ÓÁË´°¿Ú×î´ó×îĞ¡»¯£¬Òş²ØÏÔÊ¾Õı³£µÄ¼¸¸öº¯Êı                2013/06/06
-'               Ôö¼ÓÁË»ñÈ¡¿Ø¼şÏà¹Øº¯ÊıÊÇ·ñÊ¹ÓÃÕıÔòµÄ²ÎÊıUseRegExpÄ¬ÈÏF
-'          V1.6 ½«Left£¬Topº¯Êı¸ÄÎªÊôĞÔ£¬¿É»ñµÃ¿ÉÉèÖÃ                       2013/06/10
-'          V1.7 Ôö¼Óº¯Êı£ºCloseApp ½áÊø½ø³Ì                                 2013/06/13
-'               ĞŞÕıÁË²¿·Ö¸úÕıÔòÆ¥ÅäÏà¹ØµÄº¯Êı
-'               Ôö¼Óº¯Êı£ºGetElementTextByText
-'               Ôö¼Óº¯Êı£ºGetElementHwndByText
-'          V1.8 Ôö¼Óº¯Êı£ºGetWindowByClassName                              2013/06/26
-'               Ôö¼Óº¯Êı£ºGetWindowByClassNameEx
-'               Ôö¼Óº¯Êı£ºGetWindowByAppName
-'               Ôö¼ÓË½ÓĞ±äÁ¿hWnd_
-'               Ôö¼ÓÊôĞÔhWnd£¬¿ÉÉèÖÃ£¬µ¥ÉèÖÃÊ±ºò»á¼ì²é£¬·Ç·¨ÔòÉèÖÃÎª0
-'               ¸üĞÂGetWindowByTitleExº¯Êı£¬Ê¹Ö®¿ÉÒÔÑ¡ÔñĞÔÖ§³ÖÕıÔò
-'               É¾³ıGetWindowByTitleRegExpº¯Êı£¬ºÏ²¢µ½ÉÏÃæº¯Êı
-'               Ôö¼ÓSetFocusº¯Êı£¬µ÷ÓÃFocusÊµÏÖ£¬ÎªÁËÊÇ¼æÈİVBÏ°¹ß
-'               À©ÁËProcessID¡¢AppPath¡¢AppName¡¢AppCommandLineÈı¸öº¯Êı£¬¿É´ø²ÎÊı
-'               ÍøÓÑwwb(wwbing@gmail.com)Ìá¹©ÁËÒ»Ğ©º¯ÊıºÍ·½·¨ÊôĞÔ£º
+'Email   ï¼šsysdzw@163.com
+'QQ      ï¼š171977759
+'ç‰ˆ    æœ¬ï¼šV1.0 åˆç‰ˆ                                                        2012/12/03
+'          V1.1 ä¿®æ­£äº†å‡ ä¸ªæ­£åˆ™ç›¸å…³çš„å‡½æ•°ï¼Œè°ƒæ•´äº†éƒ¨åˆ†ç±»ç»“æ„                  2013/05/28
+'          V1.2 å¢åŠ å±æ€§Captionï¼Œå¯ä»¥è·å–æˆ–è®¾ç½®å½“å‰æ ‡é¢˜æ                    2013/05/29
+'          V1.3 å¢åŠ äº†æ–¹æ³•Focusï¼Œå¯ä»¥æ¿€æ´»å½“å‰çª—å£                           2013/06/01
+'               å¢åŠ äº†æ–¹æ³•Left,Top,Width,Height,Moveï¼Œå¤„ç†çª—å£ä½ç½®ç­‰
+'          V1.4 å¢åŠ äº†çª—å£ä½ç½®è°ƒæ•´çš„å‡ ä¸ªå‡½æ•°                                2013/06/04
+'               å¢åŠ äº†å¾—åˆ°åº”ç”¨ç¨‹åºè·¯å¾„çš„å‡½æ•°AppName
+'               å¢åŠ äº†å¾—åˆ°åº”ç”¨ç¨‹åºå¯åŠ¨å‚æ•°çš„å‡½æ•°AppCommandLine
+'          V1.5 å¢åŠ äº†çª—å£æœ€å¤§æœ€å°åŒ–ï¼Œéšè—æ˜¾ç¤ºæ­£å¸¸çš„å‡ ä¸ªå‡½æ•°                2013/06/06
+'               å¢åŠ äº†è·å–æ§ä»¶ç›¸å…³å‡½æ•°æ˜¯å¦ä½¿ç”¨æ­£åˆ™çš„å‚æ•°UseRegExpé»˜è®¤F
+'          V1.6 å°†Leftï¼ŒTopå‡½æ•°æ”¹ä¸ºå±æ€§ï¼Œå¯è·å¾—å¯è®¾ç½®                       2013/06/10
+'          V1.7 å¢åŠ å‡½æ•°ï¼šCloseApp ç»“æŸè¿›ç¨‹                                 2013/06/13
+'               ä¿®æ­£äº†éƒ¨åˆ†è·Ÿæ­£åˆ™åŒ¹é…ç›¸å…³çš„å‡½æ•°
+'               å¢åŠ å‡½æ•°ï¼šGetElementTextByText
+'               å¢åŠ å‡½æ•°ï¼šGetElementHwndByText
+'          V1.8 å¢åŠ å‡½æ•°ï¼šGetWindowByClassName                              2013/06/26
+'               å¢åŠ å‡½æ•°ï¼šGetWindowByClassNameEx
+'               å¢åŠ å‡½æ•°ï¼šGetWindowByAppName
+'               å¢åŠ ç§æœ‰å˜é‡hWnd_
+'               å¢åŠ å±æ€§hWndï¼Œå¯è®¾ç½®ï¼Œå•è®¾ç½®æ—¶å€™ä¼šæ£€æŸ¥ï¼Œéæ³•åˆ™è®¾ç½®ä¸º0
+'               æ›´æ–°GetWindowByTitleExå‡½æ•°ï¼Œä½¿ä¹‹å¯ä»¥é€‰æ‹©æ€§æ”¯æŒæ­£åˆ™
+'               åˆ é™¤GetWindowByTitleRegExpå‡½æ•°ï¼Œåˆå¹¶åˆ°ä¸Šé¢å‡½æ•°
+'               å¢åŠ SetFocuså‡½æ•°ï¼Œè°ƒç”¨Focuså®ç°ï¼Œä¸ºäº†æ˜¯å…¼å®¹VBä¹ æƒ¯
+'               æ‰©äº†ProcessIDã€AppPathã€AppNameã€AppCommandLineä¸‰ä¸ªå‡½æ•°ï¼Œå¯å¸¦å‚æ•°
+'               ç½‘å‹wwb(wwbing@gmail.com)æä¾›äº†ä¸€äº›å‡½æ•°å’Œæ–¹æ³•å±æ€§ï¼š
 '                 CheckWindow, Load, WindowState, Visible, hDC, ZOrder
 '                 AlphaBlend, Enabled, Refresh, TransparentColor
-'               ²ÉÄÉwwbÍøÓÑµÄ²¿·ÖÒâ¼û£¬½«¾ä±ú±äÁ¿¸ÄÎªhWnd_£¬µ«ÊÇhWnd×÷Îª¹«¹²ÊôĞÔ
-'          V1.9 ĞŞÕıº¯Êı£ºGetMatchHwndFromWindow ÕıÔò±í´ïÊ½µÄ´íÎó           2013/08/07
-'               ĞŞÕıº¯Êı£ºGetMatchHwndFromWindow º¯ÊıÖĞµÄÒ»Ğ©´íÎó           2014/09/23
-'               Ôö¼Óº¯Êı£ºGetWindowByClassNameEx
-'               Ôö¼Óº¯Êı£ºGetWindowByPID ¸ù¾İPIDÈ¡´°¿Ú¾ä±ú
-'               Ôö¼Óº¯Êı£ºGetCaptionByHwnd ¸ù¾İ¾ä±úÈ¡µÃ±êÌâ
-'               Ôö¼Óº¯Êı£ºSetTopÉèÖÃ´°ÌåÖÃ¶¥£¬´«Èë²ÎÊıfalseÔòÈ¡Ïû           2014/09/24
-'               Ôö¼Óº¯Êı£ºShake¡¢FadeIn¡¢FadeOut ¶¶¶¯¡¢µ­Èë¡¢µ­³öÌØĞ§
-'          V2.0 ĞŞÕıº¯Êı£ºGetWindowByPID ±éÀú´°ÌåWin7ÏÂÓĞÒ»Ğ©ÎÊÌâ           2015/09/29
-'               ĞŞÕıº¯Êı£ºGetWindowByAppName ±éÀú´°ÌåWin7ÏÂÓĞÒ»Ğ©ÎÊÌâ
-'               ĞŞÕıº¯Êı£ºGetWindowByAppNameEx ±éÀú´°ÌåWin7ÏÂÓĞÒ»Ğ©ÎÊÌâ
-'          V2.1 ĞŞÕıº¯Êı£ºClickPoint Ôö¼ÓÎ»ÖÃÄ£Ê½²ÎÊıÏà¶ÔºÍ¾ø¶Ô£¬Ä¬ÈÏÏà¶Ô   2018/06/05
-'               Ôö¼Óº¯Êı£ºSelectComboBoxIndex ¸ù¾İÖ¸¶¨µÄindexÑ¡ÔñÏÂÀ­¿òÖĞµÄÏî
-'                         ÉÏÊö·½·¨µÃµ½ÍøÓÑChen8013µÄ²»ÉÙ°ïÖú£¬ÌØ´Ë¸ĞĞ»
-'               Ôö¼Óº¯Êı£ºGetWindowByHwnd ¸ù¾İÖ¸¶¨µÄ¾ä±úÈ·¶¨´°¿Ú            2018/07/22
-'               Ôö¼Óº¯Êı£ºGetWindowByCursorPos ¸ù¾İµ±Ç°¹â±ê»ñÈ¡´°¿Ú£¨¿Ø¼ş£©
-'               Ôö¼Óº¯Êı£ºGetWindowByPoint ¸ù¾İÖ¸¶¨µÄÎ»ÖÃ»ñÈ¡´°¿Ú£¨¿Ø¼ş£©
-'               Éı¼¶ClickPointº¯Êı£¬Ö§³Öµã»÷Ç°ºó·Ö±ğÑÓÊ±£¬Ä¬ÈÏÑÓÊ±Îª0       2018/07/23
+'               é‡‡çº³wwbç½‘å‹çš„éƒ¨åˆ†æ„è§ï¼Œå°†å¥æŸ„å˜é‡æ”¹ä¸ºhWnd_ï¼Œä½†æ˜¯hWndä½œä¸ºå…¬å…±å±æ€§
+'          V1.9 ä¿®æ­£å‡½æ•°ï¼šGetMatchHwndFromWindow æ­£åˆ™è¡¨è¾¾å¼çš„é”™è¯¯           2013/08/07
+'               ä¿®æ­£å‡½æ•°ï¼šGetMatchHwndFromWindow å‡½æ•°ä¸­çš„ä¸€äº›é”™è¯¯           2014/09/23
+'               å¢åŠ å‡½æ•°ï¼šGetWindowByClassNameEx
+'               å¢åŠ å‡½æ•°ï¼šGetWindowByPID æ ¹æ®PIDå–çª—å£å¥æŸ„
+'               å¢åŠ å‡½æ•°ï¼šGetCaptionByHwnd æ ¹æ®å¥æŸ„å–å¾—æ ‡é¢˜
+'               å¢åŠ å‡½æ•°ï¼šSetTopè®¾ç½®çª—ä½“ç½®é¡¶ï¼Œä¼ å…¥å‚æ•°falseåˆ™å–æ¶ˆ           2014/09/24
+'               å¢åŠ å‡½æ•°ï¼šShakeã€FadeInã€FadeOut æŠ–åŠ¨ã€æ·¡å…¥ã€æ·¡å‡ºç‰¹æ•ˆ
+'          V2.0 ä¿®æ­£å‡½æ•°ï¼šGetWindowByPID éå†çª—ä½“Win7ä¸‹æœ‰ä¸€äº›é—®é¢˜           2015/09/29
+'               ä¿®æ­£å‡½æ•°ï¼šGetWindowByAppName éå†çª—ä½“Win7ä¸‹æœ‰ä¸€äº›é—®é¢˜
+'               ä¿®æ­£å‡½æ•°ï¼šGetWindowByAppNameEx éå†çª—ä½“Win7ä¸‹æœ‰ä¸€äº›é—®é¢˜
+'          V2.1 ä¿®æ­£å‡½æ•°ï¼šClickPoint å¢åŠ ä½ç½®æ¨¡å¼å‚æ•°ç›¸å¯¹å’Œç»å¯¹ï¼Œé»˜è®¤ç›¸å¯¹   2018/06/05
+'               å¢åŠ å‡½æ•°ï¼šSelectComboBoxIndex æ ¹æ®æŒ‡å®šçš„indexé€‰æ‹©ä¸‹æ‹‰æ¡†ä¸­çš„é¡¹
+'                         ä¸Šè¿°æ–¹æ³•å¾—åˆ°ç½‘å‹Chen8013çš„ä¸å°‘å¸®åŠ©ï¼Œç‰¹æ­¤æ„Ÿè°¢
+'               å¢åŠ å‡½æ•°ï¼šGetWindowByHwnd æ ¹æ®æŒ‡å®šçš„å¥æŸ„ç¡®å®šçª—å£            2018/07/22
+'               å¢åŠ å‡½æ•°ï¼šGetWindowByCursorPos æ ¹æ®å½“å‰å…‰æ ‡è·å–çª—å£ï¼ˆæ§ä»¶ï¼‰
+'               å¢åŠ å‡½æ•°ï¼šGetWindowByPoint æ ¹æ®æŒ‡å®šçš„ä½ç½®è·å–çª—å£ï¼ˆæ§ä»¶ï¼‰
+'               å‡çº§ClickPointå‡½æ•°ï¼Œæ”¯æŒç‚¹å‡»å‰ååˆ†åˆ«å»¶æ—¶ï¼Œé»˜è®¤å»¶æ—¶ä¸º0       2018/07/23
 '==============================================================================================
 Option Explicit
 
 Private Const DelayOneTime = 500
-Private hWnd_ As Long '´°¿Ú¾ä±ú
-Private wReturn As New clsWindow '×÷Îª·µ»Ø¶ÔÏóÒÔ±ãÁ¬ÓÃ
-Public DebugMe As Boolean '±íÊ¾ÊÇ·ñÆôÓÃµ÷ÊÔÄ£Ê½
+Private hWnd_ As Long 'çª—å£å¥æŸ„
+Private wReturn As New clsWindow 'ä½œä¸ºè¿”å›å¯¹è±¡ä»¥ä¾¿è¿ç”¨
+Public DebugMe As Boolean 'è¡¨ç¤ºæ˜¯å¦å¯ç”¨è°ƒè¯•æ¨¡å¼
 
 Public Function Move(Optional ByVal x, Optional ByVal y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
     If IsMissing(x) Then x = Left
@@ -83,11 +83,11 @@ Public Function Move(Optional ByVal x, Optional ByVal y, Optional ByVal nWidth, 
     Move = MoveWindow(hWnd_, x, y, nWidth, nHeight, True)
 End Function
 
-'µÃµ½µ±Ç°´°¿ÚµÄ¾ä±ú
+'å¾—åˆ°å½“å‰çª—å£çš„å¥æŸ„
 Public Property Get hWnd() As Long
     hWnd = hWnd_
 End Property
-'ÉèÖÃÀàµÄ¾ä±ú
+'è®¾ç½®ç±»çš„å¥æŸ„
 Public Property Let hWnd(ByVal hWnd As Long)
     If IsWindow(hWnd) Then
         hWnd_ = hWnd
@@ -95,7 +95,7 @@ Public Property Let hWnd(ByVal hWnd As Long)
         hWnd_ = 0
     End If
 End Property
-'µÃµ½´°¿ÚµÄLeftÎ»ÖÃ
+'å¾—åˆ°çª—å£çš„Leftä½ç½®
 Public Property Get Left() As Long
     Dim rect As rect
     If hWnd_ > 0 Then
@@ -105,11 +105,11 @@ Public Property Get Left() As Long
         Left = -1
     End If
 End Property
-'ÉèÖÃ´°¿ÚµÄLeftÎ»ÖÃ
+'è®¾ç½®çª—å£çš„Leftä½ç½®
 Public Property Let Left(ByVal lngLeft As Long)
     Move lngLeft
 End Property
-'µÃµ½´°¿ÚµÄTopÎ»ÖÃ
+'å¾—åˆ°çª—å£çš„Topä½ç½®
 Public Property Get Top() As Long
     Dim rect As rect
     If hWnd_ > 0 Then
@@ -119,11 +119,11 @@ Public Property Get Top() As Long
         Top = -1
     End If
 End Property
-'ÉèÖÃ´°¿ÚµÄTopÎ»ÖÃ
+'è®¾ç½®çª—å£çš„Topä½ç½®
 Public Property Let Top(ByVal lngTop As Long)
     Move , lngTop
 End Property
-'µÃµ½´°¿ÚµÄWidth´óĞ¡
+'å¾—åˆ°çª—å£çš„Widthå¤§å°
 Public Property Get Width() As Long
     Dim rect As rect
     If hWnd_ > 0 Then
@@ -133,11 +133,11 @@ Public Property Get Width() As Long
         Width = -1
     End If
 End Property
-'ÉèÖÃ´°¿ÚµÄWidth
+'è®¾ç½®çª—å£çš„Width
 Public Property Let Width(ByVal lngWidth As Long)
     Move , , lngWidth
 End Property
-'µÃµ½´°¿ÚµÄHeight´óĞ¡
+'å¾—åˆ°çª—å£çš„Heightå¤§å°
 Public Property Get Height() As Long
     Dim rect As rect
     If hWnd_ > 0 Then
@@ -147,47 +147,47 @@ Public Property Get Height() As Long
         Height = -1
     End If
 End Property
-'ÉèÖÃ´°¿ÚµÄWidth
+'è®¾ç½®çª—å£çš„Width
 Public Property Let Height(ByVal lngHeight As Long)
     Move , , , lngHeight
 End Property
-'´°¿ÚÖÃÇ°
+'çª—å£ç½®å‰
 Public Function SetPosFront() As Long
     If hWnd_ > 0 Then
         SetPosFront = SetWindowPos(hWnd_, -1, 0, 0, 0, 0, 3)
     End If
 End Function
-'´°¿ÚÖÃºó
+'çª—å£ç½®å
 Public Function SetPosBottom() As Long
     If hWnd_ > 0 Then
         SetPosBottom = SetWindowPos(hWnd_, 1, 0, 0, 0, 0, 3)
     End If
 End Function
-'ÉèÖÃ´°¿ÚÎ»ÖÃÕı³£
+'è®¾ç½®çª—å£ä½ç½®æ­£å¸¸
 Public Function SetPosNormal() As Long
     If hWnd_ > 0 Then
         SetPosNormal = SetWindowPos(hWnd_, -2, 0, 0, 0, 0, 3)
     End If
 End Function
-'ÉèÖÃ´°¿Ú×îĞ¡»¯
+'è®¾ç½®çª—å£æœ€å°åŒ–
 Public Function Minimized() As Long
     If hWnd_ > 0 Then
         Minimized = ShowWindow(hWnd_, SW_SHOWMINIMIZED)
     End If
 End Function
-'ÉèÖÃ´°¿Ú×î´ó»¯
+'è®¾ç½®çª—å£æœ€å¤§åŒ–
 Public Function Maximized() As Long
     If hWnd_ > 0 Then
         Maximized = ShowWindow(hWnd_, SW_SHOWMAXIMIZED)
     End If
 End Function
-'ÉèÖÃ´°¿ÚÎ»ÖÃÒş²Ø
+'è®¾ç½®çª—å£ä½ç½®éšè—
 Public Function Hide() As Long
     If hWnd_ > 0 Then
         Hide = ShowWindow(hWnd_, SW_HIDE)
     End If
 End Function
-'ÉèÖÃ´°¿ÚÏÔÊ¾
+'è®¾ç½®çª—å£æ˜¾ç¤º
 'Public Const SW_MINIMIZE = 6
 'Public Const SW_SHOW = 5
 'Public Const SW_SHOWMAXIMIZED = 3
@@ -195,18 +195,18 @@ End Function
 'Public Const SW_HIDE = 0
 'Public Const SW_NORMAL = 1
 'Public Const SW_SHOWNORMAL = 1
-Public Function Show(Optional ByVal ShowStatus As VbAppWinStyle = 5) As Long 'Ä¬ÈÏÊÇ5£¬Ö±½ÓÏÔÊ¾
+Public Function Show(Optional ByVal ShowStatus As VbAppWinStyle = 5) As Long 'é»˜è®¤æ˜¯5ï¼Œç›´æ¥æ˜¾ç¤º
     If hWnd_ > 0 Then
         Show = ShowWindow(hWnd_, ShowStatus)
     End If
 End Function
-'ÉèÖÃ´°¿ÚÕı³£ÏÔÊ¾
+'è®¾ç½®çª—å£æ­£å¸¸æ˜¾ç¤º
 Public Function Normal() As Long
     If hWnd_ > 0 Then
         Normal = ShowWindow(hWnd_, SW_NORMAL)
     End If
 End Function
-'ÉèÖÃµ±Ç°´°¿ÚÎª»î¶¯´°¿Ú
+'è®¾ç½®å½“å‰çª—å£ä¸ºæ´»åŠ¨çª—å£
 Public Sub Focus()
     Dim hWnd&, hForeWnd&, dwForeID&, dwCurID&
     hWnd = hWnd_
@@ -220,12 +220,12 @@ Public Sub Focus()
     SetForegroundWindow hWnd
     AttachThreadInput dwCurID, dwForeID, False
 End Sub
-'Ö§³ÖºÍVBÖĞÍ¨³£Ãû³ÆµÄ·½·¨
+'æ”¯æŒå’ŒVBä¸­é€šå¸¸åç§°çš„æ–¹æ³•
 Public Sub SetFocus()
     Call Focus
 End Sub
 
-'µÃµ½½ø³Ì±êÊ¶
+'å¾—åˆ°è¿›ç¨‹æ ‡è¯†
 Public Function ProcessID(Optional ByVal my_hWnd) As Long
     Dim l&
     If IsMissing(my_hWnd) Then
@@ -235,11 +235,11 @@ Public Function ProcessID(Optional ByVal my_hWnd) As Long
     End If
     ProcessID = l
 End Function
-'¸ù¾İ´°¿Ú¾ä±úµÃµ½Ó¦ÓÃ³ÌĞòµÄÂ·¾¶
+'æ ¹æ®çª—å£å¥æŸ„å¾—åˆ°åº”ç”¨ç¨‹åºçš„è·¯å¾„
 Public Function AppPath(Optional ByVal hwn1) As String
     Dim dwProcessID As Long, hProcess As Long, hModule As Long
     Dim nSize As Long
-    If IsMissing(hwn1) Then 'Èç¹ûÃ»Ğ´Ôò±íÊ¾´¦Àíµ±Ç°´æ´¢µÄ¾ä±ú
+    If IsMissing(hwn1) Then 'å¦‚æœæ²¡å†™åˆ™è¡¨ç¤ºå¤„ç†å½“å‰å­˜å‚¨çš„å¥æŸ„
         If hWnd_ > 0 Then dwProcessID = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
     Else
         dwProcessID = ProcessID(hwn1)
@@ -250,7 +250,7 @@ Public Function AppPath(Optional ByVal hwn1) As String
     AppPath = Mid(AppPath, 1, nSize)
     Call CloseHandle(hProcess)
 End Function
-'µÃµ½exeÃû×Ö,Èç¹ûÈ±Ê¡¾Í»ñÈ¡×Ô¼ºµÄexeÃû³Æ
+'å¾—åˆ°exeåå­—,å¦‚æœç¼ºçœå°±è·å–è‡ªå·±çš„exeåç§°
 Public Function AppName(Optional ByVal hwnd1) As String
     Dim v
     Static i%
@@ -262,7 +262,7 @@ Public Function AppName(Optional ByVal hwnd1) As String
     i = i + 1
     If UBound(v) >= 0 Then AppName = v(UBound(v))
 End Function
-'µÃµ½exeÎÄ¼şµÄÆô¶¯²ÎÊı
+'å¾—åˆ°exeæ–‡ä»¶çš„å¯åŠ¨å‚æ•°
 Public Function AppCommandLine(Optional ByVal strAppName) As String
     If hWnd_ > 0 Then
         Dim objWMIService As Object
@@ -292,12 +292,12 @@ Public Function AppCommandLine(Optional ByVal strAppName) As String
         End If
     End If
 End Function
-'ÉèÖÃ¸ù¾İ´°Ìå±êÌâµÃµ½´°¿Ú¾ä±ú£¬¿ÉÒÔÖ¸¶¨µÈ´ı¼¸Ãë¼ì²âÖ¸¶¨±êÌâµÄ´°ÌåÊÇ·ñ³öÏÖ£¬Ä¬ÈÏÊÇµÈ´ı60Ãë
+'è®¾ç½®æ ¹æ®çª—ä½“æ ‡é¢˜å¾—åˆ°çª—å£å¥æŸ„ï¼Œå¯ä»¥æŒ‡å®šç­‰å¾…å‡ ç§’æ£€æµ‹æŒ‡å®šæ ‡é¢˜çš„çª—ä½“æ˜¯å¦å‡ºç°ï¼Œé»˜è®¤æ˜¯ç­‰å¾…60ç§’
 Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds& = 60) As clsWindow
     Dim lngDelayCount&
     hWnd_ = 0
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetWindowByTitle±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strTitle=" & strTitle & vbTab & " intWaitSeconds=" & intWaitSeconds, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetWindowByTitleè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strTitle=" & strTitle & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
             
     Do
@@ -305,7 +305,7 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
         If hWnd_ > 0 Then Exit Do
 
         lngDelayCount = lngDelayCount + DelayOneTime
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'Î´·¢ÏÖ¹Ø¼ü×ÖÎª strTitle
+        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'æœªå‘ç°å…³é”®å­—ä¸º strTitle
         WAIT DelayOneTime
         
         hWnd_ = 0
@@ -314,7 +314,7 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
     wReturn.hWnd = hWnd_
     Set GetWindowByTitle = wReturn
 End Function
-'ºÍGetWindowByTitleº¯Êı¹¦ÄÜÀàËÆ£¬Ö»ÊÇÕâ¸öÊÇÄ£ºıÆ¥Åä
+'å’ŒGetWindowByTitleå‡½æ•°åŠŸèƒ½ç±»ä¼¼ï¼Œåªæ˜¯è¿™ä¸ªæ˜¯æ¨¡ç³ŠåŒ¹é…
 Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSeconds& = 60, Optional ByRef hWndAll, Optional isUseRegExp As Boolean = False, Optional ByVal checkPid = "") As clsWindow
     Dim lnghWnd&, l&, lngDelayCount&
     Dim strCaption As String
@@ -322,7 +322,7 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     Dim isMatch As Boolean
     
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetWindowByTitleEx±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strTitle=" & strTitle & vbTab & " intWaitSeconds=" & intWaitSeconds, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetWindowByTitleExè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strTitle=" & strTitle & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
     Do
         hWnd_ = 0
@@ -338,19 +338,19 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
             End If
             If isMatch Then
                 strHwndAllTmp = strHwndAllTmp & CStr(lnghWnd) & " "
-                If checkPid <> "" Then 'Èç¹ûpidÏàµÈ£¬ÓÅÏÈ·Åµ½µÚÒ»¸ö
+                If checkPid <> "" Then 'å¦‚æœpidç›¸ç­‰ï¼Œä¼˜å…ˆæ”¾åˆ°ç¬¬ä¸€ä¸ª
                     If checkPid = ProcessID() Then strHwndAllTmp = lnghWnd & " " & strHwndAllTmp
                 End If
             End If
-        Loop Until lnghWnd = 0 'Õâ²ãloopÊÇ±éÀúËùÓĞ´°¿ÚµÄ
-        If strHwndAllTmp <> "" Then Exit Do 'Èç¹ûÒ»±éÑ­»·µÃµ½½á¹ûÁË¾ÍÍË³ö
+        Loop Until lnghWnd = 0 'è¿™å±‚loopæ˜¯éå†æ‰€æœ‰çª—å£çš„
+        If strHwndAllTmp <> "" Then Exit Do 'å¦‚æœä¸€éå¾ªç¯å¾—åˆ°ç»“æœäº†å°±é€€å‡º
 
         WAIT DelayOneTime
-        lngDelayCount = lngDelayCount + DelayOneTime '¼ÆËãÀÛ¼ÆÑÓÊ±ÁË¶àÉÙ£¬È»ºóºÍÓÃ»§ÉèÖÃµÄÑÓÊ±Ê±¼ä¶Ô±È
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '³¬Ê±Î´·¢ÏÖ¹Ø¼ü×ÖstrTitle
+        lngDelayCount = lngDelayCount + DelayOneTime 'è®¡ç®—ç´¯è®¡å»¶æ—¶äº†å¤šå°‘ï¼Œç„¶åå’Œç”¨æˆ·è®¾ç½®çš„å»¶æ—¶æ—¶é—´å¯¹æ¯”
+        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'è¶…æ—¶æœªå‘ç°å…³é”®å­—strTitle
     Loop
     strHwndAllTmp = Trim(strHwndAllTmp)
-    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'Èç¹ûĞèÒªËÑ¼¯ËùÓĞ¾ä±ú£¬ÄÇÃ´ÔòÊ¹ÓÃÕâ¸ö²ÎÊı·µ»Ø
+    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'å¦‚æœéœ€è¦æœé›†æ‰€æœ‰å¥æŸ„ï¼Œé‚£ä¹ˆåˆ™ä½¿ç”¨è¿™ä¸ªå‚æ•°è¿”å›
 
     If strHwndAllTmp <> "" Then
         wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
@@ -360,12 +360,12 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     Set GetWindowByTitleEx = wReturn
     hWnd_ = wReturn.hWnd
 End Function
-'ÉèÖÃ¸ù¾İ´°ÌåÀàÃû·µ»Ø´°Ìå¾ä±ú£¬¿ÉÒÔÖ¸¶¨µÈ´ı¼¸Ãë¼ì²âÖ¸¶¨±êÌâµÄ´°ÌåÊÇ·ñ³öÏÖ£¬Ä¬ÈÏÊÇµÈ´ı60Ãë
+'è®¾ç½®æ ¹æ®çª—ä½“ç±»åè¿”å›çª—ä½“å¥æŸ„ï¼Œå¯ä»¥æŒ‡å®šç­‰å¾…å‡ ç§’æ£€æµ‹æŒ‡å®šæ ‡é¢˜çš„çª—ä½“æ˜¯å¦å‡ºç°ï¼Œé»˜è®¤æ˜¯ç­‰å¾…60ç§’
 Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWaitSeconds& = 60) As clsWindow
     Dim lngDelayCount&
     hWnd_ = 0
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetWindowByClassName±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strClassName=" & strClassName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetWindowByClassNameè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strClassName=" & strClassName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
             
     Do
@@ -373,7 +373,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
         If hWnd_ > 0 Then Exit Do
 
         lngDelayCount = lngDelayCount + DelayOneTime
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '³¬Ê±Î´·¢ÏÖ¹Ø¼ü×ÖstrClassName
+        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'è¶…æ—¶æœªå‘ç°å…³é”®å­—strClassName
         WAIT DelayOneTime
         
         hWnd_ = 0
@@ -382,7 +382,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
     wReturn.hWnd = hWnd_
     Set GetWindowByClassName = wReturn
 End Function
-'ÉèÖÃ¸ù¾İ´°ÌåÀàÃûµÃµ½´°¿Ú¾ä±ú£¬¿ÉÒÔÖ¸¶¨µÈ´ı¼¸Ãë¼ì²âÖ¸¶¨ÀàÃûµÄ´°ÌåÊÇ·ñ³öÏÖ£¬Ä¬ÈÏÊÇµÈ´ı60Ãë£¬ÔÊĞíÊ¹ÓÃÕıÔò±í´ïÊ½
+'è®¾ç½®æ ¹æ®çª—ä½“ç±»åå¾—åˆ°çª—å£å¥æŸ„ï¼Œå¯ä»¥æŒ‡å®šç­‰å¾…å‡ ç§’æ£€æµ‹æŒ‡å®šç±»åçš„çª—ä½“æ˜¯å¦å‡ºç°ï¼Œé»˜è®¤æ˜¯ç­‰å¾…60ç§’ï¼Œå…è®¸ä½¿ç”¨æ­£åˆ™è¡¨è¾¾å¼
 Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWaitSeconds& = 60, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal checkPid = "") As clsWindow
     Dim lnghWnd&, l&, lngDelayCount&
     Dim strCaption As String
@@ -392,12 +392,12 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     
     hWnd_ = 0
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetWindowByClassNameEx±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strClassName=" & strClassName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetWindowByClassNameExè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strClassName=" & strClassName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
     Do
         Do
             lnghWnd = FindWindowEx(0, lnghWnd, vbNullString, vbNullString)
-            GetClassName lnghWnd, strWindowClass, 255  '»ñµÃ´°¿ÚÀà
+            GetClassName lnghWnd, strWindowClass, 255  'è·å¾—çª—å£ç±»
             strWindowClass = Replace(strWindowClass, Chr(0), "")
             If Not isUseRegExp Then
                 isMatch = InStr(strWindowClass, strClassName) > 0
@@ -406,7 +406,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
             End If
             If isMatch Then
                 strHwndAllTmp = strHwndAllTmp & CStr(lnghWnd) & " "
-                If checkPid <> "" Then 'Èç¹ûpidÏàµÈ£¬ÓÅÏÈ·Åµ½µÚÒ»¸ö
+                If checkPid <> "" Then 'å¦‚æœpidç›¸ç­‰ï¼Œä¼˜å…ˆæ”¾åˆ°ç¬¬ä¸€ä¸ª
                     If checkPid = ProcessID() Then strHwndAllTmp = lnghWnd & " " & strHwndAllTmp
                 End If
             End If
@@ -414,11 +414,11 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
         If strHwndAllTmp <> "" Then Exit Do
 
         WAIT DelayOneTime
-        lngDelayCount = lngDelayCount + DelayOneTime '¼ÆËãÀÛ¼ÆÑÓÊ±ÁË¶àÉÙ£¬È»ºóºÍÓÃ»§ÉèÖÃµÄÑÓÊ±Ê±¼ä¶Ô±È
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '³¬Ê±Î´·¢ÏÖ¹Ø¼ü×ÖstrTitle
+        lngDelayCount = lngDelayCount + DelayOneTime 'è®¡ç®—ç´¯è®¡å»¶æ—¶äº†å¤šå°‘ï¼Œç„¶åå’Œç”¨æˆ·è®¾ç½®çš„å»¶æ—¶æ—¶é—´å¯¹æ¯”
+        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'è¶…æ—¶æœªå‘ç°å…³é”®å­—strTitle
     Loop
     strHwndAllTmp = Trim(strHwndAllTmp)
-    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'Èç¹ûĞèÒªËÑ¼¯ËùÓĞ¾ä±ú£¬ÄÇÃ´ÔòÊ¹ÓÃÕâ¸ö²ÎÊı·µ»Ø
+    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'å¦‚æœéœ€è¦æœé›†æ‰€æœ‰å¥æŸ„ï¼Œé‚£ä¹ˆåˆ™ä½¿ç”¨è¿™ä¸ªå‚æ•°è¿”å›
     
     If strHwndAllTmp <> "" Then
         wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
@@ -428,7 +428,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     Set GetWindowByClassNameEx = wReturn
     hWnd_ = wReturn.hWnd
 End Function
-'ÉèÖÃ¸ù¾İ½ø³ÌÃû³Æ·µ»Ø´°Ìå¾ä±ú£¬¿ÉÒÔÖ¸¶¨µÈ´ı¼¸Ãë¼ì²âÖ¸¶¨½ø³ÌÃû³ÆµÄ´°ÌåÊÇ·ñ³öÏÖ£¬Ä¬ÈÏÊÇµÈ´ı60Ãë
+'è®¾ç½®æ ¹æ®è¿›ç¨‹åç§°è¿”å›çª—ä½“å¥æŸ„ï¼Œå¯ä»¥æŒ‡å®šç­‰å¾…å‡ ç§’æ£€æµ‹æŒ‡å®šè¿›ç¨‹åç§°çš„çª—ä½“æ˜¯å¦å‡ºç°ï¼Œé»˜è®¤æ˜¯ç­‰å¾…60ç§’
 Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeconds& = 60, Optional ByVal isWholeMatch As Boolean = False) As clsWindow
     Dim lnghWnd&, currWnd&, l&, lngDelayCount&
     Dim strCaption As String
@@ -441,20 +441,20 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
     writeToFile "DEBUG_exe.txt", ""
     hWnd_ = 0
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetWindowByAppName±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strAppName=" & strAppName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetWindowByAppNameè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strAppName=" & strAppName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
     Do
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
-            strGetHwndAppName = LCase(AppName(currWnd)) '¸ù¾İ¾ä±úµÃµ½½ø³ÌÃû×Ö£¬¶¼×ª»»³ÉĞ¡Ğ´
-            If isWholeMatch Then 'ÅĞ¶ÏÊÇ·ñÍêÈ«ÏàµÈ
+            strGetHwndAppName = LCase(AppName(currWnd)) 'æ ¹æ®å¥æŸ„å¾—åˆ°è¿›ç¨‹åå­—ï¼Œéƒ½è½¬æ¢æˆå°å†™
+            If isWholeMatch Then 'åˆ¤æ–­æ˜¯å¦å®Œå…¨ç›¸ç­‰
                 isMatch = (LCase(strGetHwndAppName) = strAppName)
             Else
                 isMatch = (InStr(LCase(strGetHwndAppName), strAppName) > 0)
             End If
             strCaption = GetCaptionByHwnd(currWnd)
-            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '¹ıÂËµôÊäÈë·¨Ïà¹ØµÄ´°¿Ú
+            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then 'è¿‡æ»¤æ‰è¾“å…¥æ³•ç›¸å…³çš„çª—å£
                 hWnd_ = currWnd
                 Exit Do
             End If
@@ -464,13 +464,13 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
         If hWnd_ > 0 Then Exit Do
 
         WAIT DelayOneTime
-        lngDelayCount = lngDelayCount + DelayOneTime '¼ÆËãÀÛ¼ÆÑÓÊ±ÁË¶àÉÙ£¬È»ºóºÍÓÃ»§ÉèÖÃµÄÑÓÊ±Ê±¼ä¶Ô±È
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '³¬Ê±Î´·¢ÏÖ¹Ø¼ü×ÖstrTitle
+        lngDelayCount = lngDelayCount + DelayOneTime 'è®¡ç®—ç´¯è®¡å»¶æ—¶äº†å¤šå°‘ï¼Œç„¶åå’Œç”¨æˆ·è®¾ç½®çš„å»¶æ—¶æ—¶é—´å¯¹æ¯”
+        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'è¶…æ—¶æœªå‘ç°å…³é”®å­—strTitle
     Loop
     wReturn.hWnd = hWnd_
     Set GetWindowByAppName = wReturn
 End Function
-'¸ù¾İ¾ä±ú»ñµÃ´°¿ÚÄÚÈİ
+'æ ¹æ®å¥æŸ„è·å¾—çª—å£å†…å®¹
 Private Function GetCaptionByHwnd(ByVal hwn As Long) As String
     Dim l&, strCaption$
     l = GetWindowTextLength(hwn)
@@ -478,7 +478,7 @@ Private Function GetCaptionByHwnd(ByVal hwn As Long) As String
     GetWindowText hwn, strCaption, l + 1
     GetCaptionByHwnd = strCaption
 End Function
-'ÉèÖÃ¸ù¾İ½ø³ÌÃû³Æ·µ»Ø´°Ìå¾ä±ú£¬¿ÉÒÔÖ¸¶¨µÈ´ı¼¸Ãë¼ì²âÖ¸¶¨½ø³ÌÃû³ÆµÄ´°ÌåÊÇ·ñ³öÏÖ£¬Ä¬ÈÏÊÇµÈ´ı60Ãë£¬Ô­Àí»¹ÊÇÃ¶¾ÙËùÓĞ´°Ìå¼ì²éËüÃÇµÄËùÊô½ø³Ì£¬Ö»²»¹ıÊÇ¸ù¾İÄ¿±êµÄ½ø³ÌÃû¸ústrAppName±È¶Ô
+'è®¾ç½®æ ¹æ®è¿›ç¨‹åç§°è¿”å›çª—ä½“å¥æŸ„ï¼Œå¯ä»¥æŒ‡å®šç­‰å¾…å‡ ç§’æ£€æµ‹æŒ‡å®šè¿›ç¨‹åç§°çš„çª—ä½“æ˜¯å¦å‡ºç°ï¼Œé»˜è®¤æ˜¯ç­‰å¾…60ç§’ï¼ŒåŸç†è¿˜æ˜¯æšä¸¾æ‰€æœ‰çª—ä½“æ£€æŸ¥å®ƒä»¬çš„æ‰€å±è¿›ç¨‹ï¼Œåªä¸è¿‡æ˜¯æ ¹æ®ç›®æ ‡çš„è¿›ç¨‹åè·ŸstrAppNameæ¯”å¯¹
 Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSeconds& = 60, Optional ByRef hWndAll, Optional isUseRegExp = False) As clsWindow
     Dim lnghWnd&, currWnd&, l&, lngDelayCount&
     Dim strCaption As String
@@ -492,38 +492,38 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     
     hWnd_ = 0
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetWindowByAppNameEx±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strAppName=" & strAppName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetWindowByAppNameExè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strAppName=" & strAppName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
     strHwndAllTmp = ""
     Do
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
-            strGetHwndAppName = LCase(AppName(currWnd))  '¸ù¾İ¾ä±úµÃµ½½ø³ÌÃû×Ö£¬¶¼×ª»»³ÉĞ¡Ğ´
+            strGetHwndAppName = LCase(AppName(currWnd))  'æ ¹æ®å¥æŸ„å¾—åˆ°è¿›ç¨‹åå­—ï¼Œéƒ½è½¬æ¢æˆå°å†™
             If InStr(strGetHwndAppName, "pad") > 0 Then
             Dim aaa  As Integer
             aaa = 1
             End If
-            If Not isUseRegExp Then 'Èç¹û²»ÓÃÕıÔò¾Í°üº¬¹ØÏµÆ¥Åä
+            If Not isUseRegExp Then 'å¦‚æœä¸ç”¨æ­£åˆ™å°±åŒ…å«å…³ç³»åŒ¹é…
                 isMatch = (InStr(strGetHwndAppName, strAppName) > 0)
             Else
                 isMatch = regTest(strGetHwndAppName, strAppName)
             End If
             strCaption = GetCaptionByHwnd(currWnd)
-            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '¹ıÂËµôÊäÈë·¨Ïà¹ØµÄ´°¿Ú
+            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then 'è¿‡æ»¤æ‰è¾“å…¥æ³•ç›¸å…³çš„çª—å£
                 strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
             End If
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
             DoEvents
         Loop
-        If strHwndAllTmp <> "" Then Exit Do '±íÊ¾Æ¥Åäµ½ÁËÒ»²¿·ÖÊı¾İ
+        If strHwndAllTmp <> "" Then Exit Do 'è¡¨ç¤ºåŒ¹é…åˆ°äº†ä¸€éƒ¨åˆ†æ•°æ®
 
         WAIT DelayOneTime
-        lngDelayCount = lngDelayCount + DelayOneTime '¼ÆËãÀÛ¼ÆÑÓÊ±ÁË¶àÉÙ£¬È»ºóºÍÓÃ»§ÉèÖÃµÄÑÓÊ±Ê±¼ä¶Ô±È
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '³¬Ê±Î´·¢ÏÖ¹Ø¼ü×ÖstrTitle
+        lngDelayCount = lngDelayCount + DelayOneTime 'è®¡ç®—ç´¯è®¡å»¶æ—¶äº†å¤šå°‘ï¼Œç„¶åå’Œç”¨æˆ·è®¾ç½®çš„å»¶æ—¶æ—¶é—´å¯¹æ¯”
+        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'è¶…æ—¶æœªå‘ç°å…³é”®å­—strTitle
     Loop
     strHwndAllTmp = Trim(strHwndAllTmp)
-    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'Èç¹ûĞèÒªËÑ¼¯ËùÓĞ¾ä±ú£¬ÄÇÃ´ÔòÊ¹ÓÃÕâ¸ö²ÎÊı·µ»Ø
+    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'å¦‚æœéœ€è¦æœé›†æ‰€æœ‰å¥æŸ„ï¼Œé‚£ä¹ˆåˆ™ä½¿ç”¨è¿™ä¸ªå‚æ•°è¿”å›
     
     If strHwndAllTmp <> "" Then
         wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
@@ -533,7 +533,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     Set GetWindowByAppNameEx = wReturn
     hWnd_ = wReturn.hWnd
 End Function
-'¸ù¾İpid»ñµÃ´°Ìå
+'æ ¹æ®pidè·å¾—çª—ä½“
 Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds& = 60, Optional ByRef hWndAll) As clsWindow
     Dim lnghWnd&, currWnd&, l&, lngDelayCount&
     Dim strCaption As String
@@ -545,31 +545,31 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
     
     hWnd_ = 0
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetWindowByPID±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª PID=" & PID & vbTab & " hWndAll=" & hWndAll, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetWindowByPIDè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º PID=" & PID & vbTab & " hWndAll=" & hWndAll, False
     End If
     strHwndAllTmp = ""
     Dim aaa&, bbb&
-    Do 'Ñ­»·ÕÒ¼¸±é
+    Do 'å¾ªç¯æ‰¾å‡ é
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
-            currentPID = ProcessID(currWnd) 'µÃµ½pid
+            currentPID = ProcessID(currWnd) 'å¾—åˆ°pid
             isMatch = (currentPID = PID)
             strCaption = GetCaptionByHwnd(currWnd)
-            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '¹ıÂËµôÊäÈë·¨Ïà¹ØµÄ´°¿Ú
+            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then 'è¿‡æ»¤æ‰è¾“å…¥æ³•ç›¸å…³çš„çª—å£
                 strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
             End If
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
             DoEvents
         Loop
-        If strHwndAllTmp <> "" Then Exit Do '±íÊ¾Æ¥Åäµ½ÁËÒ»²¿·ÖÊı¾İ
+        If strHwndAllTmp <> "" Then Exit Do 'è¡¨ç¤ºåŒ¹é…åˆ°äº†ä¸€éƒ¨åˆ†æ•°æ®
 
         WAIT DelayOneTime
-        lngDelayCount = lngDelayCount + DelayOneTime '¼ÆËãÀÛ¼ÆÑÓÊ±ÁË¶àÉÙ£¬È»ºóºÍÓÃ»§ÉèÖÃµÄÑÓÊ±Ê±¼ä¶Ô±È
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '³¬Ê±Î´·¢ÏÖ¹Ø¼ü×ÖstrTitle
+        lngDelayCount = lngDelayCount + DelayOneTime 'è®¡ç®—ç´¯è®¡å»¶æ—¶äº†å¤šå°‘ï¼Œç„¶åå’Œç”¨æˆ·è®¾ç½®çš„å»¶æ—¶æ—¶é—´å¯¹æ¯”
+        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do 'è¶…æ—¶æœªå‘ç°å…³é”®å­—strTitle
     Loop
     strHwndAllTmp = Trim(strHwndAllTmp)
-    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'Èç¹ûĞèÒªËÑ¼¯ËùÓĞ¾ä±ú£¬ÄÇÃ´ÔòÊ¹ÓÃÕâ¸ö²ÎÊı·µ»Ø
+    If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp 'å¦‚æœéœ€è¦æœé›†æ‰€æœ‰å¥æŸ„ï¼Œé‚£ä¹ˆåˆ™ä½¿ç”¨è¿™ä¸ªå‚æ•°è¿”å›
     
     If strHwndAllTmp <> "" Then
         Dim vHwnd
@@ -581,15 +581,15 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
     Set GetWindowByPID = wReturn
     hWnd_ = wReturn.hWnd
 End Function
-'¸ù¾İ¿Ø¼şµÄÀàÃûÉèÖÃ¿Ø¼şµÄÏÔÊ¾ÎÄ×Ö
+'æ ¹æ®æ§ä»¶çš„ç±»åè®¾ç½®æ§ä»¶çš„æ˜¾ç¤ºæ–‡å­—
 Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$, Optional ByVal intIndex% = 1, Optional ByVal UseRegExp As Boolean = False) As Boolean
     Dim lngControlsHwnd As Long
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
         lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
     Else
-        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '×îºóµÄtrue¿ÉÒÔÊ¡ÂÔ£¬Ä¬ÈÏÎªÀàÃû£¬·ñÔò¾ÍÊÇÎÄ±¾
+        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) 'æœ€åçš„trueå¯ä»¥çœç•¥ï¼Œé»˜è®¤ä¸ºç±»åï¼Œå¦åˆ™å°±æ˜¯æ–‡æœ¬
     End If
     
     If lngControlsHwnd > 0 Then
@@ -599,16 +599,16 @@ Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$
         SetElementTextByClassName = False
     End If
 End Function
-'¸ù¾İ¿Ø¼şµÄÀàÃû×·¼ÓÏÔÊ¾¿Ø¼şµÄÎÄ×Ö
+'æ ¹æ®æ§ä»¶çš„ç±»åè¿½åŠ æ˜¾ç¤ºæ§ä»¶çš„æ–‡å­—
 'Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As String
 Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewText$, Optional ByVal intIndex% = 1, Optional ByVal UseRegExp As Boolean = False) As Long
     Dim lngControlsHwnd As Long
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
         lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
     Else
-        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '×îºóµÄtrue¿ÉÒÔÊ¡ÂÔ£¬Ä¬ÈÏÎªÀàÃû£¬·ñÔò¾ÍÊÇÎÄ±¾
+        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) 'æœ€åçš„trueå¯ä»¥çœç•¥ï¼Œé»˜è®¤ä¸ºç±»åï¼Œå¦åˆ™å°±æ˜¯æ–‡æœ¬
     End If
     
     If lngControlsHwnd > 0 Then
@@ -620,20 +620,20 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewTe
         AppendElementTextByClassName = -1
     End If
 End Function
-'¸ù¾İ¿Ø¼şµÄÀàÃûµÃµ½¿Ø¼şµÄÏÔÊ¾ÎÄ×Ö
+'æ ¹æ®æ§ä»¶çš„ç±»åå¾—åˆ°æ§ä»¶çš„æ˜¾ç¤ºæ–‡å­—
 Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As String
     Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementTextByClassName±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strClassName=" & strClassName & vbTab & " intIndex=" & intIndex, False
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementTextByClassNameÖĞµ÷ÓÃº¯ÊıgetMatchHwndFromWindow", False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementTextByClassNameè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strClassName=" & strClassName & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementTextByClassNameä¸­è°ƒç”¨å‡½æ•°getMatchHwndFromWindow", False
     End If
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
         lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
     Else
-        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '×îºóµÄtrue¿ÉÒÔÊ¡ÂÔ£¬Ä¬ÈÏÎªÀàÃû£¬·ñÔò¾ÍÊÇÎÄ±¾
+        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) 'æœ€åçš„trueå¯ä»¥çœç•¥ï¼Œé»˜è®¤ä¸ºç±»åï¼Œå¦åˆ™å°±æ˜¯æ–‡æœ¬
     End If
     
     If lngControlsHwnd > 0 Then
@@ -644,20 +644,20 @@ Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal in
         GetElementTextByClassName = ""
     End If
 End Function
-'¸ù¾İ¿Ø¼şµÄÀàÃûµÃµ½¿Ø¼şµÄÏÔÊ¾ÎÄ×Ö
+'æ ¹æ®æ§ä»¶çš„ç±»åå¾—åˆ°æ§ä»¶çš„æ˜¾ç¤ºæ–‡å­—
 Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As String
     Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementHwndByClassName±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strText=" & strText & vbTab & " intIndex=" & intIndex, False
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementHwndByClassNameÖĞµ÷ÓÃº¯ÊıGetElementTextByText", False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementHwndByClassNameè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strText=" & strText & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementHwndByClassNameä¸­è°ƒç”¨å‡½æ•°GetElementTextByText", False
     End If
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
-        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s.*?\s" & strText & "$", intIndex)
+        lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+[\-\d]+\s.*?\s" & strText & "$", intIndex)
     Else
-        lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False±íÊ¾Ê¹ÓÃÎÄ±¾£¬Ä¬ÈÏÊÇtrue±íÊ¾ÀàÃû
+        lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'Falseè¡¨ç¤ºä½¿ç”¨æ–‡æœ¬ï¼Œé»˜è®¤æ˜¯trueè¡¨ç¤ºç±»å
     End If
     
     If lngControlsHwnd > 0 Then
@@ -667,48 +667,48 @@ Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1
         GetElementTextByText = ""
     End If
 End Function
-'¸ù¾İ¿Ø¼şµÄÀàÃûµÃµ½¿Ø¼şµÄÏÔÊ¾ÎÄ×Ö
+'æ ¹æ®æ§ä»¶çš„ç±»åå¾—åˆ°æ§ä»¶çš„æ˜¾ç¤ºæ–‡å­—
 Public Function GetElementHwndByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Long
     Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementHwndByClassName±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strClassName=" & strClassName & vbTab & " intIndex=" & intIndex, False
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementHwndByClassNameÖĞµ÷ÓÃº¯ÊıgetMatchHwndFromWindow", False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementHwndByClassNameè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strClassName=" & strClassName & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementHwndByClassNameä¸­è°ƒç”¨å‡½æ•°getMatchHwndFromWindow", False
     End If
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
         GetElementHwndByClassName = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
     Else
-        GetElementHwndByClassName = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '×îºóµÄtrue¿ÉÒÔÊ¡ÂÔ£¬Ä¬ÈÏÎªÀàÃû£¬·ñÔò¾ÍÊÇÎÄ±¾
+        GetElementHwndByClassName = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) 'æœ€åçš„trueå¯ä»¥çœç•¥ï¼Œé»˜è®¤ä¸ºç±»åï¼Œå¦åˆ™å°±æ˜¯æ–‡æœ¬
     End If
 End Function
-'¸ù¾İ¿Ø¼şµÄÎÄ±¾ÄÚÈİµÃµ½¿Ø¼şµÄÏÔÊ¾ÎÄ×Ö
+'æ ¹æ®æ§ä»¶çš„æ–‡æœ¬å†…å®¹å¾—åˆ°æ§ä»¶çš„æ˜¾ç¤ºæ–‡å­—
 Public Function GetElementHwndByText(ByVal strText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Long
     Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementHwndByClassName±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª strText=" & strText & vbTab & " intIndex=" & intIndex, False
-        writeToFile "DEBUG.txt", Now & " º¯ÊıGetElementHwndByClassNameÖĞµ÷ÓÃº¯ÊıGetElementHwndByText", False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementHwndByClassNameè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º strText=" & strText & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°GetElementHwndByClassNameä¸­è°ƒç”¨å‡½æ•°GetElementHwndByText", False
     End If
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
         GetElementHwndByText = GetMatchHwndFromWindow("^(\d+)\s+\d+\s.*?\s" & strText & "$", intIndex)
     Else
-        GetElementHwndByText = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False±íÊ¾Ê¹ÓÃÎÄ±¾£¬Ä¬ÈÏÊÇtrue±íÊ¾ÀàÃû
+        GetElementHwndByText = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'Falseè¡¨ç¤ºä½¿ç”¨æ–‡æœ¬ï¼Œé»˜è®¤æ˜¯trueè¡¨ç¤ºç±»å
     End If
 End Function
-'¸ù¾İ¿Ø¼şµÄÏÔÊ¾ÎÄ×ÖÉèÖÃĞÂµÄÏÔÊ¾ÎÄ×Ö
-'º¯ÊıÓĞÎÊÌâ£¬µ÷ÓÃ¼ÇÊÂ±¾£¬·¢ÏÖ²»ÄÜ¸ù¾İÎÄ±¾¿òÄÚÈİ¶¨Î» 20130613
+'æ ¹æ®æ§ä»¶çš„æ˜¾ç¤ºæ–‡å­—è®¾ç½®æ–°çš„æ˜¾ç¤ºæ–‡å­—
+'å‡½æ•°æœ‰é—®é¢˜ï¼Œè°ƒç”¨è®°äº‹æœ¬ï¼Œå‘ç°ä¸èƒ½æ ¹æ®æ–‡æœ¬æ¡†å†…å®¹å®šä½ 20130613
 Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Boolean
     Dim lngControlsHwnd As Long
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
         lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s.*?\s" & strText & "$", intIndex)
     Else
-        lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False±íÊ¾Ê¹ÓÃÎÄ±¾£¬Ä¬ÈÏÊÇtrue±íÊ¾ÀàÃû
+        lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'Falseè¡¨ç¤ºä½¿ç”¨æ–‡æœ¬ï¼Œé»˜è®¤æ˜¯trueè¡¨ç¤ºç±»å
     End If
     If lngControlsHwnd > 0 Then
         SendMessage lngControlsHwnd, WM_SETTEXT, 0&, ByVal strNewText
@@ -718,13 +718,13 @@ Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional
     End If
 End Function
 
-'ÉèÖÃµ±Ç°´°¿ÚµÄ±êÌâÀ¸ÎÄ×Ö
+'è®¾ç½®å½“å‰çª—å£çš„æ ‡é¢˜æ æ–‡å­—
 Public Property Let Caption(ByVal strNewText As String)
     If hWnd_ > 0 Then
         SendMessage hWnd_, WM_SETTEXT, 0&, ByVal strNewText
     End If
 End Property
-'µÃµ½µ±Ç°´°¿ÚµÄ±êÌâÀ¸ÎÄ×Ö
+'å¾—åˆ°å½“å‰çª—å£çš„æ ‡é¢˜æ æ–‡å­—
 Public Property Get Caption() As String
     Dim l&, strCaption$
     l = GetWindowTextLength(hWnd_)
@@ -733,29 +733,29 @@ Public Property Get Caption() As String
     Caption = strCaption
 End Property
 
-'¸ù¾İ¿Ø¼şµÄÀàÃûµã»÷¿Ø¼ş
+'æ ¹æ®æ§ä»¶çš„ç±»åç‚¹å‡»æ§ä»¶
 Public Function ClickElementByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp = False) As Long
     Dim lngControlsHwnd As Long
-    'Èç¹ûÊ¹ÓÃ·ÇÕıÔòÄ£Ê½ĞèÒªÌæ»»ÌØÊâ×Ö·û£¬ÒòÎªº¯ÊıÄÚ²¿Ê¼ÖÕÓÃÕıÔò²éÑ¯µÄ£¬·ÀÖ¹¸ÉÈÅ
+    'å¦‚æœä½¿ç”¨éæ­£åˆ™æ¨¡å¼éœ€è¦æ›¿æ¢ç‰¹æ®Šå­—ç¬¦ï¼Œå› ä¸ºå‡½æ•°å†…éƒ¨å§‹ç»ˆç”¨æ­£åˆ™æŸ¥è¯¢çš„ï¼Œé˜²æ­¢å¹²æ‰°
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
         lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s" & strClassName & "\s.*?$", intIndex)
     Else
-        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '×îºóµÄtrue¿ÉÒÔÊ¡ÂÔ£¬Ä¬ÈÏÎªÀàÃû£¬·ñÔò¾ÍÊÇÎÄ±¾
+        lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) 'æœ€åçš„trueå¯ä»¥çœç•¥ï¼Œé»˜è®¤ä¸ºç±»åï¼Œå¦åˆ™å°±æ˜¯æ–‡æœ¬
     End If
     If lngControlsHwnd > 0 Then
         ClickElementByClassName = PostMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
 '        ClickElementByClassName = SendMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
     End If
 End Function
-'¸ù¾İ¿Ø¼şµÄÏÔÊ¾ÎÄ×Öµã»÷¿Ø¼ş
+'æ ¹æ®æ§ä»¶çš„æ˜¾ç¤ºæ–‡å­—ç‚¹å‡»æ§ä»¶
 Public Function ClickElementByText(ByVal strText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp = False) As Long
     Dim lngControlsHwnd As Long
     If Not UseRegExp Then
         strText = replaceReg(strText, "([\\+-\.()\[\]{}?*\|])", "\$1")
         lngControlsHwnd = GetMatchHwndFromWindow("^(\d+)\s+\d+\s.*?\s" & strText & "$", intIndex)
     Else
-        lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False±íÊ¾Ê¹ÓÃÎÄ±¾£¬Ä¬ÈÏÊÇtrue±íÊ¾ÀàÃû
+        lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'Falseè¡¨ç¤ºä½¿ç”¨æ–‡æœ¬ï¼Œé»˜è®¤æ˜¯trueè¡¨ç¤ºç±»å
     End If
     If lngControlsHwnd > 0 Then
         ClickElementByText = PostMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
@@ -763,7 +763,7 @@ Public Function ClickElementByText(ByVal strText$, Optional ByVal intIndex = 1, 
         ClickElementByText = 0
     End If
 End Function
-'´ÓÆ¥Åä½á¹ûÖĞµÃµ½¾ä±ú
+'ä»åŒ¹é…ç»“æœä¸­å¾—åˆ°å¥æŸ„
 Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal intIndex = 1, Optional ByVal UseRegExp = False, Optional ByVal isUseClass = True) As Long
     Dim reg As Object
     Dim matchs As Object, match As Object
@@ -771,8 +771,8 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
     Dim intGet As Integer
     
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıgetMatchHwndFromWindow±»µ÷ÓÃ" & vbCrLf & "²ÎÊıÎª Pattern=" & Pattern & vbTab & " intIndex=" & intIndex, False
-        writeToFile "DEBUG.txt", Now & " º¯ÊıgetMatchHwndFromWindowÖĞµ÷ÓÃº¯ÊıControlsInfo£¬²ÎÊıÎª hWnd_=" & hWnd_, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°getMatchHwndFromWindowè¢«è°ƒç”¨" & vbCrLf & "å‚æ•°ä¸º Pattern=" & Pattern & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°getMatchHwndFromWindowä¸­è°ƒç”¨å‡½æ•°ControlsInfoï¼Œå‚æ•°ä¸º hWnd_=" & hWnd_, False
     End If
     strControlsInfo = ControlsInfo(hWnd_, DebugMe)
     Set reg = CreateObject("vbscript.regexp")
@@ -786,26 +786,26 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
         If matchs.Count >= intIndex Then
             GetMatchHwndFromWindow = CLng(matchs(intIndex - 1).SubMatches(0))
         End If
-    Else 'Ã¿ĞĞ½á¹¹Îª="43452836    0   ToolbarWindow32 Ëõ·Å¼¶±ğ¡±
-        reg.Pattern = "^(\d+)\t\d+\t(.*?)\t(.*?)$" 'Ä¬ÈÏ¼ìË÷»ñµÃ¡°ToolbarWindow32¡±
-        If Not isUseClass Then reg.Pattern = "^(\d+)\t\d+\t.*?\t(.*?)$" 'Èç¹û²»ÊÇÀàÃûÄÇÃ´¾ÍÓÃÎÄ±¾ÄÚÈİ½øĞĞÕıÔò¼ìË÷¡°Ëõ·Å¼¶±ğ¡±
+    Else 'æ¯è¡Œç»“æ„ä¸º="43452836    0   ToolbarWindow32 ç¼©æ”¾çº§åˆ«â€
+        reg.Pattern = "^(\d+)\t\d+\t(.*?)\t(.*?)$" 'é»˜è®¤æ£€ç´¢è·å¾—â€œToolbarWindow32â€
+        If Not isUseClass Then reg.Pattern = "^(\d+)\t\d+\t.*?\t(.*?)$" 'å¦‚æœä¸æ˜¯ç±»åé‚£ä¹ˆå°±ç”¨æ–‡æœ¬å†…å®¹è¿›è¡Œæ­£åˆ™æ£€ç´¢â€œç¼©æ”¾çº§åˆ«â€
         Set matchs = reg.Execute(strControlsInfo)
         For Each match In matchs
-            If regTest(match.SubMatches(1), Pattern) Then 'Æ¥ÅäµÄ
+            If regTest(match.SubMatches(1), Pattern) Then 'åŒ¹é…çš„
                 intGet = intGet + 1
                 GetMatchHwndFromWindow = CLng(match.SubMatches(0))
-                If intGet = intIndex Then Exit For 'Èç¹ûÒÑ¾­È·¶¨µ±Ç°Ë÷Òı´ÎĞò¾ÍÊÇÒª´¦ÀíµÄ£¬ÄÇÃ´ÍË³ö¼ìË÷Ñ­»·
+                If intGet = intIndex Then Exit For 'å¦‚æœå·²ç»ç¡®å®šå½“å‰ç´¢å¼•æ¬¡åºå°±æ˜¯è¦å¤„ç†çš„ï¼Œé‚£ä¹ˆé€€å‡ºæ£€ç´¢å¾ªç¯
             End If
         Next
     End If
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıgetMatchHwndFromWindowÖ´ĞĞÍê±Ï" & vbCrLf & "Æ¥ÅäÊıÁ¿Îª=" & matchs.Count, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°getMatchHwndFromWindowæ‰§è¡Œå®Œæ¯•" & vbCrLf & "åŒ¹é…æ•°é‡ä¸º=" & matchs.Count, False
     End If
 End Function
 Public Function CloseWindow() As Long
     CloseWindow = PostMessage(hWnd_, WM_CLOSE, 0, 0)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " º¯ÊıcloseWindowÖ´ĞĞÍê±Ï" & vbCrLf & "¹Ø±Õ´°¿Ú£¬¾ä±úÎª=" & hWnd_, False
+        writeToFile "DEBUG.txt", Now & " å‡½æ•°closeWindowæ‰§è¡Œå®Œæ¯•" & vbCrLf & "å…³é—­çª—å£ï¼Œå¥æŸ„ä¸º=" & hWnd_, False
     End If
 End Function
 Public Function CloseApp() As Long
@@ -825,7 +825,7 @@ Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enum
     ElseIf PositionMod = relative Then
         SetCursorPos Left + x1, Top + y1
     Else
-        MsgBox "º¯ÊıClickPointÖ´ĞĞÒ»´Î¡£Î´ÄÜÊ¶±ğµã»÷Ä£Ê½" & PositionMod & "£¬ÒªÃ´ÊÇrelative(Ïà¶ÔÎ»ÖÃ)ÒªÃ´ÊÇabsolute(¾ø¶ÔÎ»ÖÃ)£¬Ä¬ÈÏÊÇÏà¶ÔÎ»ÖÃ¡£", vbExclamation
+        MsgBox "å‡½æ•°ClickPointæ‰§è¡Œä¸€æ¬¡ã€‚æœªèƒ½è¯†åˆ«ç‚¹å‡»æ¨¡å¼" & PositionMod & "ï¼Œè¦ä¹ˆæ˜¯relative(ç›¸å¯¹ä½ç½®)è¦ä¹ˆæ˜¯absolute(ç»å¯¹ä½ç½®)ï¼Œé»˜è®¤æ˜¯ç›¸å¯¹ä½ç½®ã€‚", vbExclamation
         Exit Sub
     End If
     Do While clickTimes > 0
@@ -836,8 +836,8 @@ Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enum
         clickTimes = clickTimes - 1
     Loop
 End Sub
-'ÒÔÏÂÊÇ¼¸¸öÌØĞ§µÄ·½·¨
-'ÌØĞ§1£º´°Ìå¶¶¶¯
+'ä»¥ä¸‹æ˜¯å‡ ä¸ªç‰¹æ•ˆçš„æ–¹æ³•
+'ç‰¹æ•ˆ1ï¼šçª—ä½“æŠ–åŠ¨
 Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal shakeRepeats = 30, Optional ByVal shakePads = 10, Optional ByVal shakeInterval = 25)
     Dim i%
     
@@ -876,7 +876,7 @@ Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal s
             Next
     End Select
 End Sub
-'ÌØĞ§2£ºµ­Èë
+'ç‰¹æ•ˆ2ï¼šæ·¡å…¥
 Public Sub FadeIn(Optional ByVal speed = 10)
     Dim sty As Long, i As Long
     
@@ -889,13 +889,13 @@ Public Sub FadeIn(Optional ByVal speed = 10)
     If speed > 255 Then speed = 255
     If speed < 1 Then speed = 1
     For i = 1 To 255 Step speed
-        SetLayeredWindowAttributes hWnd_, 0, i, LWA_ALPHA   'ÉèÖÃ´°ÌåÍ¸Ã÷¶È
+        SetLayeredWindowAttributes hWnd_, 0, i, LWA_ALPHA   'è®¾ç½®çª—ä½“é€æ˜åº¦
         WAIT 50
     Next
     SetLayeredWindowAttributes hWnd_, 0, 255, LWA_ALPHA
 End Sub
-'ÌØĞ§3£ºµ­³ö
-'¿ÉÒÔÑ¡ÔñÊÇ·ñ¹Ø±Õ´°¿Ú»òÕß¾­³£
+'ç‰¹æ•ˆ3ï¼šæ·¡å‡º
+'å¯ä»¥é€‰æ‹©æ˜¯å¦å…³é—­çª—å£æˆ–è€…ç»å¸¸
 Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = False, Optional ByVal isCloseApp = False)
     Dim sty As Long, i As Long
     
@@ -908,7 +908,7 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If speed > 255 Then speed = 255
     If speed < 1 Then speed = 1
     For i = 255 To 1 Step -speed
-        SetLayeredWindowAttributes hWnd_, 0, i, LWA_ALPHA   'ÉèÖÃ´°ÌåÍ¸Ã÷¶È
+        SetLayeredWindowAttributes hWnd_, 0, i, LWA_ALPHA   'è®¾ç½®çª—ä½“é€æ˜åº¦
         WAIT 50
     Next
     SetLayeredWindowAttributes hWnd_, 0, 0, LWA_ALPHA
@@ -917,17 +917,17 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
 End Sub
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-'ÒÔÏÂ¼¸¸ö·½·¨ÎªÍøÓÑwwb£¨ÓÊÏä£ºwwbing@gmail.com£©ËùÔö¼Ó
-'ÈÕÆÚ£º2013-6-26
-'¾ßÌåÓĞ£ºCheckWindow, Load, WindowState, Visible, hDC,
+'ä»¥ä¸‹å‡ ä¸ªæ–¹æ³•ä¸ºç½‘å‹wwbï¼ˆé‚®ç®±ï¼šwwbing@gmail.comï¼‰æ‰€å¢åŠ 
+'æ—¥æœŸï¼š2013-6-26
+'å…·ä½“æœ‰ï¼šCheckWindow, Load, WindowState, Visible, hDC,
 '       AlphaBlend, Enabled, Refresh, TransparentColor, ZOrder
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-'¼ì²éµ±Ç°´°¿Ú¾ä±úÊÇ·ñ»¹ÓĞĞ§
+'æ£€æŸ¥å½“å‰çª—å£å¥æŸ„æ˜¯å¦è¿˜æœ‰æ•ˆ
 Private Function CheckWindow() As Long
     CheckWindow = IsWindow(hWnd_)
     If CheckWindow = 0 Then hWnd_ = 0
 End Function
-'Load ´°¿ÚÔØÈëµÄÈë¿Ú
+'Load çª—å£è½½å…¥çš„å…¥å£
 Public Function Load(WindowHwnd As Variant) As clsWindow
     Select Case VarType(WindowHwnd)
         Case vbLong
@@ -942,7 +942,7 @@ Public Function Load(WindowHwnd As Variant) As clsWindow
     End If
     Set Load = wReturn
 End Function
-'Ö±½ÓÓÉ¾ä±úÖ¸¶¨´°¿Ú£¬ÓëÖ±½ÓÉèÖÃw.hwnd»òÕßload·½·¨Í¬µÈĞ§¹û
+'ç›´æ¥ç”±å¥æŸ„æŒ‡å®šçª—å£ï¼Œä¸ç›´æ¥è®¾ç½®w.hwndæˆ–è€…loadæ–¹æ³•åŒç­‰æ•ˆæœ
 Public Function GetWindowByHwnd(WindowHwnd As Variant) As clsWindow
     Select Case VarType(WindowHwnd)
         Case vbLong
@@ -955,15 +955,15 @@ Public Function GetWindowByHwnd(WindowHwnd As Variant) As clsWindow
         Set GetWindowByHwnd = wReturn
     End If
 End Function
-'Ö±½Ó»ñµÃµ±Ç°Êó±êÏÂµÄ´°¿Ú»ò¿Ø¼şµÄ¾ä±ú
+'ç›´æ¥è·å¾—å½“å‰é¼ æ ‡ä¸‹çš„çª—å£æˆ–æ§ä»¶çš„å¥æŸ„
 Public Function GetWindowByCursorPos() As clsWindow
     Dim tPoint As POINTAPI
-    GetCursorPos tPoint '»ñµÃµ±Ç°Êó±êÎ»ÖÃ
+    GetCursorPos tPoint 'è·å¾—å½“å‰é¼ æ ‡ä½ç½®
     hWnd_ = WindowFromPoint(tPoint.x, tPoint.y)
     wReturn.hWnd = hWnd_
     Set GetWindowByCursorPos = wReturn
 End Function
-'¸ù¾İÖ¸¶¨µÄµã»ñÈ¡´°¿Ú»ò¿Ø¼şµÄ¾ä±ú
+'æ ¹æ®æŒ‡å®šçš„ç‚¹è·å–çª—å£æˆ–æ§ä»¶çš„å¥æŸ„
 Public Function GetWindowByPoint(ByVal x As Long, ByVal y As Long) As clsWindow
     hWnd_ = WindowFromPoint(x, y)
     wReturn.hWnd = hWnd_
@@ -1063,21 +1063,21 @@ Public Property Let TransparentColor(ByVal vNewValue As Long)
     GetLayeredWindowAttributes hWnd_, vbNull, v, R
     SetLayeredWindowAttributes hWnd_, vNewValue, v, R Or LWA_COLORKEY
 End Property
-'ÉèÖÃ´°ÌåÖÃ¶¥
+'è®¾ç½®çª—ä½“ç½®é¡¶
 Public Sub SetTop(Optional ByVal isSetTop As Boolean = True)
     SetWindowPos hWnd, IIf(isSetTop, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOSIZE + SWP_NOMOVE
 End Sub
-'´Ë·½·¨Î´¾­²âÊÔ
+'æ­¤æ–¹æ³•æœªç»æµ‹è¯•
 Public Sub ZOrder()
     If CheckWindow() = 0 Then Exit Sub
     BringWindowToTop hWnd_
 End Sub
 
-'µÃµ½°æ±¾ĞÅÏ¢
+'å¾—åˆ°ç‰ˆæœ¬ä¿¡æ¯
 Public Property Get Version() As String
     Version = "v2.0"
 End Property
-'¸ù¾İÖ¸¶¨µÄindexÑ¡ÔñÏÂÀ­¿òÖĞÄÚÈİ
+'æ ¹æ®æŒ‡å®šçš„indexé€‰æ‹©ä¸‹æ‹‰æ¡†ä¸­å†…å®¹
 Public Sub SelectComboBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
     SendMessage hWnd, CB_SETCURSEL, intIndex, 0
 End Sub
