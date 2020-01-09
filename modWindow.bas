@@ -1,3 +1,4 @@
+Attribute VB_Name = "modWindow"
 '===========================================================================
 '描    述：是clsWindow.cls类的调用模块，一些常用函数和api在此声明 (modWindow)
 '编    程：sysdzw 原创开发，如果有需要对模块进行更新请发我一份，共同维护
@@ -287,3 +288,4 @@ Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCo
 Err1:
     writeToFile = False
 End Function
+
