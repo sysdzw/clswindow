@@ -60,6 +60,31 @@ Public Const GW_CHILD = 5
 Public Const CB_SETCURSEL = &H14E
 Public Const PROCESS_ALL_ACCESS As Long = &H1F0FFF
 
+Public Const WAIT_ABANDONED& = &H80&
+Public Const WAIT_ABANDONED_0& = &H80&
+Public Const WAIT_FAILED& = -1&
+Public Const WAIT_IO_COMPLETION& = &HC0&
+Public Const WAIT_OBJECT_0& = 0
+Public Const WAIT_OBJECT_1& = 1
+Public Const WAIT_TIMEOUT& = &H102&
+Public Const INFINITE = &HFFFF
+Public Const QS_HOTKEY& = &H80
+Public Const QS_KEY& = &H1
+Public Const QS_MOUSEBUTTON& = &H4
+Public Const QS_MOUSEMOVE& = &H2
+Public Const QS_PAINT& = &H20
+Public Const QS_POSTMESSAGE& = &H8
+Public Const QS_SENDMESSAGE& = &H40
+Public Const QS_TIMER& = &H10
+Public Const ERROR_ALREADY_EXISTS = 183&
+Public Const QS_MOUSE& = (QS_MOUSEMOVE Or QS_MOUSEBUTTON)
+Public Const QS_INPUT& = (QS_MOUSE Or QS_KEY)
+Public Const QS_ALLEVENTS& = (QS_INPUT Or QS_POSTMESSAGE Or QS_TIMER Or QS_PAINT Or QS_HOTKEY)
+Public Const QS_ALLINPUT& = (QS_SENDMESSAGE Or QS_PAINT Or QS_TIMER Or QS_POSTMESSAGE Or QS_MOUSEBUTTON Or QS_MOUSEMOVE Or QS_HOTKEY Or QS_KEY)
+
+Public Const UNITS = 4294967296#
+Public Const MAX_LONG = -2147483648#
+
 '结构体定义
 Public Type rect
     Left As Long
@@ -83,6 +108,19 @@ Public Enum enumPositionMode
     absolute
     relative
 End Enum
+
+Public Type FILETIME
+    dwLowDateTime As Long
+    dwHighDateTime As Long
+End Type
+
+
+Public Declare Function CreateWaitableTimer Lib "kernel32" Alias "CreateWaitableTimerA" (ByVal lpSemaphoreAttributes As Long, ByVal bManualReset As Long, ByVal lpName As String) As Long
+Public Declare Function OpenWaitableTimer Lib "kernel32" Alias "OpenWaitableTimerA" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal lpName As String) As Long
+Public Declare Function SetWaitableTimer Lib "kernel32" (ByVal hTimer As Long, lpDueTime As FILETIME, ByVal lPeriod As Long, ByVal pfnCompletionRoutine As Long, ByVal lpArgToCompletionRoutine As Long, ByVal fResume As Long) As Long
+Public Declare Function CancelWaitableTimer Lib "kernel32" (ByVal hTimer As Long)
+Public Declare Function WaitForSingleObject Lib "kernel32" (ByVal hHandle As Long, ByVal dwMilliseconds As Long) As Long
+Public Declare Function MsgWaitForMultipleObjects Lib "user32" (ByVal nCount As Long, pHandles As Long, ByVal fWaitAll As Long, ByVal dwMilliseconds As Long, ByVal dwWakeMask As Long) As Long
 
 Public Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
 Public Declare Function GetForegroundWindow Lib "user32" () As Long
@@ -145,7 +183,7 @@ Public strWindowInfo$ '保存所有窗口的信息，格式为 句柄 文本内�
 Private strWindowKeyWord$ '要参与的过滤的窗口的关键字，如果不需要过滤就留空
 Dim strTmp$, isWholeEx As Boolean
 
-Public objTimer As New clsWaitableTimer
+Public mlTimer As Long
 
 '得到所有窗口的信息
 Private Function GetWindowInfo(Optional ByVal strKeyWord = "", Optional ByVal isWhole As Boolean = False) As String
@@ -288,4 +326,3 @@ Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCo
 Err1:
     writeToFile = False
 End Function
-
