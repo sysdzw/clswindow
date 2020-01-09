@@ -12,7 +12,7 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '==============================================================================================
-'名    称：windows窗体控制类v2.1
+'名    称：windows窗体控制类v2.2
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
 '使用范例：Dim window As New clsWindow
 '          window.GetWindowByTitle("计算器").closeWindow
@@ -69,12 +69,14 @@ Attribute VB_Exposed = False
 '               升级ClickPoint函数，支持点击前后分别延时，默认延时为0            2018/07/23
 '          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了正则       2020/02/08
 '               优化方法：Get Caption，根据网友小凡的建议改成可获得文本框内容
+'               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/02/09
 '==============================================================================================
 Option Explicit
 
 Private Const DelayOneTime = 500
 Private hWnd_ As Long '窗口句柄
 Private wReturn As New clsWindow '作为返回对象以便连用
+Private Const strVersion = "V2.2"
 Public DebugMe As Boolean '表示是否启用调试模式
 
 Public Function Move(Optional ByVal x, Optional ByVal y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
@@ -84,7 +86,6 @@ Public Function Move(Optional ByVal x, Optional ByVal y, Optional ByVal nWidth, 
     If IsMissing(nHeight) Then nHeight = Height
     Move = MoveWindow(hWnd_, x, y, nWidth, nHeight, True)
 End Function
-
 '得到当前窗口的句柄
 Public Property Get hWnd() As Long
     hWnd = hWnd_
@@ -308,7 +309,7 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
 
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '未发现关键字为 strTitle
-        WAIT DelayOneTime
+        Wait DelayOneTime
         
         hWnd_ = 0
     Loop
@@ -347,7 +348,7 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
         Loop Until lnghWnd = 0 '这层loop是遍历所有窗口的
         If strHwndAllTmp <> "" Then Exit Do '如果一遍循环得到结果了就退出
 
-        WAIT DelayOneTime
+        Wait DelayOneTime
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
@@ -376,7 +377,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
 
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strClassName
-        WAIT DelayOneTime
+        Wait DelayOneTime
         
         hWnd_ = 0
     Loop
@@ -415,7 +416,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
         Loop Until lnghWnd = 0
         If strHwndAllTmp <> "" Then Exit Do
 
-        WAIT DelayOneTime
+        Wait DelayOneTime
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
@@ -465,7 +466,7 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
         Loop
         If hWnd_ <> 0 Then Exit Do
 
-        WAIT DelayOneTime
+        Wait DelayOneTime
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
@@ -520,7 +521,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
         Loop
         If strHwndAllTmp <> "" Then Exit Do '表示匹配到了一部分数据
 
-        WAIT DelayOneTime
+        Wait DelayOneTime
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
@@ -566,7 +567,7 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
         Loop
         If strHwndAllTmp <> "" Then Exit Do '表示匹配到了一部分数据
 
-        WAIT DelayOneTime
+        Wait DelayOneTime
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
@@ -820,11 +821,6 @@ Public Function CloseApp() As Long
     CloseApp = TerminateProcess(hProcess, 0)
     CloseHandle hProcess
 End Function
-Public Sub WAIT(ByVal MilliSeconds As Long)
-    Dim objTimer As New clsWaitableTimer
-    objTimer.WAIT MilliSeconds
-    Set objTimer = Nothing
-End Sub
 Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If PositionMod = absolute Then
         SetCursorPos x1, y1
@@ -835,10 +831,10 @@ Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enum
         Exit Sub
     End If
     Do While clickTimes > 0
-        WAIT delayMilliSecondsBefore
+        Wait delayMilliSecondsBefore
         mouse_event MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0
         mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
-        WAIT delayMilliSecondsAfter
+        Wait delayMilliSecondsAfter
         clickTimes = clickTimes - 1
     Loop
 End Sub
@@ -861,7 +857,7 @@ Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal s
                 Else
                     Left = Left - shakePads
                 End If
-                WAIT shakeInterval
+                Wait shakeInterval
             Next
         Case Vertical
             For i = 1 To shakeRepeats
@@ -870,20 +866,20 @@ Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal s
                 Else
                     Top = Top - shakePads
                 End If
-                WAIT shakeInterval
+                Wait shakeInterval
             Next
         Case Both
             For i = 1 To shakeRepeats
                 If i Mod 2 = 0 Then
                     Left = Left + shakePads
-                    WAIT 10
+                    Wait 10
                     Top = Top + shakePads
                 Else
                     Left = Left - shakePads
-                    WAIT 10
+                    Wait 10
                     Top = Top - shakePads
                 End If
-                WAIT shakeInterval
+                Wait shakeInterval
             Next
     End Select
 End Sub
@@ -901,7 +897,7 @@ Public Sub FadeIn(Optional ByVal speed = 10)
     If speed < 1 Then speed = 1
     For i = 1 To 255 Step speed
         SetLayeredWindowAttributes hWnd_, 0, i, LWA_ALPHA   '设置窗体透明度
-        WAIT 50
+        Wait 50
     Next
     SetLayeredWindowAttributes hWnd_, 0, 255, LWA_ALPHA
 End Sub
@@ -920,7 +916,7 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If speed < 1 Then speed = 1
     For i = 255 To 1 Step -speed
         SetLayeredWindowAttributes hWnd_, 0, i, LWA_ALPHA   '设置窗体透明度
-        WAIT 50
+        Wait 50
     Next
     SetLayeredWindowAttributes hWnd_, 0, 0, LWA_ALPHA
     If isCloseWindow Then CloseWindow
@@ -1083,12 +1079,60 @@ Public Sub ZOrder()
     If CheckWindow() = 0 Then Exit Sub
     BringWindowToTop hWnd_
 End Sub
-
 '得到版本信息
 Public Property Get Version() As String
-    Version = "v2.0"
+    Version = strVersion
 End Property
 '根据指定的index选择下拉框中内容
 Public Sub SelectComboBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
     SendMessage hWnd, CB_SETCURSEL, intIndex, 0
+End Sub
+
+Private Sub Class_Terminate()
+    On Error Resume Next
+    If mlTimer <> 0 Then CloseHandle mlTimer
+End Sub
+'延时
+Public Sub Wait(ByVal MilliSeconds As Long)
+    On Error GoTo ErrHandler
+    Dim ft As FILETIME
+    Dim lBusy As Long
+    Dim lRet As Long
+    Dim dblDelay As Double
+    Dim dblDelayLow As Double
+    
+    If MilliSeconds = 0 Then Exit Sub
+    
+    Randomize
+    mlTimer = CreateWaitableTimer(0, True, App.EXEName & "Timer" & Format$(Now(), "NNSS") & Int(Rnd * 10000))
+    
+    If Err.LastDllError <> ERROR_ALREADY_EXISTS Then
+        ft.dwLowDateTime = -1
+        ft.dwHighDateTime = -1
+        lRet = SetWaitableTimer(mlTimer, ft, 0, 0, 0, 0)
+    End If
+    
+    dblDelay = CDbl(MilliSeconds) * 10000#
+    
+    ft.dwHighDateTime = -CLng(dblDelay / UNITS) - 1
+    dblDelayLow = -UNITS * (dblDelay / UNITS - Fix(CStr(dblDelay / UNITS)))
+    
+    If dblDelayLow < MAX_LONG Then dblDelayLow = UNITS + dblDelayLow
+    
+    ft.dwLowDateTime = CLng(dblDelayLow)
+    lRet = SetWaitableTimer(mlTimer, ft, 0, 0, 0, False)
+    
+    Do
+        lBusy = MsgWaitForMultipleObjects(1, mlTimer, False, INFINITE, QS_ALLINPUT&)
+        
+        DoEvents
+'        Exit Sub '**DEBUG**调试时可以加上
+    Loop Until lBusy = WAIT_OBJECT_0
+    
+    CloseHandle mlTimer
+    mlTimer = 0
+    Exit Sub
+    
+ErrHandler:
+    Err.Raise Err.Number, Err.Source, "[clsWaitableTimer.Wait]" & Err.Description
 End Sub
