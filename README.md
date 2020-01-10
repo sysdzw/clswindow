@@ -111,5 +111,6 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
 '               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
 '               增加方法：SetCursor(别名：SetPoint MoveCursor MoveCursorTo)
+'               更新函数：GetWindowByClassName 默认时间60秒改为10秒
 '==============================================================================================
 ```
