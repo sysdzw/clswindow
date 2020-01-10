@@ -106,8 +106,8 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：GetWindowByCursorPos 根据当前光标获取窗口（控件）
 '               增加函数：GetWindowByPoint 根据指定的位置获取窗口（控件）
 '               升级ClickPoint函数，支持点击前后分别延时，默认延时为0            2018/07/23
-'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了正则       2020/01/08
-'               优化方法：Get Caption，根据网友小凡的建议改成可获得文本框内容
+'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了相关正则   2020/01/08
+'               优化属性：Caption(Get)，根据网友小凡的建议改成可获得文本框内容
 '               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
 '               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
 '               增加方法：SetCursor(别名：SetPoint MoveCursor MoveCursorTo)
