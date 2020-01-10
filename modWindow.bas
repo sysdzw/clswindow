@@ -1,19 +1,19 @@
 Attribute VB_Name = "modWindow"
 '===========================================================================
-'æ    è¿°ï¼šæ˜¯clsWindow.clsç±»çš„è°ƒç”¨æ¨¡å—ï¼Œä¸€äº›å¸¸ç”¨å‡½æ•°å’Œapiåœ¨æ­¤å£°æ˜ (modWindow)
-'ç¼–    ç¨‹ï¼šsysdzw åŸåˆ›å¼€å‘ï¼Œå¦‚æœæœ‰éœ€è¦å¯¹æ¨¡å—è¿›è¡Œæ›´æ–°è¯·å‘æˆ‘ä¸€ä»½ï¼Œå…±åŒç»´æŠ¤
-'å‘å¸ƒæ—¥æœŸï¼š2013/05/28
-'åš    å®¢ï¼šhttp://blog.163.com/sysdzw
+'Ãè    Êö£ºÊÇclsWindow.clsÀàµÄµ÷ÓÃÄ£¿é£¬Ò»Ğ©³£ÓÃº¯ÊıºÍapiÔÚ´ËÉùÃ÷ (modWindow)
+'±à    ³Ì£ºsysdzw Ô­´´¿ª·¢£¬Èç¹ûÓĞĞèÒª¶ÔÄ£¿é½øĞĞ¸üĞÂÇë·¢ÎÒÒ»·İ£¬¹²Í¬Î¬»¤
+'·¢²¼ÈÕÆÚ£º2013/05/28
+'²©    ¿Í£ºhttp://blog.163.com/sysdzw
 '          http://blog.csdn.net/sysdzw
-'Email   ï¼šsysdzw@163.com
-'QQ      ï¼š171977759
-'ç‰ˆ    æœ¬ï¼šV1.0 åˆç‰ˆ                                        2012/12/3
-'          V1.1 å°†ç±»ä¸­çš„apiå‡½æ•°ä»¥åŠéƒ¨åˆ†å˜é‡æŒªåˆ°æ­¤æ¨¡å—       2013/05/28
-'          V1.2 å°†EnumChildProcä¸­è·å–æ§ä»¶æ–‡å­—å‡½æ•°ä¿®æ”¹äº†     2013/06/13
+'Email   £ºsysdzw@163.com
+'QQ      £º171977759
+'°æ    ±¾£ºV1.0 ³õ°æ                                        2012/12/3
+'          V1.1 ½«ÀàÖĞµÄapiº¯ÊıÒÔ¼°²¿·Ö±äÁ¿Å²µ½´ËÄ£¿é       2013/05/28
+'          V1.2 ½«EnumChildProcÖĞ»ñÈ¡¿Ø¼şÎÄ×Öº¯ÊıĞŞ¸ÄÁË     2013/06/13
 '===========================================================================
 Option Explicit
 
-'å¸¸é‡å®šä¹‰
+'³£Á¿¶¨Òå
 Public Const SW_MINIMIZE = 6
 Public Const SW_SHOW = 5
 Public Const SW_SHOWMAXIMIZED = 3
@@ -85,7 +85,7 @@ Public Const QS_ALLINPUT& = (QS_SENDMESSAGE Or QS_PAINT Or QS_TIMER Or QS_POSTME
 Public Const UNITS = 4294967296#
 Public Const MAX_LONG = -2147483648#
 
-'ç»“æ„ä½“å®šä¹‰
+'½á¹¹Ìå¶¨Òå
 Public Type rect
     Left As Long
     Top As Long
@@ -177,15 +177,15 @@ Public Declare Function GetDesktopWindow Lib "user32" () As Long
 Public Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Long, ByVal dx As Long, ByVal dy As Long, ByVal cButtons As Long, ByVal dwExtraInfo As Long)
 Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
-'è‡ªå®šä¹‰å˜é‡å£°æ˜
-Public strControlInfo$ 'ä¿å­˜å®¹å™¨å†…æ‰€æœ‰æ§ä»¶çš„ä¿¡æ¯
-Public strWindowInfo$ 'ä¿å­˜æ‰€æœ‰çª—å£çš„ä¿¡æ¯ï¼Œæ ¼å¼ä¸º å¥æŸ„ æ–‡æœ¬å†…å®¹
-Private strWindowKeyWord$ 'è¦å‚ä¸çš„è¿‡æ»¤çš„çª—å£çš„å…³é”®å­—ï¼Œå¦‚æœä¸éœ€è¦è¿‡æ»¤å°±ç•™ç©º
+'×Ô¶¨Òå±äÁ¿ÉùÃ÷
+Public strControlInfo$ '±£´æÈİÆ÷ÄÚËùÓĞ¿Ø¼şµÄĞÅÏ¢
+Public strWindowInfo$ '±£´æËùÓĞ´°¿ÚµÄĞÅÏ¢£¬¸ñÊ½Îª ¾ä±ú ÎÄ±¾ÄÚÈİ
+Private strWindowKeyWord$ 'Òª²ÎÓëµÄ¹ıÂËµÄ´°¿ÚµÄ¹Ø¼ü×Ö£¬Èç¹û²»ĞèÒª¹ıÂË¾ÍÁô¿Õ
 Dim strTmp$, isWholeEx As Boolean
 
 Public mlTimer As Long
 
-'å¾—åˆ°æ‰€æœ‰çª—å£çš„ä¿¡æ¯
+'µÃµ½ËùÓĞ´°¿ÚµÄĞÅÏ¢
 Private Function GetWindowInfo(Optional ByVal strKeyWord = "", Optional ByVal isWhole As Boolean = False) As String
     strWindowInfo = ""
     isWholeEx = isWhole
@@ -198,7 +198,7 @@ End Function
 Private Function EnumWindowProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     If (GetWindowLong(hWnd, GWL_STYLE) And &HCF0000) = &HCF0000 And (IsWindowVisible(hWnd) = 1) Then
         strTmp = GetWinText(hWnd)
-        If InStr(strTmp, strWindowKeyWord) > 0 Then 'å¦‚æœåœ¨å…³é”®å­—å†…å°±æ˜¾ç¤º
+        If InStr(strTmp, strWindowKeyWord) > 0 Then 'Èç¹ûÔÚ¹Ø¼ü×ÖÄÚ¾ÍÏÔÊ¾
             strWindowInfo = strWindowInfo & CStr(hWnd) & " " & strTmp & vbCrLf
         End If
     End If
@@ -210,13 +210,12 @@ Public Function GetWinText(ByVal hWnd As Long) As String
     GetWindowText hWnd, GetWinText, Len(GetWinText)
     GetWinText = Left$(GetWinText, InStr(GetWinText, Chr(0)) - 1)
 End Function
-
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-'åŠŸèƒ½ï¼šå¾—åˆ°æ‰€æœ‰æ§ä»¶çš„ä¿¡æ¯ï¼Œæ˜¯æŒ‰æ¬¡åºè·å¾—çš„ï¼Œå¯ç”¨äºç¼–å†™è„šæœ¬çš„å‚è€ƒå’Œç¨‹åºè®¾ç½®å€¼æ—¶ä½¿ç”¨ã€‚æ­¤å‡½æ•°éœ€è¦å’ŒEnumChildProcä¸€èµ·ä½¿ç”¨
-'å‡½æ•°åï¼šControlsInfo
-'å…¥å£å‚æ•°ï¼šhWnd   longå‹  å®¹å™¨å¥æŸ„ï¼Œä¸€èˆ¬æŒ‡çª—ä½“å¥æŸ„ã€‚å¯ç¼ºçœï¼Œç¼ºçœä¸ºæœ€æ–°è·å–åˆ°çš„çª—ä½“çš„å¥æŸ„ï¼Œä¹Ÿå¯ä»¥æŒ‡å®šä¸€ä¸ªå¥æŸ„
-'è¿”å›å€¼ï¼šstring   ä¿å­˜äº†å®¹å™¨å†…æ‰€æœ‰æ§ä»¶çš„ä¿¡æ¯ï¼ŒåŒ…å«â€œå¥æŸ„ã€IDã€ç±»åã€æ˜¾ç¤ºæ–‡å­—â€
-'å¤‡æ³¨ï¼šsysdzw äº 2010-11-13 æä¾›
+'¹¦ÄÜ£ºµÃµ½ËùÓĞ¿Ø¼şµÄĞÅÏ¢£¬ÊÇ°´´ÎĞò»ñµÃµÄ£¬¿ÉÓÃÓÚ±àĞ´½Å±¾µÄ²Î¿¼ºÍ³ÌĞòÉèÖÃÖµÊ±Ê¹ÓÃ¡£´Ëº¯ÊıĞèÒªºÍEnumChildProcÒ»ÆğÊ¹ÓÃ
+'º¯ÊıÃû£ºControlsInfo
+'Èë¿Ú²ÎÊı£ºhWnd   longĞÍ  ÈİÆ÷¾ä±ú£¬Ò»°ãÖ¸´°Ìå¾ä±ú¡£¿ÉÈ±Ê¡£¬È±Ê¡Îª×îĞÂ»ñÈ¡µ½µÄ´°ÌåµÄ¾ä±ú£¬Ò²¿ÉÒÔÖ¸¶¨Ò»¸ö¾ä±ú
+'·µ»ØÖµ£ºstring   ±£´æÁËÈİÆ÷ÄÚËùÓĞ¿Ø¼şµÄĞÅÏ¢£¬°üº¬¡°¾ä±ú¡¢ID¡¢ÀàÃû¡¢ÏÔÊ¾ÎÄ×Ö¡±
+'±¸×¢£ºsysdzw ÓÚ 2010-11-13 Ìá¹©
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug = False) As String
     Dim strHwnd$, strCtlId$, strClass$
@@ -225,8 +224,8 @@ Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug = False
     Dim strWindowClass As String * 255
     Dim strWindowTitle$
     
-    GetClassName lngMainHwnd, strWindowClass, 255  'è·å¾—çª—å£ç±»
-    SendMessage lngMainHwnd, &HD, 64000, Txt(0) 'è·å¾—çª—å£æ ‡é¢˜(ä¹Ÿå¯ä½¿ç”¨ API å‡½æ•°:GetWindowText,ä½†æ•ˆæœä¸ä½³)
+    GetClassName lngMainHwnd, strWindowClass, 255  '»ñµÃ´°¿ÚÀà
+    SendMessage lngMainHwnd, &HD, 64000, Txt(0) '»ñµÃ´°¿Ú±êÌâ(Ò²¿ÉÊ¹ÓÃ API º¯Êı:GetWindowText,µ«Ğ§¹û²»¼Ñ)
     strWindowTitle = StrConv(Txt, vbUnicode)
     strWindowTitle = Replace(strWindowTitle, Chr(0), "")
     strWindowClass = Replace(strWindowClass, Chr(0), "")
@@ -236,13 +235,12 @@ Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug = False
     ControlsInfo = strControlInfo
     If isDebug Then writeToFile "controls.txt", strControlInfo
 End Function
-
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-'åŠŸèƒ½ï¼šå’Œapiå‡½æ•°EnumChildWindowsç»“åˆä½¿ç”¨å¾—åˆ°ä¸€ä¸ªçª—ä½“å®¹å™¨å†…çš„æ‰€æœ‰childæ§ä»¶
-'å‡½æ•°åï¼šEnumChildProc
-'å…¥å£å‚æ•°ï¼šhWnd   longå‹  å®¹å™¨å¥æŸ„ï¼Œä¸€èˆ¬æŒ‡çª—ä½“å¥æŸ„
-'è¿”å›å€¼ï¼šlong   è¿™é‡Œç›´æ¥è¿”å›çš„trueï¼Œå¦‚æœæ˜¯trueåˆ™ç»§ç»­è°ƒç”¨
-'å¤‡æ³¨ï¼šsysdzw äº 2010-11-13 æä¾›
+'¹¦ÄÜ£ººÍapiº¯ÊıEnumChildWindows½áºÏÊ¹ÓÃµÃµ½Ò»¸ö´°ÌåÈİÆ÷ÄÚµÄËùÓĞchild¿Ø¼ş
+'º¯ÊıÃû£ºEnumChildProc
+'Èë¿Ú²ÎÊı£ºhWnd   longĞÍ  ÈİÆ÷¾ä±ú£¬Ò»°ãÖ¸´°Ìå¾ä±ú
+'·µ»ØÖµ£ºlong   ÕâÀïÖ±½Ó·µ»ØµÄtrue£¬Èç¹ûÊÇtrueÔò¼ÌĞøµ÷ÓÃ
+'±¸×¢£ºsysdzw ÓÚ 2010-11-13 Ìá¹©
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Private Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     Dim strClassName As String * 255
@@ -258,7 +256,7 @@ Private Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     SendMessage hWnd, &HD, 64000, Txt2(0)
     strCaption = StrConv(Txt2, vbUnicode)
     strCaption = Left$(strCaption, InStr(strCaption, Chr$(0)) - 1)
-    strCaption = Replace(strCaption, vbCrLf, " ") 'å¼ºåˆ¶å°†æ–‡æœ¬æ¡†ä¸­å†…å®¹å›è½¦æ›¿æ¢æˆç©ºæ ¼ï¼Œä»¥é˜²æ­¢å½±å“æ­£åˆ™è·å–
+    strCaption = Replace(strCaption, vbCrLf, " ") 'Ç¿ÖÆ½«ÎÄ±¾¿òÖĞÄÚÈİ»Ø³µÌæ»»³É¿Õ¸ñ£¬ÒÔ·ÀÖ¹Ó°ÏìÕıÔò»ñÈ¡
     
     strHwnd$ = CStr(hWnd)
     strHwnd$ = strHwnd$ & vbTab
@@ -301,14 +299,14 @@ Public Function regTest(ByVal str1$, ByVal strPattern$) As Boolean
     regTest = reg.test(strData)  '"\$1"
 End Function
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-'åŠŸèƒ½ï¼šæ ¹æ®æ‰€ç»™æ–‡ä»¶åå’Œå†…å®¹ç›´æ¥å†™æ–‡ä»¶
-'å‡½æ•°åï¼šwriteToFile
-'å…¥å£å‚æ•°(å¦‚ä¸‹)ï¼š
-'  strFileName æ‰€ç»™çš„æ–‡ä»¶åï¼›
-'  strContent è¦è¾“å…¥åˆ°ä¸Šè¿°æ–‡ä»¶çš„å­—ç¬¦ä¸²
-'  isCover æ˜¯å¦è¦†ç›–è¯¥æ–‡ä»¶ï¼Œé»˜è®¤ä¸ºè¦†ç›–
-'è¿”å›å€¼ï¼šTrueæˆ–Falseï¼ŒæˆåŠŸåˆ™è¿”å›å‰è€…ï¼Œå¦åˆ™è¿”å›åè€…
-'å¤‡æ³¨ï¼šsysdzw äº 2007-5-2 æä¾›
+'¹¦ÄÜ£º¸ù¾İËù¸øÎÄ¼şÃûºÍÄÚÈİÖ±½ÓĞ´ÎÄ¼ş
+'º¯ÊıÃû£ºwriteToFile
+'Èë¿Ú²ÎÊı(ÈçÏÂ)£º
+'  strFileName Ëù¸øµÄÎÄ¼şÃû£»
+'  strContent ÒªÊäÈëµ½ÉÏÊöÎÄ¼şµÄ×Ö·û´®
+'  isCover ÊÇ·ñ¸²¸Ç¸ÃÎÄ¼ş£¬Ä¬ÈÏÎª¸²¸Ç
+'·µ»ØÖµ£ºTrue»òFalse£¬³É¹¦Ôò·µ»ØÇ°Õß£¬·ñÔò·µ»ØºóÕß
+'±¸×¢£ºsysdzw ÓÚ 2007-5-2 Ìá¹©
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCover As Boolean = True) As Boolean
     On Error GoTo Err1
@@ -326,3 +324,4 @@ Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCo
 Err1:
     writeToFile = False
 End Function
+

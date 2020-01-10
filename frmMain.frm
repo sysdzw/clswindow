@@ -69,7 +69,7 @@ Begin VB.Form frmMain
       Width           =   3015
    End
    Begin VB.CommandButton Command2 
-      Caption         =   "调用计算器进行计算(仅XP有效)"
+      Caption         =   "调用计算器进行计算"
       Height          =   495
       Left            =   240
       TabIndex        =   1
@@ -133,6 +133,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Dim window As New clsWindow
+Private Declare Function SetParent Lib "user32" (ByVal hWndChild As Long, ByVal hWndNewParent As Long) As Long
 
 '关闭纸牌等游戏窗口
 Private Sub Command1_Click()
@@ -162,12 +163,11 @@ Private Sub Command2_Click()
 '    window.SetElementTextByClassName "SciCalc", "计算2+3的结果："'方法1：通过类名定位设置窗口文字
 '    window.setElementTextByText "计算器", "计算2+3的结果："      '方法2：通过窗口文字定位设置窗口文字
     window.Caption = "计算2+3的结果："                            '方法3：直接使用当前存储的句柄设置窗口文字
-    window.WAIT 500
+    window.Wait 500
     window.ClickElementByText "2"
     window.ClickElementByText "+"
     window.ClickElementByText "3"
     window.ClickElementByText "="
-    window.WAIT 2000
     
     '循环处理计算器按键
     Dim s$, i%
@@ -176,12 +176,13 @@ Private Sub Command2_Click()
     For i = 1 To Len(s)
         window.ClickElementByText Mid(s, i, 1)
     Next
-    window.WAIT 2000
+    window.Wait 2000
     
     window.Caption = "两秒后关闭计算器"
-    window.WAIT 2000
+    window.Wait 2000
     window.CloseWindow
     Command2.Enabled = True
+    window.Wait 2000
 End Sub
 '激活窗口获得焦点
 Private Sub Command3_Click()
@@ -189,11 +190,11 @@ Private Sub Command3_Click()
     
     Dim w As New clsWindow
     
-    w.WAIT 500
+    w.Wait 500
     w.GetWindowByTitleEx("Google Chrome", 1).Focus   '如果谷歌浏览器窗口获取到就激活
-    w.WAIT 500
+    w.Wait 500
     If w.GetWindowByTitleEx("扫雷", 1).hWnd > 0 Then w.Focus '如果扫雷游戏窗口获取到就激活，默认等待1秒
-    w.WAIT 500
+    w.Wait 500
     If w.GetWindowByTitleEx("Internet Explorer", 1).hWnd > 0 Then  '如果IE浏览器窗口获取到就激活
         w.Focus
         Randomize
@@ -220,15 +221,15 @@ Private Sub Command4_Click()
     
     w.GetWindowByTitleEx "计算器", 2, Shell("calc.exe", 1)
     strHwnd = strHwnd & w.hWnd & ","
-    w.WAIT 20
+    w.Wait 20
     '向下移动
     For i = 0 To Screen.Height / 15 - w.Height Step 10
-        w.WAIT 5
+        w.Wait 5
         w.Move lngLeft, i
     Next
     '再回头
     For i = Screen.Height / 15 - w.Height To 300 Step -10
-        w.WAIT 5
+        w.Wait 5
         w.Move lngLeft, i
     Next
     w.Move lngLeft, 300
@@ -238,7 +239,7 @@ Private Sub Command4_Click()
         w.GetWindowByTitleEx "计算器", 2, Shell("calc.exe", 1)
         w.Caption = "句柄为:" & w.hWnd
         For j = 0 To Screen.Width / 15 - w.Width Step 10
-            w.WAIT 10
+            w.Wait 10
             w.Caption = "坐标(" & j & "." & lngTop & ")"
             w.Move j, lngTop
         Next
@@ -249,19 +250,19 @@ Private Sub Command4_Click()
     v = Split(strHwnd, ",")
     
     '激活测试，窗口全部激活一遍，注意标题会闪动一下
-    w.WAIT 1000
+    w.Wait 1000
     For i = 0 To UBound(v) - 1
         w.hWnd = v(i)
-        w.WAIT 100
+        w.Wait 100
         w.Hide
         w.Focus
     Next
     
     '1秒后逐步关闭所有刚刚打开的窗口
-    w.WAIT 1000
+    w.Wait 1000
     For i = UBound(v) - 1 To 0 Step -1
         w.hWnd = v(i)
-        w.WAIT 100 '延时是为了看到逐步关闭的进程，不然一下子关了看不到效果
+        w.Wait 100 '延时是为了看到逐步关闭的进程，不然一下子关了看不到效果
         w.CloseWindow
     Next
     Command4.Enabled = True
@@ -325,7 +326,7 @@ Dim w As New clsWindow
 
 If w.GetWindowByTitleEx("记事本", 2).hWnd > 0 Then
     w.Focus '设置为焦点
-    w.Shake '抖动
+    w.Shake  '抖动
     w.FadeOut '淡出
     w.FadeIn '淡入
 Else
@@ -416,8 +417,17 @@ Dim w As New clsWindow
 'w.GetWindowByTitleEx("新时代").SetElementTextByClassName "Edit", "12345678"
 'w.SetElementTextByClassName "Edit", "8888888", 2
 'MsgBox w.GetWindowByTitleEx("imm").AppName
-w.hWnd = 332302
-MsgBox w.AppName
+
+'w.WAIT 5000
+'Dim i%
+'For i = 1 To 3000
+'    w.WAIT 50
+'    w.ClickPoint2
+'Next
+'MsgBox "点击好了"
+'SetParent w.GetWindowByPID(Shell("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", 1)).hWnd, Me.hWnd
+MsgBox w.GetWindowByClassName("ConsoleWindowClass").Caption
+'SetParent
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
@@ -427,16 +437,16 @@ Private Sub Command8_Click()
     w.Caption = "看到记事本打开了吗？" & Now '设置应用程序标题内容
     w.Shake '抖动窗口，可以通过参数调节抖动方向、速度、幅度、次数
     
-    w.SetElementTextByClassName "Edit", "clsWindowv2.0发布 " & Now() '设置输入框文字
-    w.WAIT 1000
+    w.SetElementTextByClassName "Edit", "clsWindowv" & w.Version & "发布 " & Now()    '设置输入框文字
+    w.Wait 1000
     w.FadeOut '淡出
     w.AppendElementTextByClassName "Edit", vbCrLf & "功能全面" '向输入框追加内容
     w.FadeIn '淡入
     w.AppendElementTextByClassName "Edit", vbCrLf & "欢迎测试反馈" '向输入框追加内容
-    w.WAIT 1000
+    w.Wait 1000
     
     w.Focus
-    w.WAIT 500
+    w.Wait 500
     SendKeys "^{s}" '设置焦点后按快捷键保存
     Dim w2 As New clsWindow
     w2.GetWindowByTitleEx("另存为").SetElementTextByClassName "Edit", "c:\test" & Format(Now, "yyyymmddhhnnss") & ".txt"
@@ -451,12 +461,12 @@ Private Sub Command9_Click()
     For i = 1 To 40
         w.GetWindowByTitle("红岭创投维权交流").Focus
         w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
-        w.WAIT 20
+        w.Wait 20
         Clipboard.Clear
         Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow2.1类发出 " & Now
         SendKeys "^{v}"
         SendKeys "%{s}"
-        w.WAIT 2
+        w.Wait 2
     Next
 End Sub
 
