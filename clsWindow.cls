@@ -67,9 +67,12 @@ Attribute VB_Exposed = False
 '               增加函数：GetWindowByCursorPos 根据当前光标获取窗口（控件）
 '               增加函数：GetWindowByPoint 根据指定的位置获取窗口（控件）
 '               升级ClickPoint函数，支持点击前后分别延时，默认延时为0            2018/07/23
-'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了正则       2020/02/08
+'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了正则       2020/01/08
 '               优化方法：Get Caption，根据网友小凡的建议改成可获得文本框内容
-'               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/02/09
+'               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
+'               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
+'               增加方法：SetCursor(别名：SetPoint MoveCursor MoveCursorTo)
+'               更新函数：GetWindowByClassName 默认时间60秒改为10秒
 '==============================================================================================
 Option Explicit
 
@@ -363,8 +366,8 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     Set GetWindowByTitleEx = wReturn
     hWnd_ = wReturn.hWnd
 End Function
-'设置根据窗体类名返回窗体句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待60秒
-Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWaitSeconds& = 60) As clsWindow
+'设置根据窗体类名返回窗体句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待10秒
+Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10) As clsWindow
     Dim lngDelayCount&
     hWnd_ = 0
     If DebugMe Then
@@ -838,10 +841,36 @@ Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enum
         clickTimes = clickTimes - 1
     Loop
 End Sub
-
-Public Sub ClickPoint2()
+'点击当前坐标
+Public Sub ClickCurrentPoint()
     mouse_event MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0
     mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
+End Sub
+'移动鼠标到指定点
+Public Sub SetCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If PositionMod = absolute Then
+        Wait delayMilliSecondsBefore
+        SetCursorPos x1, y1
+    ElseIf PositionMod = relative Then
+        Wait delayMilliSecondsBefore
+        SetCursorPos Left + x1, Top + y1
+        Wait delayMilliSecondsAfter
+    Else
+        MsgBox "函数ClickPoint执行一次。未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
+        Exit Sub
+    End If
+End Sub
+'同SetCursor
+Public Sub SetPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+End Sub
+'同SetCursor
+Public Sub MoveCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+End Sub
+'同SetCursor
+Public Sub MoveCursorTo(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '以下是几个特效的方法
 '特效1：窗体抖动

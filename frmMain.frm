@@ -426,7 +426,8 @@ Dim w As New clsWindow
 'Next
 'MsgBox "点击好了"
 'SetParent w.GetWindowByPID(Shell("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", 1)).hWnd, Me.hWnd
-MsgBox w.GetWindowByClassName("ConsoleWindowClass").Caption
+'MsgBox w.GetWindowByClassName("ConsoleWindowClass").Caption
+w.SetPoint 200, 200
 'SetParent
 End Sub
 
@@ -459,7 +460,7 @@ Private Sub Command9_Click()
     Dim i%
     Dim w As New clsWindow
     For i = 1 To 40
-        w.GetWindowByTitle("红岭创投维权交流").Focus
+        w.GetWindowByTitle("VB高级语言学习交流群").Focus
         w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
         w.Wait 20
         Clipboard.Clear
