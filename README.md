@@ -114,3 +114,6 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               更新函数：GetWindowByClassName 默认时间60秒改为10秒
 '==============================================================================================
 ```
+
+
+！[image](https://img-blog.csdn.net/20180423135213794)
