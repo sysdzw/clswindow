@@ -67,12 +67,13 @@ Attribute VB_Exposed = False
 '               增加函数：GetWindowByCursorPos 根据当前光标获取窗口（控件）
 '               增加函数：GetWindowByPoint 根据指定的位置获取窗口（控件）
 '               升级ClickPoint函数，支持点击前后分别延时，默认延时为0            2018/07/23
-'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了正则       2020/01/08
-'               优化方法：Get Caption，根据网友小凡的建议改成可获得文本框内容
+'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了相关正则   2020/01/08
+'               优化属性：Caption(Get)，根据网友小凡的建议改成可获得文本框内容
 '               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
 '               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
 '               增加方法：SetCursor(别名：SetPoint MoveCursor MoveCursorTo)
 '               更新函数：GetWindowByClassName 默认时间60秒改为10秒
+'               增加属性：Text、Value、Title（均为Caption别名）                 2020/01/12
 '==============================================================================================
 Option Explicit
 
@@ -157,6 +158,50 @@ End Property
 Public Property Let Height(ByVal lngHeight As Long)
     Move , , , lngHeight
 End Property
+
+'设置当前窗口的标题栏文字
+Public Property Let Caption(ByVal strNewText As String)
+    If hWnd_ <> 0 Then
+        SendMessage hWnd_, WM_SETTEXT, 0&, ByVal strNewText
+    End If
+End Property
+'得到当前窗口的标题栏文字
+Public Property Get Caption() As String
+'    Dim l&, strCaption$
+'    l = GetWindowTextLength(hWnd_)
+'    strCaption = Space(l)
+'    GetWindowText hWnd_, strCaption, l + 1
+'    Caption = strCaption
+    
+    Dim Txt2(64000) As Byte
+    SendMessage hWnd_, WM_GETTEXT, 64000, Txt2(0)
+    Caption = StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode)
+End Property
+'设置当前窗口的标题栏文字
+Public Property Let Text(ByVal strNewText As String)
+    Caption = strNewText
+End Property
+'得到当前窗口的标题栏文字
+Public Property Get Text() As String
+    Text = Caption
+End Property
+'设置当前窗口的标题栏文字
+Public Property Let Value(ByVal strNewText As String)
+    Caption = strNewText
+End Property
+'得到当前窗口的标题栏文字
+Public Property Get Value() As String
+    Value = Caption
+End Property
+'设置当前窗口的标题栏文字
+Public Property Let Title(ByVal strNewText As String)
+    Caption = strNewText
+End Property
+'得到当前窗口的标题栏文字
+Public Property Get Title() As String
+    Title = Caption
+End Property
+
 '窗口置前
 Public Function SetPosFront() As Long
     If hWnd_ <> 0 Then
@@ -590,6 +635,10 @@ End Function
 '根据控件的类名设置控件的显示文字
 Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$, Optional ByVal intIndex% = 1, Optional ByVal UseRegExp As Boolean = False) As Boolean
     Dim lngControlsHwnd As Long
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数SetElementTextByClassName被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " strNewText=" & strNewText & vbTab & " intIndex=" & intIndex & vbTab & " UseRegExp=" & UseRegExp, False
+        writeToFile "DEBUG.txt", Now & " 函数SetElementTextByClassName中调用函数getMatchHwndFromWindow", False
+    End If
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
@@ -606,9 +655,12 @@ Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$
     End If
 End Function
 '根据控件的类名追加显示控件的文字
-'Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As String
 Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewText$, Optional ByVal intIndex% = 1, Optional ByVal UseRegExp As Boolean = False) As Long
     Dim lngControlsHwnd As Long
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数AppendElementTextByClassName被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " strNewText=" & strNewText & vbTab & " UseRegExp=" & UseRegExp, False
+        writeToFile "DEBUG.txt", Now & " 函数AppendElementTextByClassName中调用函数getMatchHwndFromWindow", False
+    End If
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
         strClassName = replaceReg(strClassName, "([\\+-\.()\[\]{}?*\|])", "\$1")
@@ -618,9 +670,7 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewTe
     End If
     
     If lngControlsHwnd <> 0 Then
-'    MsgBox GetElementTextByClassName(strClassName, intIndex, UseRegExp)
         strNewText = RTrim(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strNewText
-        writeToFile "xxxx.txt", strNewText & vbCrLf & RTrim(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strNewText
         AppendElementTextByClassName = SendMessage(lngControlsHwnd, WM_SETTEXT, 0&, ByVal strNewText)
     Else
         AppendElementTextByClassName = -1
@@ -655,8 +705,8 @@ Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1
     Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数GetElementHwndByClassName被调用" & vbCrLf & "参数为 strText=" & strText & vbTab & " intIndex=" & intIndex, False
-        writeToFile "DEBUG.txt", Now & " 函数GetElementHwndByClassName中调用函数GetElementTextByText", False
+        writeToFile "DEBUG.txt", Now & " 函数GetElementTextByText被调用" & vbCrLf & "参数为 strText=" & strText & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " 函数GetElementTextByText中调用函数GetMatchHwndFromWindow", False
     End If
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
     If Not UseRegExp Then
@@ -723,27 +773,6 @@ Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional
         SetElementTextByText = False
     End If
 End Function
-
-'设置当前窗口的标题栏文字
-Public Property Let Caption(ByVal strNewText As String)
-    If hWnd_ <> 0 Then
-        SendMessage hWnd_, WM_SETTEXT, 0&, ByVal strNewText
-    End If
-End Property
-'得到当前窗口的标题栏文字
-Public Property Get Caption() As String
-'    Dim l&, strCaption$
-'    l = GetWindowTextLength(hWnd_)
-'    strCaption = Space(l)
-'    GetWindowText hWnd_, strCaption, l + 1
-'    Caption = strCaption
-    
-    Dim Txt2(64000) As Byte, strCaption As String
-    SendMessage hWnd_, WM_GETTEXT, 64000, Txt2(0)
-    strCaption = StrConv(Txt2, vbUnicode)
-    Caption = Left$(strCaption, InStr(strCaption, Chr$(0)) - 1)
-End Property
-
 '根据控件的类名点击控件
 Public Function ClickElementByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp = False) As Long
     Dim lngControlsHwnd As Long
