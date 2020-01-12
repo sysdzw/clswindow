@@ -113,6 +113,7 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加方法：SetCursor(别名：SetPoint MoveCursor MoveCursorTo)
 '               更新函数：GetWindowByClassName 默认时间60秒改为10秒
 '               增加属性：Text、Value、Title（均为Caption别名）                 2020/01/12
+'               优化代码：GetCaptionByHwnd采用原Caption(Get)代码，后者也做了调整
 '==============================================================================================
 ```
 
