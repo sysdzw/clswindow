@@ -74,6 +74,7 @@ Attribute VB_Exposed = False
 '               增加方法：SetCursor(别名：SetPoint MoveCursor MoveCursorTo)
 '               更新函数：GetWindowByClassName 默认时间60秒改为10秒
 '               增加属性：Text、Value、Title（均为Caption别名）                 2020/01/12
+'               优化代码：GetCaptionByHwnd采用原Caption(Get)代码，后者也做了调整
 '==============================================================================================
 Option Explicit
 
@@ -167,16 +168,14 @@ Public Property Let Caption(ByVal strNewText As String)
 End Property
 '得到当前窗口的标题栏文字
 Public Property Get Caption() As String
-'    Dim l&, strCaption$
-'    l = GetWindowTextLength(hWnd_)
-'    strCaption = Space(l)
-'    GetWindowText hWnd_, strCaption, l + 1
-'    Caption = strCaption
-    
-    Dim Txt2(64000) As Byte
-    SendMessage hWnd_, WM_GETTEXT, 64000, Txt2(0)
-    Caption = StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode)
+    Caption = GetCaptionByHwnd(hWnd_)
 End Property
+'根据句柄获得窗口内容
+Private Function GetCaptionByHwnd(ByVal hwn As Long) As String
+    Dim Txt2(64000) As Byte
+    SendMessage hwn, WM_GETTEXT, 64000, Txt2(0)
+    Caption = StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode)
+End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
     Caption = strNewText
@@ -520,14 +519,6 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
     Loop
     wReturn.hWnd = hWnd_
     Set GetWindowByAppName = wReturn
-End Function
-'根据句柄获得窗口内容
-Private Function GetCaptionByHwnd(ByVal hwn As Long) As String
-    Dim l&, strCaption$
-    l = GetWindowTextLength(hwn)
-    strCaption = Space(l)
-    GetWindowText hwn, strCaption, l + 1
-    GetCaptionByHwnd = strCaption
 End Function
 '设置根据进程名称返回窗体句柄，可以指定等待几秒检测指定进程名称的窗体是否出现，默认是等待60秒，原理还是枚举所有窗体检查它们的所属进程，只不过是根据目标的进程名跟strAppName比对
 Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSeconds& = 60, Optional ByRef hWndAll, Optional isUseRegExp = False) As clsWindow
