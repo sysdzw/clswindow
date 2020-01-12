@@ -18,8 +18,7 @@ Attribute VB_Exposed = False
 '          window.GetWindowByTitle("计算器").closeWindow
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
-'博    客：http://blog.163.com/sysdzw
-'          http://blog.csdn.net/sysdzw
+'博    客：http://blog.csdn.net/sysdzw
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
 '版    本：V1.0 初版                                                           2012/12/03
@@ -71,10 +70,11 @@ Attribute VB_Exposed = False
 '               优化属性：Caption(Get)，根据网友小凡的建议改成可获得文本框内容
 '               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
 '               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
-'               增加方法：SetCursor(别名：SetPoint MoveCursor MoveCursorTo)
+'               增加方法：SetCursor(别名:SetPoint MoveCursor MoveCursorTo)
 '               更新函数：GetWindowByClassName 默认时间60秒改为10秒
 '               增加属性：Text、Value、Title（均为Caption别名）                 2020/01/12
 '               优化代码：GetCaptionByHwnd采用原Caption(Get)代码，后者也做了调整
+'               增加函数：GetCursorPosCurrent(别名：GetCursorPoint)得到当前坐标
 '==============================================================================================
 Option Explicit
 
@@ -867,10 +867,11 @@ Public Sub ClickCurrentPoint()
     mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
 End Sub
 '移动鼠标到指定点
-Public Sub SetCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If PositionMod = absolute Then
         Wait delayMilliSecondsBefore
         SetCursorPos x1, y1
+        Wait delayMilliSecondsAfter
     ElseIf PositionMod = relative Then
         Wait delayMilliSecondsBefore
         SetCursorPos Left + x1, Top + y1
@@ -881,17 +882,27 @@ Public Sub SetCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumP
     End If
 End Sub
 '同SetCursor
-Public Sub SetPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursorTo(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursorTo(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
+'直接获得当前鼠标下的窗口或控件的句柄
+Public Function GetCursorPosCurrent() As String
+    Dim tPoint As POINTAPI
+    GetCursorPos tPoint  '获得当前鼠标位置
+    GetCursorPosCurrent = tPoint.x & "," & tPoint.y
+End Function
+'直接获得当前鼠标下的窗口或控件的句柄
+Public Function GetCursorPoint() As String
+    GetCursorPoint = GetCursorPosCurrent()
+End Function
 '以下是几个特效的方法
 '特效1：窗体抖动
 Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal shakeRepeats = 30, Optional ByVal shakePads = 10, Optional ByVal shakeInterval = 25)

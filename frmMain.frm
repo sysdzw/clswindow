@@ -427,7 +427,9 @@ Dim w As New clsWindow
 'MsgBox "µã»÷ºÃÁË"
 'SetParent w.GetWindowByPID(Shell("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", 1)).hWnd, Me.hWnd
 'MsgBox w.GetWindowByClassName("ConsoleWindowClass").Caption
+MsgBox w.GetCursorPoint
 w.SetPoint 200, 200
+MsgBox w.GetCursorPoint
 'SetParent
 End Sub
 
@@ -488,4 +490,3 @@ End Sub
 Private Sub Form_Unload(Cancel As Integer)
     End
 End Sub
-
