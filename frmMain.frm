@@ -427,10 +427,16 @@ Dim w As New clsWindow
 'MsgBox "点击好了"
 'SetParent w.GetWindowByPID(Shell("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", 1)).hWnd, Me.hWnd
 'MsgBox w.GetWindowByClassName("ConsoleWindowClass").Caption
-MsgBox w.GetCursorPoint
-w.SetPoint 200, 200
-MsgBox w.GetCursorPoint
+'MsgBox w.GetCursorPoint
+'w.SetPoint 200, 200
+'MsgBox w.GetCursorPoint
 'SetParent
+
+'MsgBox w.GetWindowByPID(Shell("G:\Program Files\Microsoft Office\Office14\winword.exe", 1)).Caption
+MsgBox w.GetWindowByPID(Shell("notepad", 1)).Caption
+'w.hWnd = 12650462
+'MsgBox w.Caption
+
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
