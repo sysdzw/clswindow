@@ -171,18 +171,10 @@ Public Property Get Caption() As String
     Caption = GetCaptionByHwnd(hWnd_)
 End Property
 '根据句柄获得窗口内容
- Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
+Private Function GetCaptionByHwnd(ByVal hWnd As Long) As String
     Dim Txt2(64000) As Byte
     SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
     GetCaptionByHwnd = Split(StrConv(Split(Txt2, Chr(0), 2)(0), vbUnicode) & Chr(0), Chr(0), 2)(0)
-End Function
-'根据句柄获得窗口内容
- Public Function GetCaptionByHwnd2(ByVal hwn As Long) As String
-    Dim l&, strCaption$
-    l = GetWindowTextLength(hwn)
-    strCaption = Space(l)
-    GetWindowText hwn, strCaption, l + 1
-    GetCaptionByHwnd2 = strCaption
 End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
