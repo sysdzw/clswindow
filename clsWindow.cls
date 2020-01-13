@@ -154,6 +154,7 @@ Public Property Get Height() As Long
     Else
         Height = -1
     End If
+    App.PrevInstance
 End Property
 '设置窗口的Width
 Public Property Let Height(ByVal lngHeight As Long)
@@ -171,7 +172,7 @@ Public Property Get Caption() As String
     Caption = GetCaptionByHwnd(hWnd_)
 End Property
 '根据句柄获得窗口内容
-Private Function GetCaptionByHwnd(ByVal hWnd As Long) As String
+Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
     Dim Txt2(64000) As Byte
     SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
     GetCaptionByHwnd = Split(StrConv(Split(Txt2, Chr(0), 2)(0), vbUnicode) & Chr(0), Chr(0), 2)(0)
@@ -1150,11 +1151,6 @@ End Property
 '根据指定的index选择下拉框中内容
 Public Sub SelectComboBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
     SendMessage hWnd, CB_SETCURSEL, intIndex, 0
-End Sub
-
-Private Sub Class_Terminate()
-    On Error Resume Next
-    If mlTimer <> 0 Then CloseHandle mlTimer
 End Sub
 '延时
 Public Sub Wait(ByVal MilliSeconds As Long)
