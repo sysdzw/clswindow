@@ -154,7 +154,6 @@ Public Property Get Height() As Long
     Else
         Height = -1
     End If
-    App.PrevInstance
 End Property
 '设置窗口的Width
 Public Property Let Height(ByVal lngHeight As Long)
@@ -275,7 +274,6 @@ End Sub
 Public Sub SetFocus()
     Call Focus
 End Sub
-
 '得到进程标识
 Public Function ProcessID(Optional ByVal my_hWnd) As Long
     Dim l&
@@ -285,6 +283,14 @@ Public Function ProcessID(Optional ByVal my_hWnd) As Long
         GetWindowThreadProcessId my_hWnd, l
     End If
     ProcessID = l
+End Function
+'得到进程标识
+Public Function PID(Optional ByVal my_hWnd) As Long
+    If IsMissing(my_hWnd) Then
+        PID = ProcessID
+    Else
+        PID = ProcessID(my_hWnd)
+    End If
 End Function
 '根据窗口句柄得到应用程序的路径
 Public Function AppPath(Optional ByVal hwn1) As String
@@ -719,7 +725,7 @@ Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1
         GetElementTextByText = ""
     End If
 End Function
-'根据控件的类名得到控件的显示文字
+'根据控件的类名得到句柄
 Public Function GetElementHwndByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Long
     Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long

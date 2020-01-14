@@ -1,6 +1,6 @@
 VERSION 5.00
 Begin VB.Form frmMain 
-   Caption         =   "Windows程序自动化操作框架V2.1 演示"
+   Caption         =   "Windows程序自动化操作框架V2.2 演示"
    ClientHeight    =   5190
    ClientLeft      =   60
    ClientTop       =   345
@@ -343,8 +343,8 @@ End Sub
 
 
 Private Sub Command7_Click()
-Dim i%
-Dim w As New clsWindow
+'Dim i%
+'Dim w As New clsWindow
 'w.GetWindowByClassName("Notepad").SetElementTextByClassName "Edit", "csdn欢迎你！"
 
 'Do While w.GetWindowByTitleEx("统计器").SetElementTextByClassName("ThunderRT6TextBox", "次序" & i + 1, i + 1)
@@ -433,9 +433,14 @@ Dim w As New clsWindow
 'SetParent
 
 'MsgBox w.GetWindowByPID(Shell("G:\Program Files\Microsoft Office\Office14\winword.exe", 1)).Caption
-MsgBox w.GetWindowByPID(Shell("notepad", 1)).Caption
+'MsgBox w.GetWindowByPID(Shell("notepad", 1)).Caption
 'w.hWnd = 12650462
 'MsgBox w.Caption
+
+
+Dim w As New clsWindow
+MsgBox w.GetWindowByAppName("notepad").Caption
+
 
 End Sub
 
