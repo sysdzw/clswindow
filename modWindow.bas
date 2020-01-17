@@ -98,6 +98,11 @@ Public Type POINTAPI
     y As Long
 End Type
 
+Public Type FILETIME
+    dwLowDateTime As Long
+    dwHighDateTime As Long
+End Type
+
 Public Enum enumShift
     Horizontal
     Vertical
@@ -108,11 +113,12 @@ Public Enum enumPositionMode
     absolute
     relative
 End Enum
-
-Public Type FILETIME
-    dwLowDateTime As Long
-    dwHighDateTime As Long
-End Type
+'过滤窗口是否可见
+Public Enum enumWindowVisible
+    HiddenWindow
+    DisplayedWindow
+    AllWindow
+End Enum
 
 
 Public Declare Function CreateWaitableTimer Lib "kernel32" Alias "CreateWaitableTimerA" (ByVal lpSemaphoreAttributes As Long, ByVal bManualReset As Long, ByVal lpName As String) As Long
@@ -197,7 +203,7 @@ End Function
 
 Private Function EnumWindowProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     If (GetWindowLong(hWnd, GWL_STYLE) And &HCF0000) = &HCF0000 And (IsWindowVisible(hWnd) = 1) Then
-        strTmp = GetWinText(hWnd)
+        strTmp = GetTextByHwnd(hWnd)
         If InStr(strTmp, strWindowKeyWord) > 0 Then '如果在关键字内就显示
             strWindowInfo = strWindowInfo & CStr(hWnd) & " " & strTmp & vbCrLf
         End If
@@ -205,10 +211,11 @@ Private Function EnumWindowProc(ByVal hWnd As Long, ByVal lParam As Long) As Lon
     EnumWindowProc = 1
 End Function
 
-Public Function GetWinText(ByVal hWnd As Long) As String
-    GetWinText = String(1024, Chr(0))
-    GetWindowText hWnd, GetWinText, Len(GetWinText)
-    GetWinText = Left$(GetWinText, InStr(GetWinText, Chr(0)) - 1)
+'根据句柄获得窗口内容
+Public Function GetTextByHwnd(ByVal hWnd As Long) As String
+    Dim Txt2(64000) As Byte
+    SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
+    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr(0), 2)(0), vbUnicode) & Chr(0), Chr(0), 2)(0)
 End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '功能：得到所有控件的信息，是按次序获得的，可用于编写脚本的参考和程序设置值时使用。此函数需要和EnumChildProc一起使用
@@ -225,9 +232,7 @@ Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug = False
     Dim strWindowTitle$
     
     GetClassName lngMainHwnd, strWindowClass, 255  '获得窗口类
-    SendMessage lngMainHwnd, &HD, 64000, Txt(0) '获得窗口标题(也可使用 API 函数:GetWindowText,但效果不佳)
-    strWindowTitle = StrConv(Txt, vbUnicode)
-    strWindowTitle = Replace(strWindowTitle, Chr(0), "")
+    strWindowTitle = GetTextByHwnd(lngMainHwnd)
     strWindowClass = Replace(strWindowClass, Chr(0), "")
     strControlInfo = lngMainHwnd & vbTab & "0" & vbTab & Replace(strWindowClass, " ", "") & vbTab & strWindowTitle & vbCrLf
     

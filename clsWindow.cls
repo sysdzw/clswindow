@@ -75,6 +75,8 @@ Attribute VB_Exposed = False
 '               增加属性：Text、Value、Title（均为Caption别名）                 2020/01/12
 '               优化代码：GetCaptionByHwnd采用原Caption(Get)代码，后者也做了调整
 '               增加函数：GetCursorPosCurrent(别名：GetCursorPoint)得到当前坐标
+'               优化函数：所有窗口获取的函数增加了是否过滤可见的参数              2020/01/16
+'               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
 '==============================================================================================
 Option Explicit
 
@@ -168,13 +170,17 @@ Public Property Let Caption(ByVal strNewText As String)
 End Property
 '得到当前窗口的标题栏文字
 Public Property Get Caption() As String
-    Caption = GetCaptionByHwnd(hWnd_)
+    Caption = GetTextByHwnd(hWnd_)
 End Property
 '根据句柄获得窗口内容
 Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
+    GetCaptionByHwnd = GetTextByHwnd(hWnd_)
+End Function
+'根据句柄获得窗口内容
+Public Function GetTextByHwnd(ByVal hWnd As Long) As String
     Dim Txt2(64000) As Byte
     SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
-    GetCaptionByHwnd = Split(StrConv(Split(Txt2, Chr(0), 2)(0), vbUnicode) & Chr(0), Chr(0), 2)(0)
+    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr(0), 2)(0), vbUnicode) & Chr(0), Chr(0), 2)(0)
 End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
@@ -350,7 +356,7 @@ Public Function AppCommandLine(Optional ByVal strAppName) As String
     End If
 End Function
 '设置根据窗体标题得到窗口句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待10秒
-Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10) As clsWindow
+Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
     Dim lngDelayCount&
     hWnd_ = 0
     If DebugMe Then
@@ -359,7 +365,7 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
             
     Do
         hWnd_ = FindWindow(vbNullString, strTitle)
-        If hWnd_ <> 0 Then Exit Do
+        If CheckWindowVisible(hWnd_, windowVisible) Then Exit Do '窗口可见度检查，符合条件表示找到了即退出
 
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '未发现关键字为 strTitle
@@ -371,9 +377,21 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
     wReturn.hWnd = hWnd_
     Set GetWindowByTitle = wReturn
 End Function
+'检查窗口可见是否符合指定要求
+Private Function CheckWindowVisible(ByVal lngHwnd&, ByVal windowVisible As enumWindowVisible) As Boolean
+    If lngHwnd <> 0 Then
+        If windowVisible = AllWindow Then
+            CheckWindowVisible = True
+        ElseIf windowVisible = DisplayedWindow Then
+            If IsWindowVisible(lngHwnd) Then CheckWindowVisible = True
+        ElseIf windowVisible = HiddenWindow Then
+            If Not IsWindowVisible(lngHwnd) Then CheckWindowVisible = True
+        End If
+    End If
+End Function
 '和GetWindowByTitle函数功能类似，只是这个是模糊匹配
-Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp As Boolean = False, Optional ByVal checkPid = "") As clsWindow
-    Dim lnghWnd&, l&, lngDelayCount&
+Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp As Boolean = False, Optional ByVal checkPid = "", Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
+    Dim lngHwnd&, l&, lngDelayCount&
     Dim strCaption As String
     Dim strHwndAllTmp$
     Dim isMatch As Boolean
@@ -384,22 +402,23 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     Do
         hWnd_ = 0
         Do
-            lnghWnd = FindWindowEx(0, lnghWnd, vbNullString, vbNullString)
-            l = GetWindowTextLength(lnghWnd)
-            strCaption = Space(l)
-            GetWindowText lnghWnd, strCaption, l + 1
-            If Not isUseRegExp Then
-                isMatch = InStr(strCaption, strTitle) > 0
-            Else
-                isMatch = regTest(strCaption, strTitle)
-            End If
-            If isMatch Then
-                strHwndAllTmp = strHwndAllTmp & CStr(lnghWnd) & " "
-                If checkPid <> "" Then '如果pid相等，优先放到第一个
-                    If checkPid = ProcessID() Then strHwndAllTmp = lnghWnd & " " & strHwndAllTmp
+            lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
+            If CheckWindowVisible(lngHwnd, windowVisible) Then  '窗口可见度检查，符合条件则继续下面的检查
+                strCaption = GetTextByHwnd(lngHwnd)
+                
+                If Not isUseRegExp Then
+                    isMatch = InStr(strCaption, strTitle) > 0
+                Else
+                    isMatch = regTest(strCaption, strTitle)
+                End If
+                If isMatch Then
+                    strHwndAllTmp = strHwndAllTmp & CStr(lngHwnd) & " "
+                    If checkPid <> "" Then '如果pid相等，优先放到第一个
+                        If checkPid = ProcessID() Then strHwndAllTmp = lngHwnd & " " & strHwndAllTmp
+                    End If
                 End If
             End If
-        Loop Until lnghWnd = 0 '这层loop是遍历所有窗口的
+        Loop Until lngHwnd = 0 '这层loop是遍历所有窗口的
         If strHwndAllTmp <> "" Then Exit Do '如果一遍循环得到结果了就退出
 
         Wait DelayOneTime
@@ -418,7 +437,7 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     hWnd_ = wReturn.hWnd
 End Function
 '设置根据窗体类名返回窗体句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待10秒
-Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10) As clsWindow
+Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
     Dim lngDelayCount&
     hWnd_ = 0
     If DebugMe Then
@@ -427,7 +446,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
             
     Do
         hWnd_ = FindWindow(strClassName, vbNullString)
-        If hWnd_ <> 0 Then Exit Do
+        If CheckWindowVisible(hWnd_, windowVisible) Then Exit Do '窗口可见度检查，符合条件表示找到了即退出
 
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strClassName
@@ -440,8 +459,8 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
     Set GetWindowByClassName = wReturn
 End Function
 '设置根据窗体类名得到窗口句柄，可以指定等待几秒检测指定类名的窗体是否出现，默认是等待10秒，允许使用正则表达式
-Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal checkPid = "") As clsWindow
-    Dim lnghWnd&, l&, lngDelayCount&
+Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal checkPid = "", Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
+    Dim lngHwnd&, l&, lngDelayCount&
     Dim strCaption As String
     Dim strWindowClass As String * 255
     Dim strHwndAllTmp$
@@ -453,21 +472,23 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     End If
     Do
         Do
-            lnghWnd = FindWindowEx(0, lnghWnd, vbNullString, vbNullString)
-            GetClassName lnghWnd, strWindowClass, 255  '获得窗口类
-            strWindowClass = Replace(strWindowClass, Chr(0), "")
-            If Not isUseRegExp Then
-                isMatch = InStr(strWindowClass, strClassName) > 0
-            Else
-                isMatch = regTest(strWindowClass, strClassName)
-            End If
-            If isMatch Then
-                strHwndAllTmp = strHwndAllTmp & CStr(lnghWnd) & " "
-                If checkPid <> "" Then '如果pid相等，优先放到第一个
-                    If checkPid = ProcessID() Then strHwndAllTmp = lnghWnd & " " & strHwndAllTmp
+            lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
+            If CheckWindowVisible(lngHwnd, windowVisible) Then
+                GetClassName lngHwnd, strWindowClass, 255  '获得窗口类
+                strWindowClass = Replace(strWindowClass, Chr(0), "")
+                If Not isUseRegExp Then
+                    isMatch = InStr(strWindowClass, strClassName) > 0
+                Else
+                    isMatch = regTest(strWindowClass, strClassName)
+                End If
+                If isMatch Then
+                    strHwndAllTmp = strHwndAllTmp & CStr(lngHwnd) & " "
+                    If checkPid <> "" Then '如果pid相等，优先放到第一个
+                        If checkPid = ProcessID() Then strHwndAllTmp = lngHwnd & " " & strHwndAllTmp
+                    End If
                 End If
             End If
-        Loop Until lnghWnd = 0
+        Loop Until lngHwnd = 0
         If strHwndAllTmp <> "" Then Exit Do
 
         Wait DelayOneTime
@@ -486,8 +507,8 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     hWnd_ = wReturn.hWnd
 End Function
 '设置根据进程名称返回窗体句柄，可以指定等待几秒检测指定进程名称的窗体是否出现，默认是等待10秒
-Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeconds& = 10, Optional ByVal isWholeMatch As Boolean = False) As clsWindow
-    Dim lnghWnd&, currWnd&, l&, lngDelayCount&
+Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeconds& = 10, Optional ByVal isWholeMatch As Boolean = False, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
+    Dim lngHwnd&, currWnd&, l&, lngDelayCount&
     Dim strCaption As String
     Dim strWindowClass As String * 255
     Dim isMatch As Boolean
@@ -504,18 +525,21 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
-            strGetHwndAppName = LCase(AppName(currWnd)) '根据句柄得到进程名字，都转换成小写
-            If isWholeMatch Then '判断是否完全相等
-                isMatch = (LCase(strGetHwndAppName) = strAppName)
-            Else
-                isMatch = (InStr(LCase(strGetHwndAppName), strAppName) > 0)
-            End If
-            strCaption = GetCaptionByHwnd(currWnd)
-            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '过滤掉输入法相关的窗口
-                hWnd_ = currWnd
-                Exit Do
+            If CheckWindowVisible(currWnd, windowVisible) Then
+                strGetHwndAppName = LCase(AppName(currWnd)) '根据句柄得到进程名字，都转换成小写
+                If isWholeMatch Then '判断是否完全相等
+                    isMatch = (LCase(strGetHwndAppName) = strAppName)
+                Else
+                    isMatch = (InStr(LCase(strGetHwndAppName), strAppName) > 0)
+                End If
+                strCaption = GetTextByHwnd(currWnd)
+                If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '过滤掉输入法相关的窗口
+                    hWnd_ = currWnd
+                    Exit Do
+                End If
             End If
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
+            
             DoEvents
         Loop
         If hWnd_ <> 0 Then Exit Do
@@ -528,8 +552,8 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
     Set GetWindowByAppName = wReturn
 End Function
 '设置根据进程名称返回窗体句柄，可以指定等待几秒检测指定进程名称的窗体是否出现，默认是等待10秒，原理还是枚举所有窗体检查它们的所属进程，只不过是根据目标的进程名跟strAppName比对
-Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False) As clsWindow
-    Dim lnghWnd&, currWnd&, l&, lngDelayCount&
+Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
+    Dim lngHwnd&, currWnd&, l&, lngDelayCount&
     Dim strCaption As String
     Dim strWindowClass As String * 255
     Dim strHwndAllTmp$
@@ -548,19 +572,17 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
-            strGetHwndAppName = LCase(AppName(currWnd))  '根据句柄得到进程名字，都转换成小写
-            If InStr(strGetHwndAppName, "pad") > 0 Then
-            Dim aaa  As Integer
-            aaa = 1
-            End If
-            If Not isUseRegExp Then '如果不用正则就包含关系匹配
-                isMatch = (InStr(strGetHwndAppName, strAppName) > 0)
-            Else
-                isMatch = regTest(strGetHwndAppName, strAppName)
-            End If
-            strCaption = GetCaptionByHwnd(currWnd)
-            If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '过滤掉输入法相关的窗口
-                strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
+            If CheckWindowVisible(currWnd, windowVisible) Then
+                strGetHwndAppName = LCase(AppName(currWnd))  '根据句柄得到进程名字，都转换成小写
+                If Not isUseRegExp Then '如果不用正则就包含关系匹配
+                    isMatch = (InStr(strGetHwndAppName, strAppName) > 0)
+                Else
+                    isMatch = regTest(strGetHwndAppName, strAppName)
+                End If
+                strCaption = GetTextByHwnd(currWnd)
+                If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '过滤掉输入法相关的窗口
+                    strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
+                End If
             End If
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
             DoEvents
@@ -583,8 +605,8 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     hWnd_ = wReturn.hWnd
 End Function
 '根据pid获得窗体
-Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll) As clsWindow
-    Dim lnghWnd&, currWnd&, l&, lngDelayCount&
+Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
+    Dim lngHwnd&, currWnd&, l&, lngDelayCount&
     Dim strCaption As String
     Dim strWindowClass As String * 255
     Dim strHwndAllTmp$
@@ -602,13 +624,15 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
-            currentPID = ProcessID(currWnd) '得到pid
-            isMatch = (currentPID = PID)
-            If isMatch Then
-                strCaption = GetCaptionByHwnd(currWnd)
-
-                If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 Then '过滤掉输入法相关的窗口
-                    strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
+            If CheckWindowVisible(currWnd, windowVisible) Then
+                currentPID = ProcessID(currWnd) '得到pid
+                isMatch = (currentPID = PID)
+                If isMatch Then
+                    strCaption = GetTextByHwnd(currWnd)
+    
+                    If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 Then '过滤掉输入法相关的窗口
+                        strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
+                    End If
                 End If
             End If
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
@@ -633,6 +657,59 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
     End If
     Set GetWindowByPID = wReturn
     hWnd_ = wReturn.hWnd
+End Function
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'以下几个方法为网友wwb（邮箱：wwbing@gmail.com）所增加
+'日期：2013-6-26
+'具体有：CheckWindow, Load, WindowState, Visible, hDC,
+'       AlphaBlend, Enabled, Refresh, TransparentColor, ZOrder
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'检查当前窗口句柄是否还有效
+Private Function CheckWindow() As Long
+    CheckWindow = IsWindow(hWnd_)
+    If CheckWindow = 0 Then hWnd_ = 0 '如果窗口不存在，我们要将当前对象的句柄修改为0，标准是不去修改，但是不修改，一个无效的句柄也没用，而且可能会被其他窗口随机分配上导致出错
+End Function
+'Load 窗口载入的入口
+Public Function Load(WindowHwnd As Variant) As clsWindow
+    If IsNumeric(WindowHwnd) Then
+        hWnd_ = CLng(WindowHwnd)
+        If CheckWindow Then
+            wReturn.hWnd = hWnd_
+            Set Load = wReturn
+        Else
+            MsgBox "类初始化错误！句柄“" & WindowHwnd & "”对应的窗口不存在！", vbExclamation
+        End If
+    Else
+        MsgBox "类初始化错误！设置的句柄“" & WindowHwnd & "”应当为一个数字。", vbExclamation
+    End If
+End Function
+'直接由句柄指定窗口，与直接设置w.hwnd或者load方法同等效果
+Public Function GetWindowByHwnd(WindowHwnd As Variant) As clsWindow
+    If IsNumeric(WindowHwnd) Then
+        hWnd_ = CLng(WindowHwnd)
+        If CheckWindow Then
+            wReturn.hWnd = hWnd_
+            Set GetWindowByHwnd = wReturn
+        Else
+            MsgBox "类初始化错误！句柄“" & WindowHwnd & "”对应的窗口不存在！", vbExclamation
+        End If
+    Else
+        MsgBox "类初始化错误！设置的句柄“" & WindowHwnd & "”应当为一个数字。", vbExclamation
+    End If
+End Function
+'直接获得当前鼠标下的窗口或控件的句柄
+Public Function GetWindowByCursorPos() As clsWindow
+    Dim tPoint As POINTAPI
+    GetCursorPos tPoint '获得当前鼠标位置
+    hWnd_ = WindowFromPoint(tPoint.x, tPoint.y)
+    wReturn.hWnd = hWnd_
+    Set GetWindowByCursorPos = wReturn
+End Function
+'根据指定的点获取窗口或控件的句柄
+Public Function GetWindowByPoint(ByVal x As Long, ByVal y As Long) As clsWindow
+    hWnd_ = WindowFromPoint(x, y)
+    wReturn.hWnd = hWnd_
+    Set GetWindowByPoint = wReturn
 End Function
 '根据控件的类名设置控件的显示文字
 Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$, Optional ByVal intIndex% = 1, Optional ByVal UseRegExp As Boolean = False) As Boolean
@@ -993,60 +1070,6 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If isCloseWindow Then CloseWindow
     If isCloseApp Then CloseApp
 End Sub
-
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-'以下几个方法为网友wwb（邮箱：wwbing@gmail.com）所增加
-'日期：2013-6-26
-'具体有：CheckWindow, Load, WindowState, Visible, hDC,
-'       AlphaBlend, Enabled, Refresh, TransparentColor, ZOrder
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-'检查当前窗口句柄是否还有效
-Private Function CheckWindow() As Long
-    CheckWindow = IsWindow(hWnd_)
-    If CheckWindow = 0 Then hWnd_ = 0
-End Function
-'Load 窗口载入的入口
-Public Function Load(WindowHwnd As Variant) As clsWindow
-    Select Case VarType(WindowHwnd)
-        Case vbLong
-            hWnd_ = WindowHwnd
-        Case vbString
-            hWnd_ = CLng(WindowHwnd)
-    End Select
-    If CheckWindow Then
-        wReturn.hWnd = hWnd_
-    Else
-        wReturn.hWnd = 0
-    End If
-    Set Load = wReturn
-End Function
-'直接由句柄指定窗口，与直接设置w.hwnd或者load方法同等效果
-Public Function GetWindowByHwnd(WindowHwnd As Variant) As clsWindow
-    Select Case VarType(WindowHwnd)
-        Case vbLong
-            hWnd_ = WindowHwnd
-        Case vbString
-            hWnd_ = CLng(WindowHwnd)
-    End Select
-    If CheckWindow Then
-        wReturn.hWnd = hWnd_
-        Set GetWindowByHwnd = wReturn
-    End If
-End Function
-'直接获得当前鼠标下的窗口或控件的句柄
-Public Function GetWindowByCursorPos() As clsWindow
-    Dim tPoint As POINTAPI
-    GetCursorPos tPoint '获得当前鼠标位置
-    hWnd_ = WindowFromPoint(tPoint.x, tPoint.y)
-    wReturn.hWnd = hWnd_
-    Set GetWindowByCursorPos = wReturn
-End Function
-'根据指定的点获取窗口或控件的句柄
-Public Function GetWindowByPoint(ByVal x As Long, ByVal y As Long) As clsWindow
-    hWnd_ = WindowFromPoint(x, y)
-    wReturn.hWnd = hWnd_
-    Set GetWindowByPoint = wReturn
-End Function
 Public Property Get WindowState() As FormWindowStateConstants
     If CheckWindow() = 0 Then Exit Property
     If IsZoomed(hWnd_) Then

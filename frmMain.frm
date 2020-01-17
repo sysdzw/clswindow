@@ -438,10 +438,14 @@ Private Sub Command7_Click()
 'MsgBox w.Caption
 
 
+'Dim w As New clsWindow
+'MsgBox w.GetWindowByAppName("notepad").Caption
+
+'得到所有记事本的句柄
 Dim w As New clsWindow
-MsgBox w.GetWindowByAppName("notepad").Caption
-
-
+Dim s As String
+w.GetWindowByTitleEx "记事本", , s
+MsgBox s
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
