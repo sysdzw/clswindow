@@ -111,10 +111,12 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
 '               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
 '               增加方法：SetCursor(别名:SetPoint MoveCursor MoveCursorTo)
-'               更新函数：GetWindowByClassName 默认时间60秒改为10秒
+'               更新函数：将所有默认等待超时60秒的函数中默认等待时间都改为10秒
 '               增加属性：Text、Value、Title（均为Caption别名）                 2020/01/12
 '               优化代码：GetCaptionByHwnd采用原Caption(Get)代码，后者也做了调整
 '               增加函数：GetCursorPosCurrent(别名：GetCursorPoint)得到当前坐标
+'               优化函数：所有窗口获取的函数增加了是否过滤可见的参数              2020/01/16
+'               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
 '==============================================================================================
 ```
 
