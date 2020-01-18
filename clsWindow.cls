@@ -180,7 +180,7 @@ End Function
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
     Dim Txt2(64000) As Byte
     SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
-    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr(0), 2)(0), vbUnicode) & Chr(0), Chr(0), 2)(0)
+    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
 End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
@@ -308,9 +308,9 @@ Public Function AppPath(Optional ByVal hwn1) As String
         dwProcessID = ProcessID(hwn1)
     End If
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwProcessID)
-    AppPath = Space(255)
+    AppPath = Space$(255)
     nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255)
-    AppPath = Mid(AppPath, 1, nSize)
+    AppPath = Mid$(AppPath, 1, nSize)
     Call CloseHandle(hProcess)
 End Function
 '得到exe名字,如果缺省就获取自己的exe名称
@@ -425,7 +425,7 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
-    strHwndAllTmp = Trim(strHwndAllTmp)
+    strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
 
     If strHwndAllTmp <> "" Then
@@ -475,7 +475,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
             lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
             If CheckWindowVisible(lngHwnd, windowVisible) Then
                 GetClassName lngHwnd, strWindowClass, 255  '获得窗口类
-                strWindowClass = Replace(strWindowClass, Chr(0), "")
+                strWindowClass = Replace(strWindowClass, Chr$(0), "")
                 If Not isUseRegExp Then
                     isMatch = InStr(strWindowClass, strClassName) > 0
                 Else
@@ -495,7 +495,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
-    strHwndAllTmp = Trim(strHwndAllTmp)
+    strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
     
     If strHwndAllTmp <> "" Then
@@ -515,7 +515,7 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
     Dim strGetHwndAppName$
     Dim strHwnd
     
-    strAppName = LCase(strAppName)
+    strAppName = LCase$(strAppName)
     writeToFile "DEBUG_exe.txt", ""
     hWnd_ = 0
     If DebugMe Then
@@ -526,11 +526,11 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
             If CheckWindowVisible(currWnd, windowVisible) Then
-                strGetHwndAppName = LCase(AppName(currWnd)) '根据句柄得到进程名字，都转换成小写
+                strGetHwndAppName = LCase$(AppName(currWnd)) '根据句柄得到进程名字，都转换成小写
                 If isWholeMatch Then '判断是否完全相等
-                    isMatch = (LCase(strGetHwndAppName) = strAppName)
+                    isMatch = (LCase$(strGetHwndAppName) = strAppName)
                 Else
-                    isMatch = (InStr(LCase(strGetHwndAppName), strAppName) > 0)
+                    isMatch = (InStr(LCase$(strGetHwndAppName), strAppName) > 0)
                 End If
                 strCaption = GetTextByHwnd(currWnd)
                 If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '过滤掉输入法相关的窗口
@@ -561,7 +561,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     Dim strGetHwndAppName$
     Dim strHwnd
     
-    strAppName = LCase(strAppName)
+    strAppName = LCase$(strAppName)
     
     hWnd_ = 0
     If DebugMe Then
@@ -573,7 +573,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
             If CheckWindowVisible(currWnd, windowVisible) Then
-                strGetHwndAppName = LCase(AppName(currWnd))  '根据句柄得到进程名字，都转换成小写
+                strGetHwndAppName = LCase$(AppName(currWnd))  '根据句柄得到进程名字，都转换成小写
                 If Not isUseRegExp Then '如果不用正则就包含关系匹配
                     isMatch = (InStr(strGetHwndAppName, strAppName) > 0)
                 Else
@@ -593,7 +593,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
-    strHwndAllTmp = Trim(strHwndAllTmp)
+    strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
     
     If strHwndAllTmp <> "" Then
@@ -645,7 +645,7 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
         Exit Do
     Loop
-    strHwndAllTmp = Trim(strHwndAllTmp)
+    strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
     
     If strHwndAllTmp <> "" Then
@@ -749,7 +749,7 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewTe
     End If
     
     If lngControlsHwnd <> 0 Then
-        strNewText = RTrim(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strNewText
+        strNewText = RTrim$(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strNewText
         AppendElementTextByClassName = SendMessage(lngControlsHwnd, WM_SETTEXT, 0&, ByVal strNewText)
     Else
         AppendElementTextByClassName = -1
@@ -757,7 +757,6 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewTe
 End Function
 '根据控件的类名得到控件的显示文字
 Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As String
-    Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetElementTextByClassName被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " intIndex=" & intIndex, False
@@ -772,16 +771,13 @@ Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal in
     End If
     
     If lngControlsHwnd <> 0 Then
-        SendMessage lngControlsHwnd, &HD, 64000, Txt(0)
-        GetElementTextByClassName = StrConv(Txt, vbUnicode)
-        GetElementTextByClassName = Left(GetElementTextByClassName, InStr(GetElementTextByClassName, Chr(0)) - 1)
+        GetElementTextByClassName = GetTextByHwnd(lngControlsHwnd)
     Else
         GetElementTextByClassName = ""
     End If
 End Function
 '根据控件的类名得到控件的显示文字
 Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As String
-    Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetElementTextByText被调用" & vbCrLf & "参数为 strText=" & strText & vbTab & " intIndex=" & intIndex, False
@@ -796,15 +792,13 @@ Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1
     End If
     
     If lngControlsHwnd <> 0 Then
-        SendMessage lngControlsHwnd, &HD, 64000, Txt(0)
-        GetElementTextByText = StrConv(Txt, vbUnicode)
+        GetElementTextByText = GetTextByHwnd(lngControlsHwnd)
     Else
         GetElementTextByText = ""
     End If
 End Function
 '根据控件的类名得到句柄
 Public Function GetElementHwndByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Long
-    Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetElementHwndByClassName被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " intIndex=" & intIndex, False
@@ -820,7 +814,6 @@ Public Function GetElementHwndByClassName(ByVal strClassName$, Optional ByVal in
 End Function
 '根据控件的文本内容得到控件的显示文字
 Public Function GetElementHwndByText(ByVal strText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Long
-    Dim Txt(64000) As Byte
     Dim lngControlsHwnd As Long
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetElementHwndByClassName被调用" & vbCrLf & "参数为 strText=" & strText & vbTab & " intIndex=" & intIndex, False

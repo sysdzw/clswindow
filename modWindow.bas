@@ -155,7 +155,6 @@ Public Declare Function EnumChildWindows Lib "user32" (ByVal hWndParent As Long,
 Public Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
 Public Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 Public Declare Function SetFocus Lib "user32" (ByVal hWnd As Long) As Long
-Public Declare Function SetFocusAPI Lib "user32" Alias "SetFocus" (ByVal hWnd As Long)
 Public Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 
 Public Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
@@ -197,7 +196,7 @@ Private Function GetWindowInfo(Optional ByVal strKeyWord = "", Optional ByVal is
     isWholeEx = isWhole
     strWindowKeyWord = strKeyWord
     Call EnumWindows(AddressOf EnumWindowProc, 0)
-    If Right(strWindowInfo, 2) = vbCrLf Then strWindowInfo = Left(strWindowInfo, Len(strWindowInfo) - 2)
+    If Right$(strWindowInfo, 2) = vbCrLf Then strWindowInfo = Left$(strWindowInfo, Len(strWindowInfo) - 2)
     GetWindowInfo = strWindowInfo
 End Function
 
@@ -215,7 +214,7 @@ End Function
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
     Dim Txt2(64000) As Byte
     SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
-    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr(0), 2)(0), vbUnicode) & Chr(0), Chr(0), 2)(0)
+    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
 End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '功能：得到所有控件的信息，是按次序获得的，可用于编写脚本的参考和程序设置值时使用。此函数需要和EnumChildProc一起使用
@@ -224,16 +223,14 @@ End Function
 '返回值：string   保存了容器内所有控件的信息，包含“句柄、ID、类名、显示文字”
 '备注：sysdzw 于 2010-11-13 提供
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug = False) As String
-    Dim strHwnd$, strCtlId$, strClass$
-    Dim Rtn&, hWin&
-    Dim Txt(64000) As Byte
+Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
+    Dim Rtn&
     Dim strWindowClass As String * 255
     Dim strWindowTitle$
     
     GetClassName lngMainHwnd, strWindowClass, 255  '获得窗口类
     strWindowTitle = GetTextByHwnd(lngMainHwnd)
-    strWindowClass = Replace(strWindowClass, Chr(0), "")
+    strWindowClass = Replace(strWindowClass, Chr$(0), "")
     strControlInfo = lngMainHwnd & vbTab & "0" & vbTab & Replace(strWindowClass, " ", "") & vbTab & strWindowTitle & vbCrLf
     
     Rtn = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
@@ -252,15 +249,13 @@ Private Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     Dim strCaption As String
     Dim lngCtlId As Long
     Dim strHwnd$, strCtlId$, strClass$
-    Dim Txt2(64000) As Byte
     
     EnumChildProc = True
     
     lngCtlId = GetWindowLong(hWnd, GWL_ID)
     Call GetClassName(hWnd, strClassName, 255)
-    SendMessage hWnd, &HD, 64000, Txt2(0)
-    strCaption = StrConv(Txt2, vbUnicode)
-    strCaption = Left$(strCaption, InStr(strCaption, Chr$(0)) - 1)
+    
+    strCaption = GetTextByHwnd(hWnd)
     strCaption = Replace(strCaption, vbCrLf, " ") '强制将文本框中内容回车替换成空格，以防止影响正则获取
     
     strHwnd$ = CStr(hWnd)
@@ -314,7 +309,7 @@ End Function
 '备注：sysdzw 于 2007-5-2 提供
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCover As Boolean = True) As Boolean
-    On Error GoTo Err1
+    On Error GoTo err1
     Dim fileHandl%
     fileHandl = FreeFile
     If isCover Then
@@ -326,7 +321,7 @@ Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCo
     Close #fileHandl
     writeToFile = True
     Exit Function
-Err1:
+err1:
     writeToFile = False
 End Function
 

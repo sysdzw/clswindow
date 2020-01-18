@@ -15,7 +15,7 @@ HelpContextID="0"
 CompatibleMode="0"
 MajorVer=2
 MinorVer=2
-RevisionVer=83
+RevisionVer=84
 AutoIncrementVer=1
 ServerSupportFiles=0
 VersionCompanyName="Symental Studio"
@@ -40,3 +40,6 @@ DebugStartupOption=0
 
 [MS Transaction Server]
 AutoRefresh=1
+
+[CodeSMART]
+Task_UID=18_01_20_23_22_53
