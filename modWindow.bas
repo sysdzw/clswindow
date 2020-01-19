@@ -34,6 +34,8 @@ Public Const GWL_STYLE = (-16)
 Public Const WM_LBUTTONDOWN = &H201
 Public Const WM_LBUTTONUP = &H202
 Public Const WM_CLOSE = &H10
+Public Const WM_GETTEXT = &HD
+
 
 Private Const SC_MOVE = &HF010&
 Private Const MF_BYCOMMAND = &H0&
@@ -58,6 +60,31 @@ Public Const GW_CHILD = 5
 Public Const CB_SETCURSEL = &H14E
 Public Const PROCESS_ALL_ACCESS As Long = &H1F0FFF
 
+Public Const WAIT_ABANDONED& = &H80&
+Public Const WAIT_ABANDONED_0& = &H80&
+Public Const WAIT_FAILED& = -1&
+Public Const WAIT_IO_COMPLETION& = &HC0&
+Public Const WAIT_OBJECT_0& = 0
+Public Const WAIT_OBJECT_1& = 1
+Public Const WAIT_TIMEOUT& = &H102&
+Public Const INFINITE = &HFFFF
+Public Const QS_HOTKEY& = &H80
+Public Const QS_KEY& = &H1
+Public Const QS_MOUSEBUTTON& = &H4
+Public Const QS_MOUSEMOVE& = &H2
+Public Const QS_PAINT& = &H20
+Public Const QS_POSTMESSAGE& = &H8
+Public Const QS_SENDMESSAGE& = &H40
+Public Const QS_TIMER& = &H10
+Public Const ERROR_ALREADY_EXISTS = 183&
+Public Const QS_MOUSE& = (QS_MOUSEMOVE Or QS_MOUSEBUTTON)
+Public Const QS_INPUT& = (QS_MOUSE Or QS_KEY)
+Public Const QS_ALLEVENTS& = (QS_INPUT Or QS_POSTMESSAGE Or QS_TIMER Or QS_PAINT Or QS_HOTKEY)
+Public Const QS_ALLINPUT& = (QS_SENDMESSAGE Or QS_PAINT Or QS_TIMER Or QS_POSTMESSAGE Or QS_MOUSEBUTTON Or QS_MOUSEMOVE Or QS_HOTKEY Or QS_KEY)
+
+Public Const UNITS = 4294967296#
+Public Const MAX_LONG = -2147483648#
+
 '结构体定义
 Public Type rect
     Left As Long
@@ -71,6 +98,11 @@ Public Type POINTAPI
     y As Long
 End Type
 
+Public Type FILETIME
+    dwLowDateTime As Long
+    dwHighDateTime As Long
+End Type
+
 Public Enum enumShift
     Horizontal
     Vertical
@@ -81,6 +113,20 @@ Public Enum enumPositionMode
     absolute
     relative
 End Enum
+'过滤窗口是否可见
+Public Enum enumWindowVisible
+    HiddenWindow
+    DisplayedWindow
+    AllWindow
+End Enum
+
+
+Public Declare Function CreateWaitableTimer Lib "kernel32" Alias "CreateWaitableTimerA" (ByVal lpSemaphoreAttributes As Long, ByVal bManualReset As Long, ByVal lpName As String) As Long
+Public Declare Function OpenWaitableTimer Lib "kernel32" Alias "OpenWaitableTimerA" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal lpName As String) As Long
+Public Declare Function SetWaitableTimer Lib "kernel32" (ByVal hTimer As Long, lpDueTime As FILETIME, ByVal lPeriod As Long, ByVal pfnCompletionRoutine As Long, ByVal lpArgToCompletionRoutine As Long, ByVal fResume As Long) As Long
+Public Declare Function CancelWaitableTimer Lib "kernel32" (ByVal hTimer As Long)
+Public Declare Function WaitForSingleObject Lib "kernel32" (ByVal hHandle As Long, ByVal dwMilliseconds As Long) As Long
+Public Declare Function MsgWaitForMultipleObjects Lib "user32" (ByVal nCount As Long, pHandles As Long, ByVal fWaitAll As Long, ByVal dwMilliseconds As Long, ByVal dwWakeMask As Long) As Long
 
 Public Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
 Public Declare Function GetForegroundWindow Lib "user32" () As Long
@@ -109,7 +155,6 @@ Public Declare Function EnumChildWindows Lib "user32" (ByVal hWndParent As Long,
 Public Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
 Public Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 Public Declare Function SetFocus Lib "user32" (ByVal hWnd As Long) As Long
-Public Declare Function SetFocusAPI Lib "user32" Alias "SetFocus" (ByVal hWnd As Long)
 Public Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 
 Public Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
@@ -143,7 +188,7 @@ Public strWindowInfo$ '保存所有窗口的信息，格式为 句柄 文本内容
 Private strWindowKeyWord$ '要参与的过滤的窗口的关键字，如果不需要过滤就留空
 Dim strTmp$, isWholeEx As Boolean
 
-Public objTimer As New clsWaitableTimer
+Public mlTimer As Long
 
 '得到所有窗口的信息
 Private Function GetWindowInfo(Optional ByVal strKeyWord = "", Optional ByVal isWhole As Boolean = False) As String
@@ -151,13 +196,13 @@ Private Function GetWindowInfo(Optional ByVal strKeyWord = "", Optional ByVal is
     isWholeEx = isWhole
     strWindowKeyWord = strKeyWord
     Call EnumWindows(AddressOf EnumWindowProc, 0)
-    If Right(strWindowInfo, 2) = vbCrLf Then strWindowInfo = Left(strWindowInfo, Len(strWindowInfo) - 2)
+    If Right$(strWindowInfo, 2) = vbCrLf Then strWindowInfo = Left$(strWindowInfo, Len(strWindowInfo) - 2)
     GetWindowInfo = strWindowInfo
 End Function
 
 Private Function EnumWindowProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     If (GetWindowLong(hWnd, GWL_STYLE) And &HCF0000) = &HCF0000 And (IsWindowVisible(hWnd) = 1) Then
-        strTmp = GetWinText(hWnd)
+        strTmp = GetTextByHwnd(hWnd)
         If InStr(strTmp, strWindowKeyWord) > 0 Then '如果在关键字内就显示
             strWindowInfo = strWindowInfo & CStr(hWnd) & " " & strTmp & vbCrLf
         End If
@@ -165,12 +210,12 @@ Private Function EnumWindowProc(ByVal hWnd As Long, ByVal lParam As Long) As Lon
     EnumWindowProc = 1
 End Function
 
-Public Function GetWinText(ByVal hWnd As Long) As String
-    GetWinText = String(1024, Chr(0))
-    GetWindowText hWnd, GetWinText, Len(GetWinText)
-    GetWinText = Left$(GetWinText, InStr(GetWinText, Chr(0)) - 1)
+'根据句柄获得窗口内容
+Public Function GetTextByHwnd(ByVal hWnd As Long) As String
+    Dim Txt2(64000) As Byte
+    SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
+    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
 End Function
-
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '功能：得到所有控件的信息，是按次序获得的，可用于编写脚本的参考和程序设置值时使用。此函数需要和EnumChildProc一起使用
 '函数名：ControlsInfo
@@ -178,25 +223,20 @@ End Function
 '返回值：string   保存了容器内所有控件的信息，包含“句柄、ID、类名、显示文字”
 '备注：sysdzw 于 2010-11-13 提供
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug = False) As String
-    Dim strHwnd$, strCtlId$, strClass$
-    Dim Rtn&, hWin&
-    Dim Txt(64000) As Byte
+Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
+    Dim Rtn&
     Dim strWindowClass As String * 255
     Dim strWindowTitle$
     
     GetClassName lngMainHwnd, strWindowClass, 255  '获得窗口类
-    SendMessage lngMainHwnd, &HD, 64000, Txt(0) '获得窗口标题(也可使用 API 函数:GetWindowText,但效果不佳)
-    strWindowTitle = StrConv(Txt, vbUnicode)
-    strWindowTitle = Replace(strWindowTitle, Chr(0), "")
-    strWindowClass = Replace(strWindowClass, Chr(0), "")
+    strWindowTitle = GetTextByHwnd(lngMainHwnd)
+    strWindowClass = Replace(strWindowClass, Chr$(0), "")
     strControlInfo = lngMainHwnd & vbTab & "0" & vbTab & Replace(strWindowClass, " ", "") & vbTab & strWindowTitle & vbCrLf
     
     Rtn = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
     ControlsInfo = strControlInfo
     If isDebug Then writeToFile "controls.txt", strControlInfo
 End Function
-
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '功能：和api函数EnumChildWindows结合使用得到一个窗体容器内的所有child控件
 '函数名：EnumChildProc
@@ -209,15 +249,13 @@ Private Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     Dim strCaption As String
     Dim lngCtlId As Long
     Dim strHwnd$, strCtlId$, strClass$
-    Dim Txt2(64000) As Byte
     
     EnumChildProc = True
     
     lngCtlId = GetWindowLong(hWnd, GWL_ID)
     Call GetClassName(hWnd, strClassName, 255)
-    SendMessage hWnd, &HD, 64000, Txt2(0)
-    strCaption = StrConv(Txt2, vbUnicode)
-    strCaption = Left$(strCaption, InStr(strCaption, Chr$(0)) - 1)
+    
+    strCaption = GetTextByHwnd(hWnd)
     strCaption = Replace(strCaption, vbCrLf, " ") '强制将文本框中内容回车替换成空格，以防止影响正则获取
     
     strHwnd$ = CStr(hWnd)
@@ -271,7 +309,7 @@ End Function
 '备注：sysdzw 于 2007-5-2 提供
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCover As Boolean = True) As Boolean
-    On Error GoTo Err1
+    On Error GoTo err1
     Dim fileHandl%
     fileHandl = FreeFile
     If isCover Then
@@ -283,7 +321,7 @@ Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCo
     Close #fileHandl
     writeToFile = True
     Exit Function
-Err1:
+err1:
     writeToFile = False
 End Function
 

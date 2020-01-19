@@ -1,9 +1,9 @@
 Type=Exe
-Form=frmMain.frm
 Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\Windows\SysWOW64\stdole2.tlb#OLE Automation
+Reference=*\G{1B45A1FF-B7A8-4D8D-9221-427693E491B2}#1.0#0#C:\Windows\VB6IDEMouseWheelAddin.dll#Sample AddIn Project
+Form=frmMain.frm
 Module=modWindow; modWindow.bas
 Class=clsWindow; clsWindow.cls
-Class=clsWaitableTimer; clsWaitableTimer.cls
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""
@@ -13,9 +13,9 @@ Command32=""
 Name="´°¿Ú¿ØÖÆÀà"
 HelpContextID="0"
 CompatibleMode="0"
-MajorVer=1
-MinorVer=8
-RevisionVer=68
+MajorVer=2
+MinorVer=2
+RevisionVer=84
 AutoIncrementVer=1
 ServerSupportFiles=0
 VersionCompanyName="Symental Studio"
@@ -36,6 +36,10 @@ Unattended=0
 Retained=0
 ThreadPerObject=0
 MaxNumberOfThreads=1
+DebugStartupOption=0
 
 [MS Transaction Server]
 AutoRefresh=1
+
+[CodeSMART]
+Task_UID=18_01_20_23_22_53
