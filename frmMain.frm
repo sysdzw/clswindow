@@ -10,14 +10,6 @@ Begin VB.Form frmMain
    ScaleHeight     =   5190
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
-   Begin VB.CommandButton Command10 
-      Caption         =   "Command10"
-      Height          =   495
-      Left            =   3720
-      TabIndex        =   13
-      Top             =   2400
-      Width           =   1215
-   End
    Begin VB.CommandButton Command9 
       Caption         =   "发消息到qq群"
       Height          =   495
@@ -155,13 +147,6 @@ Private Sub Command1_Click()
     End If
     Command1.Enabled = True
 End Sub
-
-Private Sub Command10_Click()
-Dim w As New clsWindow
-w.GetWindowByPID(Shell("notepad", 1)).Caption = "改变标题 CMB666"
-w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
-End Sub
-
 '调用计算器进行计算
 Private Sub Command2_Click()
     Dim strPID$

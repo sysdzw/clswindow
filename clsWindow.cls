@@ -77,14 +77,187 @@ Attribute VB_Exposed = False
 '               增加函数：GetCursorPosCurrent(别名：GetCursorPoint)得到当前坐标
 '               优化函数：所有窗口获取的函数增加了是否过滤可见的参数              2020/01/16
 '               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
+'               优化代码结构。将模块中能移过来的都移到类模块中了                  2020/01/19
 '==============================================================================================
 Option Explicit
+
+'常量定义
+Private Const SW_MINIMIZE = 6
+Private Const SW_SHOW = 5
+Private Const SW_SHOWMAXIMIZED = 3
+Private Const SW_SHOWMINIMIZED = 2
+Private Const SW_HIDE = 0
+Private Const SW_NORMAL = 1
+Private Const SW_SHOWNORMAL = 1
+Private Const HWND_TOPMOST = -1
+Private Const HWND_NOTOPMOST = -2
+Private Const SWP_NOSIZE = &H1
+Private Const SWP_NOMOVE = &H2
+
+Private Const WM_SETTEXT = &HC
+Private Const BM_CLICK = &HF5
+Private Const WM_SETFOCUS = &H7
+Private Const GWL_ID = (-12)
+Private Const GWL_STYLE = (-16)
+Private Const WM_LBUTTONDOWN = &H201
+Private Const WM_LBUTTONUP = &H202
+Private Const WM_CLOSE = &H10
+Private Const WM_GETTEXT = &HD
+
+
+Private Const SC_MOVE = &HF010&
+Private Const MF_BYCOMMAND = &H0&
+Private Const MF_ENABLED = &H0&
+Private Const MF_GRAYED = &H1&
+
+Private Const MOUSEEVENTF_MOVE = &H1 '  mouse move
+Private Const MOUSEEVENTF_LEFTDOWN = &H2 '  left button down
+Private Const MOUSEEVENTF_LEFTUP = &H4 '  left button up
+
+Private Const GWL_EXSTYLE = -20
+
+Private Const WS_VISIBLE = &H10000000
+
+Private Const LWA_ALPHA = &H2
+Private Const LWA_COLORKEY = &H1
+Private Const WS_EX_LAYERED = &H80000
+
+Private Const GW_HWNDFIRST = 0
+Private Const GW_HWNDNEXT = 2
+Private Const GW_CHILD = 5
+Private Const CB_SETCURSEL = &H14E
+Private Const PROCESS_ALL_ACCESS As Long = &H1F0FFF
+
+Private Const WAIT_ABANDONED& = &H80&
+Private Const WAIT_ABANDONED_0& = &H80&
+Private Const WAIT_FAILED& = -1&
+Private Const WAIT_IO_COMPLETION& = &HC0&
+Private Const WAIT_OBJECT_0& = 0
+Private Const WAIT_OBJECT_1& = 1
+Private Const WAIT_TIMEOUT& = &H102&
+Private Const INFINITE = &HFFFF
+Private Const QS_HOTKEY& = &H80
+Private Const QS_KEY& = &H1
+Private Const QS_MOUSEBUTTON& = &H4
+Private Const QS_MOUSEMOVE& = &H2
+Private Const QS_PAINT& = &H20
+Private Const QS_POSTMESSAGE& = &H8
+Private Const QS_SENDMESSAGE& = &H40
+Private Const QS_TIMER& = &H10
+Private Const ERROR_ALREADY_EXISTS = 183&
+Private Const QS_MOUSE& = (QS_MOUSEMOVE Or QS_MOUSEBUTTON)
+Private Const QS_INPUT& = (QS_MOUSE Or QS_KEY)
+Private Const QS_ALLEVENTS& = (QS_INPUT Or QS_POSTMESSAGE Or QS_TIMER Or QS_PAINT Or QS_HOTKEY)
+Private Const QS_ALLINPUT& = (QS_SENDMESSAGE Or QS_PAINT Or QS_TIMER Or QS_POSTMESSAGE Or QS_MOUSEBUTTON Or QS_MOUSEMOVE Or QS_HOTKEY Or QS_KEY)
+
+Private Const UNITS = 4294967296#
+Private Const MAX_LONG = -2147483648#
+
+'结构体定义
+Private Type rect
+    Left As Long
+    Top As Long
+    Right As Long
+    Bottom As Long
+End Type
+
+Private Type POINTAPI
+    x As Long
+    y As Long
+End Type
+
+Private Type FILETIME
+    dwLowDateTime As Long
+    dwHighDateTime As Long
+End Type
+
+Public Enum enumShift
+    Horizontal
+    Vertical
+    Both
+End Enum
+
+Public Enum enumPositionMode
+    absolute
+    relative
+End Enum
+'过滤窗口是否可见
+Public Enum enumWindowVisible
+    HiddenWindow
+    DisplayedWindow
+    AllWindow
+End Enum
+
+Private Declare Function CreateWaitableTimer Lib "kernel32" Alias "CreateWaitableTimerA" (ByVal lpSemaphoreAttributes As Long, ByVal bManualReset As Long, ByVal lpName As String) As Long
+Private Declare Function OpenWaitableTimer Lib "kernel32" Alias "OpenWaitableTimerA" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal lpName As String) As Long
+Private Declare Function SetWaitableTimer Lib "kernel32" (ByVal hTimer As Long, lpDueTime As FILETIME, ByVal lPeriod As Long, ByVal pfnCompletionRoutine As Long, ByVal lpArgToCompletionRoutine As Long, ByVal fResume As Long) As Long
+Private Declare Function CancelWaitableTimer Lib "kernel32" (ByVal hTimer As Long)
+Private Declare Function WaitForSingleObject Lib "kernel32" (ByVal hHandle As Long, ByVal dwMilliseconds As Long) As Long
+Private Declare Function MsgWaitForMultipleObjects Lib "user32" (ByVal nCount As Long, pHandles As Long, ByVal fWaitAll As Long, ByVal dwMilliseconds As Long, ByVal dwWakeMask As Long) As Long
+
+Private Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
+Private Declare Function GetForegroundWindow Lib "user32" () As Long
+Private Declare Function GetCurrentThreadId Lib "kernel32" () As Long
+Private Declare Function AttachThreadInput Lib "user32" (ByVal idAttach As Long, ByVal idAttachTo As Long, ByVal fAttach As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+
+Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+Private Declare Function OpenProcess Lib "kernel32" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessID As Long) As Long
+Private Declare Function GetModuleFileNameEx Lib "psapi.dll" Alias "GetModuleFileNameExW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
+Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, ByRef lpdwProcessId As Long) As Long
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hwnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function GetWindowTextLength Lib "user32" Alias "GetWindowTextLengthA" (ByVal hWnd As Long) As Long
+Private Declare Function TerminateProcess Lib "kernel32" (ByVal hProcess As Long, ByVal uExitCode As Long) As Long
+
+Private Declare Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hWnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
+Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
+Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
+Private Declare Function EnumWindows Lib "user32" (ByVal lpfn As Long, ByVal lParam As Long) As Long
+Private Declare Function EnumChildWindows Lib "user32" (ByVal hWndParent As Long, ByVal lpEnumFunc As Long, ByVal lParam As Long) As Long
+Private Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
+Private Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
+
+Private Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
+Private Declare Function SetCursorPos Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
+Private Declare Function GetSystemMenu Lib "user32" (ByVal hWnd As Long, ByVal bRevert As Long) As Long
+Private Declare Function ModifyMenu Lib "user32" Alias "ModifyMenuA" (ByVal hMenu As Long, ByVal nPosition As Long, ByVal wFlags As Long, ByVal wIDNewItem As Long, ByVal lpString As Any) As Long
+Private Declare Function GetWindowRect Lib "user32" (ByVal hWnd As Long, lpRect As rect) As Long
+Private Declare Function IsWindow Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function IsZoomed Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function IsIconic Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function GetLayeredWindowAttributes Lib "user32.dll" (ByVal hWnd As Long, ByRef crKey As Long, ByRef bAlpha As Byte, ByRef dwFlags As Long) As Long
+Private Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetLayeredWindowAttributes Lib "user32" (ByVal hWnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
+Private Declare Function IsWindowEnabled Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function EnableWindow Lib "user32" (ByVal hWnd As Long, ByVal fEnable As Long) As Long
+Private Declare Function UpdateWindow Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function BringWindowToTop Lib "user32" (ByVal hWnd As Long) As Long
+
+Private Declare Function QueryFullProcessImageName Lib "Kernel32.dll" Alias "QueryFullProcessImageNameW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
+Private Declare Function GetProcessImageFileName Lib "Kernel32.dll" Alias "GetProcessImageFileNameW" (ByVal hProcess As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
+Private Declare Function GetParent Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function GetDesktopWindow Lib "user32" () As Long
+Private Declare Function timeGetTime Lib "winmm.dll" () As Long
+
+Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Long, ByVal dx As Long, ByVal dy As Long, ByVal cButtons As Long, ByVal dwExtraInfo As Long)
 
 Private Const DelayOneTime = 500
 Private hWnd_ As Long '窗口句柄
 Private wReturn As New clsWindow '作为返回对象以便连用
 Private Const strVersion = "V2.2"
 Public DebugMe As Boolean '表示是否启用调试模式
+
+'自定义变量声明
+Private strWindowInfo$ '保存所有窗口的信息，格式为 句柄 文本内容
+Private strWindowKeyWord$ '要参与的过滤的窗口的关键字，如果不需要过滤就留空
+Private strTmp$, isWholeEx As Boolean
 
 Public Function Move(Optional ByVal x, Optional ByVal y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
     If IsMissing(x) Then x = Left
@@ -874,7 +1047,7 @@ Public Function ClickElementByText(ByVal strText$, Optional ByVal intIndex = 1, 
         ClickElementByText = 0
     End If
 End Function
-'从匹配结果中得到句柄
+'从匹配结果中得到句柄，一般是从一个窗口中的所有子窗口中进行检索
 Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal intIndex = 1, Optional ByVal UseRegExp = False, Optional ByVal isUseClass = True) As Long
     Dim reg As Object
     Dim matchs As Object, match As Object
@@ -1174,47 +1347,84 @@ End Property
 Public Sub SelectComboBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
     SendMessage hWnd, CB_SETCURSEL, intIndex, 0
 End Sub
-'延时
-Public Sub Wait(ByVal MilliSeconds As Long)
-    On Error GoTo ErrHandler
-    Dim ft As FILETIME
-    Dim lBusy As Long
-    Dim lRet As Long
-    Dim dblDelay As Double
-    Dim dblDelayLow As Double
-    
-    If MilliSeconds = 0 Then Exit Sub
-    
-    Randomize
-    mlTimer = CreateWaitableTimer(0, True, App.EXEName & "Timer" & Format$(Now(), "NNSS") & Int(Rnd * 10000))
-    
-    If Err.LastDllError <> ERROR_ALREADY_EXISTS Then
-        ft.dwLowDateTime = -1
-        ft.dwHighDateTime = -1
-        lRet = SetWaitableTimer(mlTimer, ft, 0, 0, 0, 0)
+'延时，单位为毫秒
+Public Function Wait(ByVal MilliSeconds As Long)
+    Dim dSavetime As Double
+    dSavetime = timeGetTime + MilliSeconds   '记下开始时的时间
+    While timeGetTime < dSavetime '循环等待
+        DoEvents '转让控制权，以便让操作系统处理其它的事件
+    Wend
+End Function
+Private Function replaceReg(ByVal str1$, ByVal strPattern$, ByVal strNew$) As String
+    Dim strData As String
+    Dim reg As Object
+
+    strData = str1 ' "1)2{}?*3.7(7"
+
+    Set reg = CreateObject("vbscript.regExp")
+    reg.Global = True
+    reg.IgnoreCase = True
+    reg.MultiLine = True
+    reg.Pattern = strPattern ' "([\\+-\.()\[\]{}?*])"
+    replaceReg = reg.Replace(strData, strNew) '"\$1"
+End Function
+Private Function regTest(ByVal str1$, ByVal strPattern$) As Boolean
+    Dim strData As String
+    Dim reg As Object
+
+    strData = str1 ' "1)2{}?*3.7(7"
+
+    Set reg = CreateObject("vbscript.regExp")
+    reg.Global = True
+    reg.IgnoreCase = True
+    reg.MultiLine = True
+    reg.Pattern = strPattern ' "([\\+-\.()\[\]{}?*])"
+    regTest = reg.test(strData)  '"\$1"
+End Function
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'功能：根据所给文件名和内容直接写文件
+'函数名：writeToFile
+'入口参数(如下)：
+'  strFileName 所给的文件名；
+'  strContent 要输入到上述文件的字符串
+'  isCover 是否覆盖该文件，默认为覆盖
+'返回值：True或False，成功则返回前者，否则返回后者
+'备注：sysdzw 于 2007-5-2 提供
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Private Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCover As Boolean = True) As Boolean
+    On Error GoTo err1
+    Dim fileHandl%
+    fileHandl = FreeFile
+    If isCover Then
+        Open strFileName For Output As #fileHandl
+    Else
+        Open strFileName For Append As #fileHandl
     End If
+    Print #fileHandl, strContent
+    Close #fileHandl
+    writeToFile = True
+    Exit Function
+err1:
+    writeToFile = False
+End Function
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'功能：得到所有控件的信息，是按次序获得的，可用于编写脚本的参考和程序设置值时使用。此函数需要和EnumChildProc一起使用
+'函数名：ControlsInfo
+'入口参数：hWnd   long型  容器句柄，一般指窗体句柄。可缺省，缺省为最新获取到的窗体的句柄，也可以指定一个句柄
+'返回值：string   保存了容器内所有控件的信息，包含“句柄、ID、类名、显示文字”
+'备注：sysdzw 于 2010-11-13 提供
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Private Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
+    Dim Rtn&
+    Dim strWindowClass As String * 255
+    Dim strWindowTitle$
     
-    dblDelay = CDbl(MilliSeconds) * 10000#
+    GetClassName lngMainHwnd, strWindowClass, 255  '获得窗口类
+    strWindowTitle = GetTextByHwnd(lngMainHwnd)
+    strWindowClass = Replace(strWindowClass, Chr$(0), "")
+    strControlInfo = lngMainHwnd & vbTab & "0" & vbTab & Replace(strWindowClass, " ", "") & vbTab & strWindowTitle & vbCrLf '第一条为主窗口的信息
     
-    ft.dwHighDateTime = -CLng(dblDelay / UNITS) - 1
-    dblDelayLow = -UNITS * (dblDelay / UNITS - Fix(CStr(dblDelay / UNITS)))
-    
-    If dblDelayLow < MAX_LONG Then dblDelayLow = UNITS + dblDelayLow
-    
-    ft.dwLowDateTime = CLng(dblDelayLow)
-    lRet = SetWaitableTimer(mlTimer, ft, 0, 0, 0, False)
-    
-    Do
-        lBusy = MsgWaitForMultipleObjects(1, mlTimer, False, INFINITE, QS_ALLINPUT&)
-        
-        DoEvents
-'        Exit Sub '**DEBUG**调试时可以加上
-    Loop Until lBusy = WAIT_OBJECT_0
-    
-    CloseHandle mlTimer
-    mlTimer = 0
-    Exit Sub
-    
-ErrHandler:
-    Err.Raise Err.Number, Err.Source, "[clsWaitableTimer.Wait]" & Err.Description
-End Sub
+    Rtn = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
+    ControlsInfo = strControlInfo
+    If isDebug Then writeToFile "controls.txt", strControlInfo
+End Function
