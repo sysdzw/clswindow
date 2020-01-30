@@ -1,5 +1,6 @@
 # clswindow v2.2 
 #### VB6操作外部程序窗口的类clsWindow2.2使用说明
+详细使用说明文档：https://www.kancloud.cn/sysdzw/clswindow
 
 clsWindow是VB6环境下使用的一个操作外部程序窗口的类，比如得到窗口句柄，得到窗口里某个文本框的内容。非常方便，使用它可以让您脱身于一堆api函数，功能强大使用简单！
 
