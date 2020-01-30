@@ -352,12 +352,29 @@ Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
 End Function
 '根据句柄获得窗口内容
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
+    '方案1
     Dim Txt2() As Byte, i&
-    i = SendMessage(hWnd, WM_GETTEXT, 0&, 0&)
+    i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
     If i = 0 Then Exit Function '没有内容
     ReDim Txt2(i - 1)
-    SendMessage hWnd, WM_GETTEXTLENGTH, i + 1, Txt2(0)
+    SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
     GetTextByHwnd = StrConv(Txt2, vbUnicode)
+    
+'    '方案2 效率欠佳
+'    Dim Txt2(64000) As Byte
+'    SendMessage hWnd, WM_GETTEXT, 5, Txt2(0)
+'    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
+'
+'    '方案3 待选
+'    Dim Txt2() As Byte, i&
+'    ReDim Txt2(64000)
+'    SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
+'    If Txt2(0) = 0 Then Exit Function  '没有内容
+'    For i = 1 To nMaxCount
+'        If Txt2(i) = 0 Then Exit For '没有内容
+'    Next
+'    ReDim Preserve Txt2(i - 1)
+'    GetTextByHwnd = StrConv(Txt2, vbUnicode)
 End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
@@ -421,13 +438,6 @@ Public Function Hide() As Long
     End If
 End Function
 '设置窗口显示
-'Public Const SW_MINIMIZE = 6
-'Public Const SW_SHOW = 5
-'Public Const SW_SHOWMAXIMIZED = 3
-'Public Const SW_SHOWMINIMIZED = 2
-'Public Const SW_HIDE = 0
-'Public Const SW_NORMAL = 1
-'Public Const SW_SHOWNORMAL = 1
 Public Function Show(Optional ByVal ShowStatus As VbAppWinStyle = 5) As Long '默认是5，直接显示
     If hWnd_ <> 0 Then
         Show = ShowWindow(hWnd_, ShowStatus)
@@ -560,9 +570,9 @@ Private Function CheckWindowVisible(ByVal lngHwnd&, ByVal windowVisible As enumW
         If windowVisible = AllWindow Then
             CheckWindowVisible = True
         ElseIf windowVisible = DisplayedWindow Then
-            If IsWindowVisible(lngHwnd) Then CheckWindowVisible = True
+            If myIsWindowVisibled(lngHwnd) Then CheckWindowVisible = True
         ElseIf windowVisible = HiddenWindow Then
-            If Not IsWindowVisible(lngHwnd) Then CheckWindowVisible = True
+            If Not myIsWindowVisibled(lngHwnd) Then CheckWindowVisible = True
         End If
     End If
 End Function
@@ -1263,9 +1273,19 @@ Public Property Let WindowState(ByVal vNewValue As FormWindowStateConstants)
 End Property
 
 Public Property Get Visible() As Boolean
-    If CheckWindow() = 0 Then Exit Property
-    Visible = CBool(IsWindowVisible(hWnd_) = 1)
+    If CheckWindow() = 0 Then Exit Property '检查是否是窗口
+    Visible = myIsWindowVisibled(hWnd_)
 End Property
+'检查窗口是否可见，如果长宽有一项为0也认为不可见
+Private Function myIsWindowVisibled(ByVal hWnd_ As Long) As Boolean
+    myIsWindowVisibled = CBool(IsWindowVisible(hWnd_) = 1) '用api函数判断窗口是否可见
+    '以下为检测宽高是否为0，如果有一项为0则认为不可见
+    Dim rect As rect, chkWidth&, chkHeight&
+    GetWindowRect hWnd_, rect
+    chkWidth = rect.Right - rect.Left
+    chkHeight = rect.Bottom - rect.Top
+    If chkWidth = 0 Or chkHeight = 0 Then myIsWindowVisibled = False
+End Function
 
 Public Property Let Visible(ByVal vNewValue As Boolean)
     If vNewValue = True Then

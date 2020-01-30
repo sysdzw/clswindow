@@ -343,7 +343,7 @@ End Sub
 
 Private Sub Command7_Click()
 'Dim i%
-Dim w As New clsWindow
+'Dim w As New clsWindow
 'w.GetWindowByClassName("Notepad").SetElementTextByClassName "Edit", "csdn欢迎你！"
 
 'Do While w.GetWindowByTitleEx("统计器").SetElementTextByClassName("ThunderRT6TextBox", "次序" & i + 1, i + 1)
@@ -451,6 +451,16 @@ Dim w As New clsWindow
 'Dim s As String
 'w.GetWindowByTitleEx "记事本", , s
 'MsgBox s
+
+Dim w As New clsWindow
+'MsgBox w.GetWindowByTitleEx("器").Height
+
+'MsgBox w.GetWindowByClassName("ThunderRT6Main", , DisplayedWindow).hWnd
+'w.Move 100, 100, 600, 600
+'w.Visible = True
+
+MsgBox w.GetWindowByPID(11780, , , DisplayedWindow).Caption
+
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
@@ -460,7 +470,7 @@ Private Sub Command8_Click()
     w.Caption = "看到记事本打开了吗？" & Now '设置应用程序标题内容
     w.Shake '抖动窗口，可以通过参数调节抖动方向、速度、幅度、次数
     
-    w.SetElementTextByClassName "Edit", "clsWindow " & w.Version & "发布 " & Now()    '设置输入框文字
+    w.SetElementTextByClassName "Edit", "clsWindow" & w.Version & "发布 " & Now()    '设置输入框文字
     w.Wait 1000
     w.FadeOut '淡出
     w.AppendElementTextByClassName "Edit", vbCrLf & "功能全面" '向输入框追加内容
@@ -482,11 +492,11 @@ Private Sub Command9_Click()
     Dim i%
     Dim w As New clsWindow
     For i = 1 To 40
-        w.GetWindowByTitle("clswindow交流群").Focus '有问题反应和交流可以加 QQ群：788028734
+        w.GetWindowByTitle("VB高级语言学习交流群").Focus
         w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
         w.Wait 20
         Clipboard.Clear
-        Clipboard.SetText "[" & i & "] 本消息由clswindow " & w.Version & "类发出，本框架QQ交流群：788028734 发送时间：" & Now
+        Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow" & w.Version & "类发出 " & Now
         SendKeys "^{v}"
         SendKeys "%{s}"
         w.Wait 2
