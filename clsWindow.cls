@@ -94,15 +94,16 @@ Private Const HWND_NOTOPMOST = -2
 Private Const SWP_NOSIZE = &H1
 Private Const SWP_NOMOVE = &H2
 
-Private Const WM_SETTEXT = &HC
 Private Const BM_CLICK = &HF5
-Private Const WM_SETFOCUS = &H7
 Private Const GWL_ID = (-12)
 Private Const GWL_STYLE = (-16)
+Private Const WM_SETFOCUS = &H7
 Private Const WM_LBUTTONDOWN = &H201
 Private Const WM_LBUTTONUP = &H202
 Private Const WM_CLOSE = &H10
+Private Const WM_SETTEXT = &HC
 Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
 
 
 Private Const SC_MOVE = &HF010&
@@ -351,9 +352,12 @@ Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
 End Function
 '根据句柄获得窗口内容
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
-    Dim Txt2(64000) As Byte
-    SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
-    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
+    Dim Txt2() As Byte, i&
+    i = SendMessage(hWnd, WM_GETTEXT, 0&, 0&)
+    If i = 0 Then Exit Function '没有内容
+    ReDim Txt2(i - 1)
+    SendMessage hWnd, WM_GETTEXTLENGTH, i + 1, Txt2(0)
+    GetTextByHwnd = StrConv(Txt2, vbUnicode)
 End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
@@ -638,7 +642,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     Dim strWindowClass As String * 255
     Dim strHwndAllTmp$
     Dim isMatch As Boolean
-    
+
     hWnd_ = 0
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetWindowByClassNameEx被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
