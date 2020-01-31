@@ -453,13 +453,14 @@ Private Sub Command7_Click()
 'MsgBox s
 
 Dim w As New clsWindow
+w.GetWindowByClassName("Notepad").Left = 200
 'MsgBox w.GetWindowByTitleEx("Æ÷").Height
 
 'MsgBox w.GetWindowByClassName("ThunderRT6Main", , DisplayedWindow).hWnd
 'w.Move 100, 100, 600, 600
 'w.Visible = True
 
-MsgBox w.GetWindowByPID(11780, , , DisplayedWindow).Caption
+'MsgBox w.GetWindowByPID(11780, , , DisplayedWindow).Caption
 
 End Sub
 

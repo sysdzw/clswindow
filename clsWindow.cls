@@ -439,7 +439,7 @@ Public Function Hide() As Long
     End If
 End Function
 '设置窗口显示
-Public Function Show(Optional ByVal ShowStatus As VbAppWinStyle = 5) As Long '默认是5，直接显示
+Public Function Show(Optional ByVal ShowStatus As VbAppWinStyle = vbNormalFocus) As Long
     If hWnd_ <> 0 Then
         Show = ShowWindow(hWnd_, ShowStatus)
     End If
