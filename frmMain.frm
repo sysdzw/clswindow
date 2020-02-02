@@ -446,21 +446,10 @@ Private Sub Command7_Click()
 'w.GetWindowByPID(Shell("notepad", 1)).Caption = "改变标题 CMB666"
 'w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
 
-'得到所有记事本的句柄
-'Dim w As New clsWindow
-'Dim s As String
-'w.GetWindowByTitleEx "记事本", , s
-'MsgBox s
-
 Dim w As New clsWindow
-w.GetWindowByClassName("Notepad").Left = 200
-'MsgBox w.GetWindowByTitleEx("器").Height
-
-'MsgBox w.GetWindowByClassName("ThunderRT6Main", , DisplayedWindow).hWnd
-'w.Move 100, 100, 600, 600
-'w.Visible = True
-
-'MsgBox w.GetWindowByPID(11780, , , DisplayedWindow).Caption
+w.DebugMe = True '调试模式
+MsgBox w.GetWindowByTitleEx("记事本").hWnd '此时会看到有文件DEBUG.txt
+MsgBox w.GetElementTextByClassName("Edit")  '此时会看到有文件controls.txt
 
 End Sub
 

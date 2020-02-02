@@ -79,6 +79,7 @@ Attribute VB_Exposed = False
 '               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
 '               优化代码结构。将模块中能移过来的都移到类模块中了                  2020/01/19
 '               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见    2020/01/31
+'               优化函数：GetTextByHwnd 网友小凡提供                              2020/02/03
 '==============================================================================================
 Option Explicit
 
@@ -168,11 +169,6 @@ Private Type POINTAPI
     y As Long
 End Type
 
-Private Type FILETIME
-    dwLowDateTime As Long
-    dwHighDateTime As Long
-End Type
-
 Public Enum enumShift
     Horizontal
     Vertical
@@ -189,13 +185,6 @@ Public Enum enumWindowVisible
     DisplayedWindow
     AllWindow
 End Enum
-
-Private Declare Function CreateWaitableTimer Lib "kernel32" Alias "CreateWaitableTimerA" (ByVal lpSemaphoreAttributes As Long, ByVal bManualReset As Long, ByVal lpName As String) As Long
-Private Declare Function OpenWaitableTimer Lib "kernel32" Alias "OpenWaitableTimerA" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal lpName As String) As Long
-Private Declare Function SetWaitableTimer Lib "kernel32" (ByVal hTimer As Long, lpDueTime As FILETIME, ByVal lPeriod As Long, ByVal pfnCompletionRoutine As Long, ByVal lpArgToCompletionRoutine As Long, ByVal fResume As Long) As Long
-Private Declare Function CancelWaitableTimer Lib "kernel32" (ByVal hTimer As Long)
-Private Declare Function WaitForSingleObject Lib "kernel32" (ByVal hHandle As Long, ByVal dwMilliseconds As Long) As Long
-Private Declare Function MsgWaitForMultipleObjects Lib "user32" (ByVal nCount As Long, pHandles As Long, ByVal fWaitAll As Long, ByVal dwMilliseconds As Long, ByVal dwWakeMask As Long) As Long
 
 Private Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
 Private Declare Function GetForegroundWindow Lib "user32" () As Long
@@ -353,29 +342,32 @@ Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
 End Function
 '根据句柄获得窗口内容
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
-    '方案1
-    Dim Txt2() As Byte, i&
-    i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
-    If i = 0 Then Exit Function '没有内容
-    ReDim Txt2(i - 1)
-    SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
-    GetTextByHwnd = StrConv(Txt2, vbUnicode)
-    
-'    '方案2 效率欠佳
-'    Dim Txt2(64000) As Byte
-'    SendMessage hWnd, WM_GETTEXT, 5, Txt2(0)
-'    GetTextByHwnd = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
-'
-'    '方案3 待选
+'    '方案1 性能欠佳
 '    Dim Txt2() As Byte, i&
-'    ReDim Txt2(64000)
-'    SendMessage hWnd, WM_GETTEXT, 64000, Txt2(0)
-'    If Txt2(0) = 0 Then Exit Function  '没有内容
-'    For i = 1 To nMaxCount
-'        If Txt2(i) = 0 Then Exit For '没有内容
-'    Next
+'    i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
+'    If i = 0 Then Exit Function '没有内容
+'    ReDim Txt2(i)
+'    SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
 '    ReDim Preserve Txt2(i - 1)
 '    GetTextByHwnd = StrConv(Txt2, vbUnicode)
+'
+    '方案2 混合方案，尽量减少api调用（本代码由网友小凡提供）
+    Dim Txt2() As Byte, i&
+    Const lMaxLength& = 6
+    ReDim Txt2(lMaxLength&)
+    SendMessage hWnd, WM_GETTEXT, lMaxLength&, Txt2(0)
+    If Txt2(0) = 0 Then Exit Function  '没有内容
+    For i = 1 To lMaxLength&
+        If Txt2(i) = 0 Then Exit For '结束
+    Next
+    If i >= lMaxLength& - 1 Then '如果已取内容不完整
+        i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
+        If i = 0 Then Exit Function '没有内容
+        ReDim Txt2(i) '须比实际内容多设一个字节来装结束符0
+        SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
+    End If
+    ReDim Preserve Txt2(i - 1) '去掉多的字节
+    GetTextByHwnd = StrConv(Txt2, vbUnicode) '转ASI字串为宽字串
 End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
@@ -1439,17 +1431,17 @@ End Function
 '返回值：string   保存了容器内所有控件的信息，包含“句柄、ID、类名、显示文字”
 '备注：sysdzw 于 2010-11-13 提供
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Private Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
-    Dim Rtn&
-    Dim strWindowClass As String * 255
+Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
+    Dim strWindowClass As String * 255, lRet&
     Dim strWindowTitle$
     
-    GetClassName lngMainHwnd, strWindowClass, 255  '获得窗口类
+    GetClassName lngMainHwnd, strWindowClass, 255
+    lRet = GetClassName(hWnd, strWindowClass, 255) '获得窗口类名，并得到类名长度
+    strWindowClass = Left$(strWindowClass, lRet)
     strWindowTitle = GetTextByHwnd(lngMainHwnd)
-    strWindowClass = Replace(strWindowClass, Chr$(0), "")
-    strControlInfo = lngMainHwnd & vbTab & "0" & vbTab & Replace(strWindowClass, " ", "") & vbTab & strWindowTitle & vbCrLf '第一条为主窗口的信息
+    strControlInfo = lngMainHwnd & vbTab & "0" & vbTab & strWindowClass & vbTab & strWindowTitle & vbCrLf '第一条为主窗口的信息
     
-    Rtn = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
+    lRet = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
     ControlsInfo = strControlInfo
     If isDebug Then writeToFile "controls.txt", strControlInfo
 End Function

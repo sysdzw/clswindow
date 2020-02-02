@@ -1,16 +1,17 @@
 Attribute VB_Name = "modWindow"
-'=====================================================================================
-'描    述：是clsWindow.cls类的依赖模块，一些无法放到类模块中的代码放在这里 (modWindow)
+'===========================================================================
+'描    述：是clsWindow.cls类的调用模块，一些常用函数和api在此声明 (modWindow)
 '编    程：sysdzw 原创开发，如果有需要对模块进行更新请发我一份，共同维护
 '发布日期：2013/05/28
-'博    客：http://blog.csdn.net/sysdzw
+'博    客：http://blog.163.com/sysdzw
+'          http://blog.csdn.net/sysdzw
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
 '版    本：V1.0 初版                                        2012/12/3
 '          V1.1 将类中的api函数以及部分变量挪到此模块         2013/05/28
 '          V1.2 将EnumChildProc中获取控件文字函数修改了      2013/06/13
 '          V1.3 将本模块中能移到类模块中的都移过去了          2020/01/19
-'=====================================================================================
+'===========================================================================
 Option Explicit
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
@@ -28,12 +29,12 @@ Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     Dim strClassName As String * 255
     Dim strText As String
     Dim lngCtlId As Long
-    Dim strHwnd$, strCtlId$, strClass$
+    Dim strHwnd$, strCtlId$, strClass$, lRet&
     
     EnumChildProc = True
     
     lngCtlId = GetWindowLong(hWnd, (-12))
-    Call GetClassName(hWnd, strClassName, 255)
+    lRet = GetClassName(hWnd, strClassName, 255)
     
     SendMessage hWnd, &HD, 64000, Txt2(0)
     strText = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
@@ -41,7 +42,7 @@ Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     
     strHwnd$ = CStr(hWnd) & vbTab
     strCtlId$ = CStr(lngCtlId) & vbTab
-    strClass$ = Left$(strClassName, InStr(strClassName, Chr$(0)) - 1) & vbTab$
+    strClass$ = Left$(strClassName, lRet) & vbTab$
     
     strControlInfo = strControlInfo & strHwnd$ & _
                     strCtlId$ & _
