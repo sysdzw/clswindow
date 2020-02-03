@@ -1432,15 +1432,9 @@ End Function
 '备注：sysdzw 于 2010-11-13 提供
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
-    Dim strWindowClass As String * 255, lRet&
-    Dim strWindowTitle$
-    
-    GetClassName lngMainHwnd, strWindowClass, 255
-    lRet = GetClassName(hWnd, strWindowClass, 255) '获得窗口类名，并得到类名长度
-    strWindowClass = Left$(strWindowClass, lRet)
-    strWindowTitle = GetTextByHwnd(lngMainHwnd)
-    strControlInfo = lngMainHwnd & vbTab & "0" & vbTab & strWindowClass & vbTab & strWindowTitle & vbCrLf '第一条为主窗口的信息
-    
+    Dim lRet&
+    ControlsInfo = ""
+    lRet = EnumChildProc(lngMainHwnd, 0&)
     lRet = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
     ControlsInfo = strControlInfo
     If isDebug Then writeToFile "controls.txt", strControlInfo

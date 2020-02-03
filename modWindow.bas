@@ -42,7 +42,7 @@ Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     
     strHwnd$ = CStr(hWnd) & vbTab
     strCtlId$ = CStr(lngCtlId) & vbTab
-    strClass$ = Left$(strClassName, lRet) & vbTab$
+    strClass$ = Left$(strClassName, lRet) & vbTab
     
     strControlInfo = strControlInfo & strHwnd$ & _
                     strCtlId$ & _
