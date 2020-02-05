@@ -80,6 +80,7 @@ Attribute VB_Exposed = False
 '               优化代码结构。将模块中能移过来的都移到类模块中了                  2020/01/19
 '               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见    2020/01/31
 '               优化函数：GetTextByHwnd 网友小凡提供                              2020/02/03
+'               增加函数：CommandLine（同AppCommandLine）                         2020/02/05
 '==============================================================================================
 Option Explicit
 
@@ -471,11 +472,11 @@ Public Function ProcessID(Optional ByVal my_hWnd) As Long
     ProcessID = l
 End Function
 '得到进程标识
-Public Function PID(Optional ByVal my_hWnd) As Long
+Public Function pid(Optional ByVal my_hWnd) As Long
     If IsMissing(my_hWnd) Then
-        PID = ProcessID
+        pid = ProcessID
     Else
-        PID = ProcessID(my_hWnd)
+        pid = ProcessID(my_hWnd)
     End If
 End Function
 '根据窗口句柄得到应用程序的路径
@@ -489,7 +490,7 @@ Public Function AppPath(Optional ByVal hwn1) As String
     End If
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwProcessID)
     AppPath = Space$(255)
-    nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255)
+    nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255) 'win7x64下获取为空，暂无解决方案
     AppPath = Mid$(AppPath, 1, nSize)
     Call CloseHandle(hProcess)
 End Function
@@ -533,6 +534,14 @@ Public Function AppCommandLine(Optional ByVal strAppName) As String
         If strResult <> "" Then
             AppCommandLine = strResult
         End If
+    End If
+End Function
+'得到exe文件的启动参数
+Public Function CommandLine(Optional ByVal strAppName) As String
+    If IsMissing(strAppName) Then
+        If hWnd_ <> 0 Then CommandLine = AppCommandLine
+    Else
+        CommandLine = AppCommandLine(strAppName)
     End If
 End Function
 '设置根据窗体标题得到窗口句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待10秒
@@ -785,7 +794,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     hWnd_ = wReturn.hWnd
 End Function
 '根据pid获得窗体
-Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
+Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
     Dim lngHwnd&, currWnd&, l&, lngDelayCount&
     Dim strCaption As String
     Dim strWindowClass As String * 255
@@ -796,7 +805,7 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
     
     hWnd_ = 0
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数GetWindowByPID被调用" & vbCrLf & "参数为 PID=" & PID & vbTab & " hWndAll=" & hWndAll, False
+        writeToFile "DEBUG.txt", Now & " 函数GetWindowByPID被调用" & vbCrLf & "参数为 PID=" & pid & vbTab & " hWndAll=" & hWndAll, False
     End If
     strHwndAllTmp = ""
     Dim aaa&, bbb&
@@ -806,7 +815,7 @@ Public Function GetWindowByPID(ByVal PID As Long, Optional ByVal intWaitSeconds&
         Do While currWnd <> 0
             If CheckWindowVisible(currWnd, windowVisible) Then
                 currentPID = ProcessID(currWnd) '得到pid
-                isMatch = (currentPID = PID)
+                isMatch = (currentPID = pid)
                 If isMatch Then
                     strCaption = GetTextByHwnd(currWnd)
     
@@ -914,10 +923,10 @@ Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$
     End If
 End Function
 '根据控件的类名追加显示控件的文字
-Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewText$, Optional ByVal intIndex% = 1, Optional ByVal UseRegExp As Boolean = False) As Long
+Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strAppendText$, Optional ByVal intIndex% = 1, Optional ByVal UseRegExp As Boolean = False) As Long
     Dim lngControlsHwnd As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数AppendElementTextByClassName被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " strNewText=" & strNewText & vbTab & " UseRegExp=" & UseRegExp, False
+        writeToFile "DEBUG.txt", Now & " 函数AppendElementTextByClassName被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " strAppendText=" & strAppendText & vbTab & " UseRegExp=" & UseRegExp, False
         writeToFile "DEBUG.txt", Now & " 函数AppendElementTextByClassName中调用函数getMatchHwndFromWindow", False
     End If
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
@@ -929,10 +938,10 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strNewTe
     End If
     
     If lngControlsHwnd <> 0 Then
-        strNewText = RTrim$(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strNewText
-        AppendElementTextByClassName = SendMessage(lngControlsHwnd, WM_SETTEXT, 0&, ByVal strNewText)
+        strAppendText = RTrim$(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strAppendText
+        AppendElementTextByClassName = SendMessage(lngControlsHwnd, WM_SETTEXT, 0&, ByVal strAppendText)
     Else
-        AppendElementTextByClassName = -1
+        AppendElementTextByClassName = 0
     End If
 End Function
 '根据控件的类名得到控件的显示文字
@@ -956,7 +965,7 @@ Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal in
         GetElementTextByClassName = ""
     End If
 End Function
-'根据控件的类名得到控件的显示文字
+'根据控件的内容得到控件的显示文字
 Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As String
     Dim lngControlsHwnd As Long
     If DebugMe Then
@@ -992,7 +1001,7 @@ Public Function GetElementHwndByClassName(ByVal strClassName$, Optional ByVal in
         GetElementHwndByClassName = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
 End Function
-'根据控件的文本内容得到控件的显示文字
+'根据控件的文本内容得到控件的句柄
 Public Function GetElementHwndByText(ByVal strText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Long
     Dim lngControlsHwnd As Long
     If DebugMe Then
@@ -1008,7 +1017,6 @@ Public Function GetElementHwndByText(ByVal strText$, Optional ByVal intIndex = 1
     End If
 End Function
 '根据控件的显示文字设置新的显示文字
-'函数有问题，调用记事本，发现不能根据文本框内容定位 20130613
 Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp As Boolean = False) As Boolean
     Dim lngControlsHwnd As Long
     '如果使用非正则模式需要替换特殊字符，因为函数内部始终用正则查询的，防止干扰
@@ -1036,7 +1044,10 @@ Public Function ClickElementByClassName(ByVal strClassName$, Optional ByVal intI
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
     If lngControlsHwnd <> 0 Then
+        Focus
         ClickElementByClassName = PostMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
+    Else
+        ClickElementByClassName = 0
     End If
 End Function
 '根据控件的显示文字点击控件
@@ -1049,6 +1060,7 @@ Public Function ClickElementByText(ByVal strText$, Optional ByVal intIndex = 1, 
         lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
     If lngControlsHwnd <> 0 Then
+        Focus
         ClickElementByText = PostMessage(lngControlsHwnd, BM_CLICK, 0&, ByVal 0)
     Else
         ClickElementByText = 0
@@ -1433,7 +1445,7 @@ End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
     Dim lRet&
-    ControlsInfo = ""
+    strControlInfo = ""
     lRet = EnumChildProc(lngMainHwnd, 0&)
     lRet = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
     ControlsInfo = strControlInfo

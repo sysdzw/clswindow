@@ -1,15 +1,23 @@
 VERSION 5.00
 Begin VB.Form frmMain 
    Caption         =   "Windows程序自动化操作框架V2.2 演示"
-   ClientHeight    =   5190
+   ClientHeight    =   6210
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   8550
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   5190
+   ScaleHeight     =   6210
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
+   Begin VB.CommandButton Command10 
+      Caption         =   "鼠标画圆"
+      Height          =   495
+      Left            =   240
+      TabIndex        =   13
+      Top             =   5160
+      Width           =   3015
+   End
    Begin VB.CommandButton Command9 
       Caption         =   "发消息到qq群"
       Height          =   495
@@ -147,6 +155,17 @@ Private Sub Command1_Click()
     End If
     Command1.Enabled = True
 End Sub
+'
+Private Sub Command10_Click()
+    Dim i%, w As New clsWindow
+    Dim k As Single
+    Const pi As Single = 3.14159
+    Do While k < 2 * pi
+        w.ClickPoint Cos(k) * 300 / 4 + 500, Sin(k) * 500 / 4 + 300, , , 10
+        k = k + pi / 180
+        DoEvents
+    Loop
+End Sub
 '调用计算器进行计算
 Private Sub Command2_Click()
     Dim strPID$
@@ -252,9 +271,8 @@ Private Sub Command4_Click()
     w.Wait 1000
     For i = 0 To UBound(v) - 1
         w.hWnd = v(i)
-        w.Wait 100
-        w.Hide
         w.Focus
+        w.FadeIn 20
     Next
     
     '1秒后逐步关闭所有刚刚打开的窗口
@@ -447,10 +465,14 @@ Private Sub Command7_Click()
 'w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
 
 Dim w As New clsWindow
-w.DebugMe = True '调试模式
-MsgBox w.GetWindowByTitleEx("记事本").hWnd '此时会看到有文件DEBUG.txt
-MsgBox w.GetElementTextByClassName("Edit")  '此时会看到有文件controls.txt
-
+If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
+    w.Normal '窗口正常
+    w.Focus '设置为活动窗口
+    w.FadeOut '默认淡入，默认速度为10
+    w.FadeOut 2 '淡入速度改为2，相比默认值降低为5倍，测试会发现明显变慢
+    w.FadeOut 50 '淡入速度改为50，比默认值提高10倍，测试会发现淡入淡入速度明显变快
+    w.FadeIn
+End If
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
@@ -479,18 +501,37 @@ Private Sub Command8_Click()
 End Sub
 
 Private Sub Command9_Click()
-    Dim i%
+'    Dim i%
+'    Dim w As New clsWindow
+'    For i = 1 To 40
+'        w.GetWindowByTitle("VB高级语言学习交流群").Focus
+'        w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
+'        w.Wait 20
+'        Clipboard.Clear
+'        Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow" & w.Version & "类发出 QQ ：788028734" & Now
+'        SendKeys "^{v}"
+'        SendKeys "%{s}"
+'        w.Wait 2
+'    Next
+    
+    sendQQMsg "clswindow交流群", "大家好，框架交流群QQ：788028734"
+End Sub
+'sendQQMsg "clswindow交流群", "大家好，框架交流群QQ：788028734"
+Private Sub sendQQMsg(ByVal strName$, ByVal strMsg$)
     Dim w As New clsWindow
-    For i = 1 To 40
-        w.GetWindowByTitle("VB高级语言学习交流群").Focus
+    If w.GetWindowByTitle(strName).hWnd <> 0 Then
+        w.GetWindowByTitle(strName).Focus
         w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
         w.Wait 20
         Clipboard.Clear
-        Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow" & w.Version & "类发出 " & Now
+        Clipboard.SetText strMsg
         SendKeys "^{v}"
         SendKeys "%{s}"
         w.Wait 2
-    Next
+    Else
+        MsgBox "未发现包含“strName”的QQ聊天窗口，请打开对应的窗口再测试，注意请在面板上取消勾选“合并勾选窗口”", vbExclamation
+    End If
+    Set w = Nothing
 End Sub
 
 Private Sub Form_Load()
