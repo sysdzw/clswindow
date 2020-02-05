@@ -1,5 +1,6 @@
 # clswindow v2.2 
 #### VB6操作外部程序窗口的类clsWindow2.2使用说明
+详细使用说明文档：https://www.kancloud.cn/sysdzw/clswindow
 
 clsWindow是VB6环境下使用的一个操作外部程序窗口的类，比如得到窗口句柄，得到窗口里某个文本框的内容。非常方便，使用它可以让您脱身于一堆api函数，功能强大使用简单！
 
@@ -117,6 +118,9 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：GetCursorPosCurrent(别名：GetCursorPoint)得到当前坐标
 '               优化函数：所有窗口获取的函数增加了是否过滤可见的参数              2020/01/16
 '               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
+'               优化代码结构。将模块中能移过来的都移到类模块中了                  2020/01/19
+'               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见    2020/01/31
+'               优化函数：GetTextByHwnd 网友小凡提供                              2020/02/03
 '==============================================================================================
 ```
 

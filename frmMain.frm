@@ -10,14 +10,6 @@ Begin VB.Form frmMain
    ScaleHeight     =   5190
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
-   Begin VB.CommandButton Command10 
-      Caption         =   "Command10"
-      Height          =   495
-      Left            =   3720
-      TabIndex        =   13
-      Top             =   2400
-      Width           =   1215
-   End
    Begin VB.CommandButton Command9 
       Caption         =   "发消息到qq群"
       Height          =   495
@@ -155,13 +147,6 @@ Private Sub Command1_Click()
     End If
     Command1.Enabled = True
 End Sub
-
-Private Sub Command10_Click()
-Dim w As New clsWindow
-w.GetWindowByPID(Shell("notepad", 1)).Caption = "改变标题 CMB666"
-w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
-End Sub
-
 '调用计算器进行计算
 Private Sub Command2_Click()
     Dim strPID$
@@ -358,7 +343,7 @@ End Sub
 
 Private Sub Command7_Click()
 'Dim i%
-Dim w As New clsWindow
+'Dim w As New clsWindow
 'w.GetWindowByClassName("Notepad").SetElementTextByClassName "Edit", "csdn欢迎你！"
 
 'Do While w.GetWindowByTitleEx("统计器").SetElementTextByClassName("ThunderRT6TextBox", "次序" & i + 1, i + 1)
@@ -461,11 +446,11 @@ Dim w As New clsWindow
 'w.GetWindowByPID(Shell("notepad", 1)).Caption = "改变标题 CMB666"
 'w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
 
-'得到所有记事本的句柄
-'Dim w As New clsWindow
-'Dim s As String
-'w.GetWindowByTitleEx "记事本", , s
-'MsgBox s
+Dim w As New clsWindow
+w.DebugMe = True '调试模式
+MsgBox w.GetWindowByTitleEx("记事本").hWnd '此时会看到有文件DEBUG.txt
+MsgBox w.GetElementTextByClassName("Edit")  '此时会看到有文件controls.txt
+
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
@@ -475,7 +460,7 @@ Private Sub Command8_Click()
     w.Caption = "看到记事本打开了吗？" & Now '设置应用程序标题内容
     w.Shake '抖动窗口，可以通过参数调节抖动方向、速度、幅度、次数
     
-    w.SetElementTextByClassName "Edit", "clsWindowv" & w.Version & "发布 " & Now()    '设置输入框文字
+    w.SetElementTextByClassName "Edit", "clsWindow" & w.Version & "发布 " & Now()    '设置输入框文字
     w.Wait 1000
     w.FadeOut '淡出
     w.AppendElementTextByClassName "Edit", vbCrLf & "功能全面" '向输入框追加内容
@@ -501,7 +486,7 @@ Private Sub Command9_Click()
         w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
         w.Wait 20
         Clipboard.Clear
-        Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow2.1类发出 " & Now
+        Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow" & w.Version & "类发出 " & Now
         SendKeys "^{v}"
         SendKeys "%{s}"
         w.Wait 2
