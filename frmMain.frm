@@ -1,15 +1,23 @@
 VERSION 5.00
 Begin VB.Form frmMain 
    Caption         =   "Windows程序自动化操作框架V2.2 演示"
-   ClientHeight    =   6210
+   ClientHeight    =   6975
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   8550
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   6210
+   ScaleHeight     =   6975
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
+   Begin VB.CommandButton Command11 
+      Caption         =   "微信发送消息"
+      Height          =   495
+      Left            =   240
+      TabIndex        =   14
+      Top             =   5760
+      Width           =   3015
+   End
    Begin VB.CommandButton Command10 
       Caption         =   "鼠标画圆"
       Height          =   495
@@ -166,6 +174,25 @@ Private Sub Command10_Click()
         DoEvents
     Loop
 End Sub
+
+Private Sub Command11_Click()
+    sendWeixinMsg "朱磊", "hello"
+End Sub
+Private Sub sendWeixinMsg(ByVal strName$, ByVal strMsg$)
+    Dim w As New clsWindow
+    If w.GetWindowByClassName("WeChatMainWndForPC").hWnd <> 0 Then
+        w.Focus
+        w.ClickPoint 30, 100, , , 1200 '延时200ms后点击聊天板块
+        w.ClickPoint 130, 40, , , 1200, 1500 '延时200ms后点击搜索框，点击后再延时500ms
+        SendKeys strName
+        w.ClickPoint 150, 130, , , 1500, 1500 '点击搜索结果
+        SendKeys strMsg & "{ENTER}"
+    Else
+        MsgBox "未发现微信桌面版，请打开微信桌面版再测试！", vbExclamation
+    End If
+    Set w = Nothing
+End Sub
+
 '调用计算器进行计算
 Private Sub Command2_Click()
     Dim strPID$
@@ -515,12 +542,14 @@ Private Sub Command9_Click()
 '    Next
     
     sendQQMsg "clswindow交流群", "大家好，框架交流群QQ：788028734"
+    sendQQMsg "石头", "hello!"
 End Sub
-'sendQQMsg "clswindow交流群", "大家好，框架交流群QQ：788028734"
+'sendQQMsg "QQ窗口标题", "测试"
 Private Sub sendQQMsg(ByVal strName$, ByVal strMsg$)
     Dim w As New clsWindow
     If w.GetWindowByTitle(strName).hWnd <> 0 Then
-        w.GetWindowByTitle(strName).Focus
+        w.SetPosNormal
+        w.Focus
         w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
         w.Wait 20
         Clipboard.Clear

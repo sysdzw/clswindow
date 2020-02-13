@@ -4,7 +4,6 @@ Reference=*\G{1B45A1FF-B7A8-4D8D-9221-427693E491B2}#1.0#0#C:\Windows\VB6IDEMouse
 Form=frmMain.frm
 Module=modWindow; modWindow.bas
 Class=clsWindow; clsWindow.cls
-Object={3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0; RICHTX32.OCX
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""

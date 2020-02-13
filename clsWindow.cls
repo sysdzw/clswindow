@@ -472,11 +472,11 @@ Public Function ProcessID(Optional ByVal my_hWnd) As Long
     ProcessID = l
 End Function
 '得到进程标识
-Public Function pid(Optional ByVal my_hWnd) As Long
+Public Function PID(Optional ByVal my_hWnd) As Long
     If IsMissing(my_hWnd) Then
-        pid = ProcessID
+        PID = ProcessID
     Else
-        pid = ProcessID(my_hWnd)
+        PID = ProcessID(my_hWnd)
     End If
 End Function
 '根据窗口句柄得到应用程序的路径
@@ -490,7 +490,7 @@ Public Function AppPath(Optional ByVal hwn1) As String
     End If
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwProcessID)
     AppPath = Space$(255)
-    nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255) 'win7x64下获取为空，暂无解决方案
+    nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255) 'win7x64下获取为空，暂无解决方案 2020-2-5
     AppPath = Mid$(AppPath, 1, nSize)
     Call CloseHandle(hProcess)
 End Function
