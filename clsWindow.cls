@@ -187,6 +187,12 @@ Public Enum enumWindowVisible
     AllWindow
 End Enum
 
+Public Enum enumWindowState
+    vbNormal = 0
+    vbMinimized = 1
+    vbMaximized = 2
+End Enum
+
 Private Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
 Private Declare Function GetForegroundWindow Lib "user32" () As Long
 Private Declare Function GetCurrentThreadId Lib "kernel32" () As Long
@@ -472,11 +478,11 @@ Public Function ProcessID(Optional ByVal my_hWnd) As Long
     ProcessID = l
 End Function
 '得到进程标识
-Public Function PID(Optional ByVal my_hWnd) As Long
+Public Function pid(Optional ByVal my_hWnd) As Long
     If IsMissing(my_hWnd) Then
-        PID = ProcessID
+        pid = ProcessID
     Else
-        PID = ProcessID(my_hWnd)
+        pid = ProcessID(my_hWnd)
     End If
 End Function
 '根据窗口句柄得到应用程序的路径
@@ -1255,7 +1261,7 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If isCloseWindow Then CloseWindow
     If isCloseApp Then CloseApp
 End Sub
-Public Property Get WindowState() As FormWindowStateConstants
+Public Property Get WindowState() As enumWindowState
     If CheckWindow() = 0 Then Exit Property
     If IsZoomed(hWnd_) Then
         WindowState = vbMaximized
@@ -1265,7 +1271,7 @@ Public Property Get WindowState() As FormWindowStateConstants
         WindowState = vbNormal
     End If
 End Property
-Public Property Let WindowState(ByVal vNewValue As FormWindowStateConstants)
+Public Property Let WindowState(ByVal vNewValue As enumWindowState)
     If CheckWindow() = 0 Then Exit Property
     Select Case vNewValue
         Case 0
