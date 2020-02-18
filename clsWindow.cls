@@ -19,6 +19,7 @@ Attribute VB_Exposed = False
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
 '博    客：http://blog.csdn.net/sysdzw
+'用户手册：https://www.kancloud.cn/sysdzw/clswindow/
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
 '版    本：V1.0 初版                                                           2012/12/03
@@ -98,6 +99,9 @@ Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
 Private Const SWP_NOSIZE = &H1
 Private Const SWP_NOMOVE = &H2
+
+Private Const SM_CXSCREEN As Long = 0&
+Private Const SM_CYSCREEN As Long = 1&
 
 Private Const BM_CLICK = &HF5
 Private Const GWL_ID = (-12)
@@ -213,6 +217,7 @@ Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal 
 Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
 Private Declare Function GetWindowTextLength Lib "user32" Alias "GetWindowTextLengthA" (ByVal hWnd As Long) As Long
 Private Declare Function TerminateProcess Lib "kernel32" (ByVal hProcess As Long, ByVal uExitCode As Long) As Long
+Private Declare Function GetSystemMetrics Lib "user32.dll" (ByVal nIndex As Long) As Long
 
 Private Declare Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hWnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
 Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
@@ -271,8 +276,8 @@ Public Function MoveToCenter() As Long
     Dim x&, y&, nWidth&, nHeight&
     nWidth = Width
     nHeight = Height
-    x = (Screen.Width \ 15 - nWidth) \ 2
-    y = (Screen.Height \ 15 - nHeight) \ 2
+    x = (GetSystemMetrics(SM_CXSCREEN) - nWidth) \ 2
+    y = (GetSystemMetrics(SM_CYSCREEN) - nHeight) \ 2
     MoveToCenter = MoveWindow(hWnd_, x, y, nWidth, nHeight, True)
 End Function
 '得到当前窗口的句柄
