@@ -10,6 +10,14 @@ Begin VB.Form frmMain
    ScaleHeight     =   6975
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
+   Begin VB.HScrollBar HScroll1 
+      Height          =   495
+      Left            =   3960
+      Max             =   100
+      TabIndex        =   15
+      Top             =   3360
+      Width           =   3855
+   End
    Begin VB.CommandButton Command11 
       Caption         =   "微信发送消息"
       Height          =   495
@@ -492,14 +500,20 @@ Private Sub Command7_Click()
 'w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
 
 Dim w As New clsWindow
-If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
-    w.Normal '窗口正常
-    w.Focus '设置为活动窗口
-    w.FadeOut '默认淡入，默认速度为10
-    w.FadeOut 2 '淡入速度改为2，相比默认值降低为5倍，测试会发现明显变慢
-    w.FadeOut 50 '淡入速度改为50，比默认值提高10倍，测试会发现淡入淡入速度明显变快
-    w.FadeIn
-End If
+MsgBox w.MakeTransparent("50%", 123456)   '测试时请注意，这个123456必须是已经存在的句柄，如果不存在函数会返回0，可以用spy++等工具查看窗口句柄值
+'If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
+'    w.MakeTransparent
+'    MsgBox "记事本已经设置透明度为50%，即默认值"
+'
+'    w.MakeTransparent 0.2
+'    MsgBox "记事本已经设置透明度为20%"
+'
+'    w.MakeTransparent "80%"
+'    MsgBox "记事本已经设置透明度为80%"
+'
+'    w.MakeTransparent 100
+'    MsgBox "记事本已经设置透明度为100%"
+'End If
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
@@ -579,4 +593,18 @@ End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
     End
+End Sub
+
+Private Sub HScroll1_Change()
+    Dim w As New clsWindow
+    If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
+        w.MakeTransparent HScroll1.Value
+    End If
+End Sub
+
+Private Sub HScroll1_Scroll()
+    Dim w As New clsWindow
+    If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
+        w.MakeTransparent HScroll1.Value
+    End If
 End Sub

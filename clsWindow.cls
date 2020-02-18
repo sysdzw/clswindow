@@ -78,9 +78,11 @@ Attribute VB_Exposed = False
 '               优化函数：所有窗口获取的函数增加了是否过滤可见的参数              2020/01/16
 '               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
 '               优化代码结构。将模块中能移过来的都移到类模块中了                  2020/01/19
-'               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见    2020/01/31
-'               优化函数：GetTextByHwnd 网友小凡提供                              2020/02/03
-'               增加函数：CommandLine（同AppCommandLine）                         2020/02/05
+'               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见   2020/01/31
+'               优化函数：GetTextByHwnd 网友小凡提供                            2020/02/03
+'               增加函数：CommandLine（同AppCommandLine）                      2020/02/05
+'               增加函数：MakeTransparent设置窗口透明度                         2020/02/18
+'               增加函数：MoveToCenter 移动窗口到屏幕中心
 '==============================================================================================
 Option Explicit
 
@@ -256,13 +258,22 @@ Public DebugMe As Boolean '表示是否启用调试模式
 Private strWindowInfo$ '保存所有窗口的信息，格式为 句柄 文本内容
 Private strWindowKeyWord$ '要参与的过滤的窗口的关键字，如果不需要过滤就留空
 Private strTmp$, isWholeEx As Boolean
-
+'移动和设置窗口到指定位置，以及设置窗口的宽高。
 Public Function Move(Optional ByVal x, Optional ByVal y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
     If IsMissing(x) Then x = Left
     If IsMissing(y) Then y = Top
     If IsMissing(nWidth) Then nWidth = Width
     If IsMissing(nHeight) Then nHeight = Height
     Move = MoveWindow(hWnd_, x, y, nWidth, nHeight, True)
+End Function
+'移动窗口到屏幕中心
+Public Function MoveToCenter() As Long
+    Dim x&, y&, nWidth&, nHeight&
+    nWidth = Width
+    nHeight = Height
+    x = (Screen.Width \ 15 - nWidth) \ 2
+    y = (Screen.Height \ 15 - nHeight) \ 2
+    MoveToCenter = MoveWindow(hWnd_, x, y, nWidth, nHeight, True)
 End Function
 '得到当前窗口的句柄
 Public Property Get hWnd() As Long
@@ -860,9 +871,9 @@ End Function
 '       AlphaBlend, Enabled, Refresh, TransparentColor, ZOrder
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '检查当前窗口句柄是否还有效
-Private Function CheckWindow() As Long
-    CheckWindow = IsWindow(hWnd_)
-    If CheckWindow = 0 Then hWnd_ = 0 '如果窗口不存在，我们要将当前对象的句柄修改为0，标准是不去修改，但是不修改，一个无效的句柄也没用，而且可能会被其他窗口随机分配上导致出错
+Private Function CheckWindow(Optional ByVal lngHwnd) As Long
+    If IsMissing(lngHwnd) Then lngHwnd = hWnd_
+    CheckWindow = IsWindow(lngHwnd)
 End Function
 'Load 窗口载入的入口
 Public Function Load(WindowHwnd As Variant) As clsWindow
@@ -1261,6 +1272,33 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If isCloseWindow Then CloseWindow
     If isCloseApp Then CloseApp
 End Sub
+'窗体设置透明，Percent 只接受：0到100的整数、0%到100%、以及介于0到1的小数
+Public Function MakeTransparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
+    Dim sty As Long
+    
+    If IsMissing(lngHwnd) Then lngHwnd = hWnd_
+    If CheckWindow(lngHwnd) = 0 Then Exit Function
+    
+    Percent = Trim$(CStr(Percent))
+    If regTest(Percent, "^\d+$") Then
+        If Percent > 100 Then Percent = 100
+        If Percent < 0 Then Percent = 0
+        Percent = Int((Percent / 100) * 255) '将百分比转换成255范围内显示
+    ElseIf regTest(Percent, "^\d+%$") Then
+        Percent = Int(Replace(Percent, "%", "") / 100 * 255)
+    ElseIf regTest(Percent, "^0?\.\d+$") Then
+        Percent = Int(Val(Percent) * 255)
+    Else
+'        MsgBox "参数值：Percent=" & Percent & " 不合法，只接受：0到100的整数、0%到100%、以及介于0到1的小数。", vbExclamation
+        Exit Function
+    End If
+    
+    sty = GetWindowLong(lngHwnd, GWL_EXSTYLE)
+    sty = sty Or WS_EX_LAYERED
+    SetWindowLong lngHwnd, GWL_EXSTYLE, sty
+    MakeTransparent = SetLayeredWindowAttributes(lngHwnd, 0, Percent, LWA_ALPHA) '表示执行结果，1表示成功，0表示失败
+End Function
+'得到窗口状态
 Public Property Get WindowState() As enumWindowState
     If CheckWindow() = 0 Then Exit Property
     If IsZoomed(hWnd_) Then
@@ -1271,6 +1309,7 @@ Public Property Get WindowState() As enumWindowState
         WindowState = vbNormal
     End If
 End Property
+'设置窗口状态
 Public Property Let WindowState(ByVal vNewValue As enumWindowState)
     If CheckWindow() = 0 Then Exit Property
     Select Case vNewValue
