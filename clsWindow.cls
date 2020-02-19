@@ -82,7 +82,7 @@ Attribute VB_Exposed = False
 '               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见   2020/01/31
 '               优化函数：GetTextByHwnd 网友小凡提供                            2020/02/03
 '               增加函数：CommandLine（同AppCommandLine）                      2020/02/05
-'               增加函数：MakeTransparent设置窗口透明度                         2020/02/18
+'               增加函数：MakeTransparent 设置窗口透明度                         2020/02/18
 '               增加函数：MoveToCenter 移动窗口到屏幕中心
 '==============================================================================================
 Option Explicit
@@ -1247,7 +1247,7 @@ Public Sub FadeIn(Optional ByVal speed = 10)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong hWnd_, GWL_EXSTYLE, sty
     
-    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
+'    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
     If speed > 255 Then speed = 255
     If speed < 1 Then speed = 1
     For i = 1 To 255 Step speed
@@ -1266,7 +1266,7 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     sty = sty Or WS_EX_LAYERED
     SetWindowLong hWnd_, GWL_EXSTYLE, sty
     
-    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
+'    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
     If speed > 255 Then speed = 255
     If speed < 1 Then speed = 1
     For i = 255 To 1 Step -speed
@@ -1278,7 +1278,7 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If isCloseApp Then CloseApp
 End Sub
 '窗体设置透明，Percent 只接受：0到100的数、0%到100%、以及介于0到1的小数
-Public Function MakeTransparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
+Public Function Transparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
     Dim sty As Long
     
     If IsMissing(lngHwnd) Then lngHwnd = hWnd_
@@ -1302,7 +1302,27 @@ Public Function MakeTransparent(Optional ByVal Percent = "50", Optional ByVal ln
     sty = GetWindowLong(lngHwnd, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong lngHwnd, GWL_EXSTYLE, sty
-    MakeTransparent = SetLayeredWindowAttributes(lngHwnd, 0, Percent, LWA_ALPHA)  '表示执行结果，1表示成功，0表示失败
+    Transparent = SetLayeredWindowAttributes(lngHwnd, 0, Percent, LWA_ALPHA)  '表示执行结果，1表示成功，0表示失败
+End Function
+'同Transparent
+Public Function MakeTransparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
+    If IsMissing(Percent) And IsMissing(lngHwnd) Then
+        MakeTransparent = Transparent
+    ElseIf IsMissing(lngHwnd) Then
+        MakeTransparent = Transparent(Percent)
+    ElseIf IsMissing(Percent) Then
+        MakeTransparent = Transparent(, lngHwnd)
+    End If
+End Function
+'同Transparent
+Public Function SetTransparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
+    If IsMissing(Percent) And IsMissing(lngHwnd) Then
+        SetTransparent = Transparent
+    ElseIf IsMissing(lngHwnd) Then
+        SetTransparent = Transparent(Percent)
+    ElseIf IsMissing(Percent) Then
+        SetTransparent = Transparent(, lngHwnd)
+    End If
 End Function
 '得到窗口状态
 Public Property Get WindowState() As enumWindowState
@@ -1472,7 +1492,7 @@ End Function
 '备注：sysdzw 于 2007-5-2 提供
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Private Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCover As Boolean = True) As Boolean
-    On Error GoTo err1
+    On Error GoTo Err1
     Dim fileHandl%
     fileHandl = FreeFile
     If isCover Then
@@ -1484,7 +1504,7 @@ Private Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isC
     Close #fileHandl
     writeToFile = True
     Exit Function
-err1:
+Err1:
     writeToFile = False
 End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
