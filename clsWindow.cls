@@ -1277,7 +1277,7 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If isCloseWindow Then CloseWindow
     If isCloseApp Then CloseApp
 End Sub
-'窗体设置透明，Percent 只接受：0到100的整数、0%到100%、以及介于0到1的小数
+'窗体设置透明，Percent 只接受：0到100的数、0%到100%、以及介于0到1的小数
 Public Function MakeTransparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
     Dim sty As Long
     
@@ -1285,23 +1285,24 @@ Public Function MakeTransparent(Optional ByVal Percent = "50", Optional ByVal ln
     If CheckWindow(lngHwnd) = 0 Then Exit Function
     
     Percent = Trim$(CStr(Percent))
-    If regTest(Percent, "^\d+$") Then
-        If Percent > 100 Then Percent = 100
-        If Percent < 0 Then Percent = 0
-        Percent = Int((Percent / 100) * 255) '将百分比转换成255范围内显示
-    ElseIf regTest(Percent, "^\d+%$") Then
-        Percent = Int(Replace(Percent, "%", "") / 100 * 255)
-    ElseIf regTest(Percent, "^0?\.\d+$") Then
-        Percent = Int(Val(Percent) * 255)
+    If regTest(Percent, "^0?\.\d+$") Then '例如：0.5
+        Percent = Val(Percent) * 255
+    ElseIf regTest(Percent, "^\d+(\.\d+)?$") Then '例如：50或者50.5
+        Percent = Percent / 100 * 255 '将百分比转换成255范围内显示
+    ElseIf regTest(Percent, "^\d+(\.\d+)?%$") Then '例如：50%或者50.5%
+        Percent = Replace(Percent, "%", "") / 100 * 255
     Else
 '        MsgBox "参数值：Percent=" & Percent & " 不合法，只接受：0到100的整数、0%到100%、以及介于0到1的小数。", vbExclamation
         Exit Function
     End If
     
+    If Percent > 255 Then Percent = 255
+    If Percent < 0 Then Percent = 0
+    
     sty = GetWindowLong(lngHwnd, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong lngHwnd, GWL_EXSTYLE, sty
-    MakeTransparent = SetLayeredWindowAttributes(lngHwnd, 0, Percent, LWA_ALPHA) '表示执行结果，1表示成功，0表示失败
+    MakeTransparent = SetLayeredWindowAttributes(lngHwnd, 0, Percent, LWA_ALPHA)  '表示执行结果，1表示成功，0表示失败
 End Function
 '得到窗口状态
 Public Property Get WindowState() As enumWindowState

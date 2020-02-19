@@ -11,12 +11,11 @@ Begin VB.Form frmMain
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
    Begin VB.HScrollBar HScroll1 
-      Height          =   495
-      Left            =   3960
-      Max             =   100
+      Height          =   375
+      Left            =   3600
       TabIndex        =   15
-      Top             =   3360
-      Width           =   3855
+      Top             =   3240
+      Width           =   4575
    End
    Begin VB.CommandButton Command11 
       Caption         =   "微信发送消息"
@@ -42,7 +41,7 @@ Begin VB.Form frmMain
       Top             =   4560
       Width           =   3015
    End
-   Begin VB.CommandButton Command7 
+   Begin VB.CommandButton Command1 
       Caption         =   "测 试"
       Height          =   495
       Left            =   4200
@@ -100,7 +99,7 @@ Begin VB.Form frmMain
       Top             =   960
       Width           =   3015
    End
-   Begin VB.CommandButton Command1 
+   Begin VB.CommandButton Command1x 
       Caption         =   "关闭纸牌等游戏窗口"
       Height          =   495
       Left            =   240
@@ -160,8 +159,8 @@ Dim window As New clsWindow
 Private Declare Function SetParent Lib "user32" (ByVal hWndChild As Long, ByVal hWndNewParent As Long) As Long
 
 '关闭纸牌等游戏窗口
-Private Sub Command1_Click()
-    Command1.Enabled = False
+Private Sub Command1x_Click()
+    Command1x.Enabled = False
 '    If window.GetWindowByTitle("纸牌", 10).hWnd > 0 Then                                            '方法1：完全匹配方式，不支持正则
 '    If window.GetWindowByTitleEx("蛛", 10).hWnd > 0 Then                                           '方法2：模糊匹配方式，含有此文字的就获取
 '    使用正则匹配，对系统自带的几种游戏通杀
@@ -169,7 +168,7 @@ Private Sub Command1_Click()
         window.CloseWindow  '关闭窗口
 '        window.CloseApp     '关闭进程，注意和上面方法的区别
     End If
-    Command1.Enabled = True
+    Command1x.Enabled = True
 End Sub
 '
 Private Sub Command10_Click()
@@ -394,7 +393,7 @@ End If
 End Sub
 
 
-Private Sub Command7_Click()
+Private Sub Command1_Click()
 'Dim i%
 'Dim w As New clsWindow
 'w.GetWindowByClassName("Notepad").SetElementTextByClassName "Edit", "csdn欢迎你！"
@@ -500,20 +499,7 @@ Private Sub Command7_Click()
 'w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
 
 Dim w As New clsWindow
-MsgBox w.MakeTransparent("50%", 123456)   '测试时请注意，这个123456必须是已经存在的句柄，如果不存在函数会返回0，可以用spy++等工具查看窗口句柄值
-'If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
-'    w.MakeTransparent
-'    MsgBox "记事本已经设置透明度为50%，即默认值"
-'
-'    w.MakeTransparent 0.2
-'    MsgBox "记事本已经设置透明度为20%"
-'
-'    w.MakeTransparent "80%"
-'    MsgBox "记事本已经设置透明度为80%"
-'
-'    w.MakeTransparent 100
-'    MsgBox "记事本已经设置透明度为100%"
-'End If
+
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
@@ -597,14 +583,13 @@ End Sub
 
 Private Sub HScroll1_Change()
     Dim w As New clsWindow
-    If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
-        w.MakeTransparent HScroll1.Value
+    If w.GetWindowByClassName("Notepad", 0).hWnd <> 0 Then
+        w.MakeTransparent HScroll1.Value / HScroll1.Max * 100 & "%"
+    Else
+        MsgBox "请先打开一个记事本文件，然后再拉动滚动条，注意观察记事本窗口变化", vbInformation
     End If
 End Sub
 
 Private Sub HScroll1_Scroll()
-    Dim w As New clsWindow
-    If w.GetWindowByClassName("Notepad").hWnd <> 0 Then
-        w.MakeTransparent HScroll1.Value
-    End If
+    Call HScroll1_Change
 End Sub
