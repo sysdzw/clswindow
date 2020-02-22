@@ -1164,7 +1164,7 @@ Public Sub ClickCurrentPoint()
     mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
 End Sub
 '移动鼠标到指定点
-Public Sub SetCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If PositionMod = absolute Then
         Wait delayMilliSecondsBefore
         SetCursorPos x1, y1
@@ -1179,15 +1179,15 @@ Public Sub SetCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumP
     End If
 End Sub
 '同SetCursor
-Public Sub SetPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursor(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursorTo(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '直接获得当前鼠标下的窗口或控件的句柄
