@@ -119,8 +119,12 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               优化函数：所有窗口获取的函数增加了是否过滤可见的参数              2020/01/16
 '               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
 '               优化代码结构。将模块中能移过来的都移到类模块中了                  2020/01/19
-'               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见    2020/01/31
-'               优化函数：GetTextByHwnd 网友小凡提供                              2020/02/03
+'               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见   2020/01/31
+'               优化函数：GetTextByHwnd 网友小凡提供                            2020/02/03
+'               增加函数：CommandLine（同AppCommandLine）                      2020/02/05
+'               增加函数：MakeTransparent 设置窗口透明度                        2020/02/18
+'               增加函数：MoveToCenter 移动窗口到屏幕中心
+'               增加函数：IsTopmost 判断窗口是否为置顶                          2020/02/20
 '==============================================================================================
 ```
 

@@ -1,17 +1,17 @@
 Attribute VB_Name = "modWindow"
-'===========================================================================
-'描    述：是clsWindow.cls类的调用模块，一些常用函数和api在此声明 (modWindow)
+'=====================================================================================
+'描    述：是clsWindow.cls类的依赖模块，一些无法放到类模块中的代码放在这里 (modWindow)
 '编    程：sysdzw 原创开发，如果有需要对模块进行更新请发我一份，共同维护
 '发布日期：2013/05/28
-'博    客：http://blog.163.com/sysdzw
-'          http://blog.csdn.net/sysdzw
+'博    客：http://blog.csdn.net/sysdzw
+'用户手册：https://www.kancloud.cn/sysdzw/clswindow/
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
 '版    本：V1.0 初版                                        2012/12/3
 '          V1.1 将类中的api函数以及部分变量挪到此模块         2013/05/28
 '          V1.2 将EnumChildProc中获取控件文字函数修改了      2013/06/13
 '          V1.3 将本模块中能移到类模块中的都移过去了          2020/01/19
-'===========================================================================
+'=====================================================================================
 Option Explicit
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long

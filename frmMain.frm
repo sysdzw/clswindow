@@ -1,15 +1,38 @@
 VERSION 5.00
 Begin VB.Form frmMain 
    Caption         =   "Windows程序自动化操作框架V2.2 演示"
-   ClientHeight    =   5190
+   ClientHeight    =   6975
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   8550
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   5190
+   ScaleHeight     =   6975
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
+   Begin VB.HScrollBar HScroll1 
+      Height          =   375
+      Left            =   3600
+      TabIndex        =   15
+      Top             =   3240
+      Width           =   4575
+   End
+   Begin VB.CommandButton Command11 
+      Caption         =   "微信发送消息"
+      Height          =   495
+      Left            =   240
+      TabIndex        =   14
+      Top             =   5760
+      Width           =   3015
+   End
+   Begin VB.CommandButton Command10 
+      Caption         =   "鼠标画圆"
+      Height          =   495
+      Left            =   240
+      TabIndex        =   13
+      Top             =   5160
+      Width           =   3015
+   End
    Begin VB.CommandButton Command9 
       Caption         =   "发消息到qq群"
       Height          =   495
@@ -18,7 +41,7 @@ Begin VB.Form frmMain
       Top             =   4560
       Width           =   3015
    End
-   Begin VB.CommandButton Command7 
+   Begin VB.CommandButton Command1 
       Caption         =   "测 试"
       Height          =   495
       Left            =   4200
@@ -76,7 +99,7 @@ Begin VB.Form frmMain
       Top             =   960
       Width           =   3015
    End
-   Begin VB.CommandButton Command1 
+   Begin VB.CommandButton Command1x 
       Caption         =   "关闭纸牌等游戏窗口"
       Height          =   495
       Left            =   240
@@ -136,8 +159,8 @@ Dim window As New clsWindow
 Private Declare Function SetParent Lib "user32" (ByVal hWndChild As Long, ByVal hWndNewParent As Long) As Long
 
 '关闭纸牌等游戏窗口
-Private Sub Command1_Click()
-    Command1.Enabled = False
+Private Sub Command1x_Click()
+    Command1x.Enabled = False
 '    If window.GetWindowByTitle("纸牌", 10).hWnd > 0 Then                                            '方法1：完全匹配方式，不支持正则
 '    If window.GetWindowByTitleEx("蛛", 10).hWnd > 0 Then                                           '方法2：模糊匹配方式，含有此文字的就获取
 '    使用正则匹配，对系统自带的几种游戏通杀
@@ -145,8 +168,38 @@ Private Sub Command1_Click()
         window.CloseWindow  '关闭窗口
 '        window.CloseApp     '关闭进程，注意和上面方法的区别
     End If
-    Command1.Enabled = True
+    Command1x.Enabled = True
 End Sub
+'
+Private Sub Command10_Click()
+    Dim i%, w As New clsWindow
+    Dim k As Single
+    Const pi As Single = 3.14159
+    Do While k < 2 * pi
+        w.ClickPoint Cos(k) * 300 / 4 + 500, Sin(k) * 500 / 4 + 300, , , 10
+        k = k + pi / 180
+        DoEvents
+    Loop
+End Sub
+
+Private Sub Command11_Click()
+    sendWeixinMsg "朱磊", "hello"
+End Sub
+Private Sub sendWeixinMsg(ByVal strName$, ByVal strMsg$)
+    Dim w As New clsWindow
+    If w.GetWindowByClassName("WeChatMainWndForPC").hWnd <> 0 Then
+        w.Focus
+        w.ClickPoint 30, 100, , , 1200 '延时200ms后点击聊天板块
+        w.ClickPoint 130, 40, , , 1200, 1500 '延时200ms后点击搜索框，点击后再延时500ms
+        SendKeys strName
+        w.ClickPoint 150, 130, , , 1500, 1500 '点击搜索结果
+        SendKeys strMsg & "{ENTER}"
+    Else
+        MsgBox "未发现微信桌面版，请打开微信桌面版再测试！", vbExclamation
+    End If
+    Set w = Nothing
+End Sub
+
 '调用计算器进行计算
 Private Sub Command2_Click()
     Dim strPID$
@@ -252,9 +305,8 @@ Private Sub Command4_Click()
     w.Wait 1000
     For i = 0 To UBound(v) - 1
         w.hWnd = v(i)
-        w.Wait 100
-        w.Hide
         w.Focus
+        w.FadeIn 20
     Next
     
     '1秒后逐步关闭所有刚刚打开的窗口
@@ -341,7 +393,7 @@ End If
 End Sub
 
 
-Private Sub Command7_Click()
+Private Sub Command1_Click()
 'Dim i%
 'Dim w As New clsWindow
 'w.GetWindowByClassName("Notepad").SetElementTextByClassName "Edit", "csdn欢迎你！"
@@ -447,9 +499,6 @@ Private Sub Command7_Click()
 'w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
 
 Dim w As New clsWindow
-w.DebugMe = True '调试模式
-MsgBox w.GetWindowByTitleEx("记事本").hWnd '此时会看到有文件DEBUG.txt
-MsgBox w.GetElementTextByClassName("Edit")  '此时会看到有文件controls.txt
 
 End Sub
 
@@ -479,18 +528,39 @@ Private Sub Command8_Click()
 End Sub
 
 Private Sub Command9_Click()
-    Dim i%
+'    Dim i%
+'    Dim w As New clsWindow
+'    For i = 1 To 40
+'        w.GetWindowByTitle("VB高级语言学习交流群").Focus
+'        w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
+'        w.Wait 20
+'        Clipboard.Clear
+'        Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow" & w.Version & "类发出 QQ ：788028734" & Now
+'        SendKeys "^{v}"
+'        SendKeys "%{s}"
+'        w.Wait 2
+'    Next
+    
+    sendQQMsg "clswindow交流群", "大家好，框架交流群QQ：788028734"
+    sendQQMsg "石头", "hello!"
+End Sub
+'sendQQMsg "QQ窗口标题", "测试"
+Private Sub sendQQMsg(ByVal strName$, ByVal strMsg$)
     Dim w As New clsWindow
-    For i = 1 To 40
-        w.GetWindowByTitle("VB高级语言学习交流群").Focus
+    If w.GetWindowByTitle(strName).hWnd <> 0 Then
+        w.SetPosNormal
+        w.Focus
         w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
         w.Wait 20
         Clipboard.Clear
-        Clipboard.SetText "[" & i & "]发送 本消息由程序clswindow" & w.Version & "类发出 " & Now
+        Clipboard.SetText strMsg
         SendKeys "^{v}"
         SendKeys "%{s}"
         w.Wait 2
-    Next
+    Else
+        MsgBox "未发现包含“strName”的QQ聊天窗口，请打开对应的窗口再测试，注意请在面板上取消勾选“合并勾选窗口”", vbExclamation
+    End If
+    Set w = Nothing
 End Sub
 
 Private Sub Form_Load()
@@ -509,4 +579,17 @@ End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
     End
+End Sub
+
+Private Sub HScroll1_Change()
+    Dim w As New clsWindow
+    If w.GetWindowByClassName("Notepad", 0).hWnd <> 0 Then
+        w.MakeTransparent HScroll1.Value / HScroll1.Max * 100 & "%"
+    Else
+        MsgBox "请先打开一个记事本文件，然后再拉动滚动条，注意观察记事本窗口变化", vbInformation
+    End If
+End Sub
+
+Private Sub HScroll1_Scroll()
+    Call HScroll1_Change
 End Sub
