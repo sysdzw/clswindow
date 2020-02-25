@@ -1240,14 +1240,23 @@ Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal s
             Next
     End Select
 End Sub
-'特效2：淡入
-Public Sub FadeIn(Optional ByVal speed = 10)
+'特效2：淡入 第二个参数只能在1到100之间，表示透明度截止百分比
+Public Sub FadeIn(Optional ByVal speed = 10, Optional ByVal intPercentTansparent)
     Dim sty As Long, i As Long
+    Dim intMaxTrans As Integer
     
     If CheckWindow() = 0 Then Exit Sub
     sty = GetWindowLong(hWnd_, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong hWnd_, GWL_EXSTYLE, sty
+    
+    If IsMissing(intPercentTansparent) Then
+        intMaxTrans = 255
+    ElseIf intPercentTansparent < 0 Or intPercentTansparent > 255 Then
+        intMaxTrans = 255
+    Else
+        intMaxTrans = (intPercentTansparent / 100) * 255
+    End If
     
 '    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
     If speed > 255 Then speed = 255
@@ -1255,6 +1264,7 @@ Public Sub FadeIn(Optional ByVal speed = 10)
     For i = 1 To 255 Step speed
         SetLayeredWindowAttributes hWnd_, 0, i, LWA_ALPHA   '设置窗体透明度
         Wait 50
+        If i > intMaxTrans Then Exit Sub
     Next
     SetLayeredWindowAttributes hWnd_, 0, 255, LWA_ALPHA
 End Sub
