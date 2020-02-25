@@ -58,8 +58,8 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '          window.GetWindowByTitle("计算器").closeWindow
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
-'博    客：http://blog.163.com/sysdzw
-'          http://blog.csdn.net/sysdzw
+'博    客：http://blog.csdn.net/sysdzw
+'用户手册：https://www.kancloud.cn/sysdzw/clswindow/
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
 '版    本：V1.0 初版                                                           2012/12/03
