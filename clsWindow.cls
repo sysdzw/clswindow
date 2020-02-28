@@ -85,6 +85,7 @@ Attribute VB_Exposed = False
 '               增加函数：MakeTransparent 设置窗口透明度                        2020/02/18
 '               增加函数：MoveToCenter 移动窗口到屏幕中心
 '               增加函数：IsTopmost 判断窗口是否为置顶                          2020/02/20
+'               增加函数：GetWindowTextByHwnd 获得窗口标题，给窗口句柄专用       2020/02/28
 '==============================================================================================
 Option Explicit
 
@@ -357,9 +358,9 @@ Public Property Let Caption(ByVal strNewText As String)
         SendMessage hWnd_, WM_SETTEXT, 0&, ByVal strNewText
     End If
 End Property
-'得到当前窗口的标题栏文字
+'得到当前窗口的标题栏文字 使用GetWindowTextByHwnd函数
 Public Property Get Caption() As String
-    Caption = GetTextByHwnd(hWnd_)
+    Caption = GetWindowTextByHwnd(hWnd_)
 End Property
 '根据句柄获得窗口内容
 Public Function GetCaptionByHwnd(ByVal Hwnd As Long) As String
@@ -367,7 +368,7 @@ Public Function GetCaptionByHwnd(ByVal Hwnd As Long) As String
 End Function
 '根据句柄获得窗口内容
 Public Function GetTextByHwnd(ByVal Hwnd As Long) As String
-'    '方案1 性能欠佳
+    '方案1 性能一般
 '    Dim Txt2() As Byte, i&
 '    i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
 '    If i = 0 Then Exit Function '没有内容
@@ -375,10 +376,10 @@ Public Function GetTextByHwnd(ByVal Hwnd As Long) As String
 '    SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
 '    ReDim Preserve Txt2(i - 1)
 '    GetTextByHwnd = StrConv(Txt2, vbUnicode)
-'
+
     '方案2 混合方案，尽量减少api调用（本代码由网友小凡提供）
     Dim Txt2() As Byte, i&
-    Const lMaxLength& = 6
+    Const lMaxLength& = 500
     ReDim Txt2(lMaxLength&)
     SendMessage Hwnd, WM_GETTEXT, lMaxLength&, Txt2(0)
     If Txt2(0) = 0 Then Exit Function  '没有内容
@@ -393,6 +394,14 @@ Public Function GetTextByHwnd(ByVal Hwnd As Long) As String
     End If
     ReDim Preserve Txt2(i - 1) '去掉多的字节
     GetTextByHwnd = StrConv(Txt2, vbUnicode) '转ASI字串为宽字串
+End Function
+'根据句柄获得窗口内容 窗口专用
+Private Function GetWindowTextByHwnd(ByVal hwn As Long) As String
+    Dim l&, strCaption$
+    l = GetWindowTextLength(hwn)
+    strCaption = Space(l)
+    GetWindowText hwn, strCaption, l + 1
+    GetWindowTextByHwnd = strCaption
 End Function
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
@@ -617,12 +626,15 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
         Do
             lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
             If CheckWindowVisible(lngHwnd, windowVisible) Then  '窗口可见度检查，符合条件则继续下面的检查
-                strCaption = GetTextByHwnd(lngHwnd)
-                
-                If Not isUseRegExp Then
-                    isMatch = InStr(strCaption, strTitle) > 0
+                strCaption = GetWindowTextByHwnd(lngHwnd) '使用窗口专用的函数
+                If strCaption <> "" Then
+                    If Not isUseRegExp Then
+                        isMatch = InStr(strCaption, strTitle) > 0
+                    Else
+                        isMatch = regTest(strCaption, strTitle)
+                    End If
                 Else
-                    isMatch = regTest(strCaption, strTitle)
+                    isMatch = (strTitle = "") '用户可能就需要获取窗口标题为空的呢
                 End If
                 If isMatch Then
                     strHwndAllTmp = strHwndAllTmp & CStr(lngHwnd) & " "
@@ -675,7 +687,7 @@ End Function
 Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal checkPid = "", Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
     Dim lngHwnd&, l&, lngDelayCount&
     Dim strCaption As String
-    Dim strWindowClass As String * 255
+    Dim strClassNameCurrent As String * 255
     Dim strHwndAllTmp$
     Dim isMatch As Boolean
 
@@ -687,12 +699,16 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
         Do
             lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
             If CheckWindowVisible(lngHwnd, windowVisible) Then
-                GetClassName lngHwnd, strWindowClass, 255  '获得窗口类
-                strWindowClass = Replace(strWindowClass, Chr$(0), "")
-                If Not isUseRegExp Then
-                    isMatch = InStr(strWindowClass, strClassName) > 0
+                GetClassName lngHwnd, strClassNameCurrent, 255  '获得窗口类
+                strClassNameCurrent = Replace(strClassNameCurrent, Chr$(0), "")
+                If strClassNameCurrent <> "" Then
+                    If Not isUseRegExp Then
+                        isMatch = InStr(strClassNameCurrent, strClassName) > 0
+                    Else
+                        isMatch = regTest(strClassNameCurrent, strClassName)
+                    End If
                 Else
-                    isMatch = regTest(strWindowClass, strClassName)
+                    isMatch = (strClassName = "") '用户可能就需要获取窗口标题为空的呢
                 End If
                 If isMatch Then
                     strHwndAllTmp = strHwndAllTmp & CStr(lngHwnd) & " "
@@ -745,7 +761,7 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
                 Else
                     isMatch = (InStr(LCase$(strGetHwndAppName), strAppName) > 0)
                 End If
-                strCaption = GetTextByHwnd(currWnd)
+                strCaption = GetWindowTextByHwnd(currWnd)
                 If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '过滤掉输入法相关的窗口
                     hWnd_ = currWnd
                     Exit Do
@@ -771,7 +787,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     Dim strWindowClass As String * 255
     Dim strHwndAllTmp$
     Dim isMatch As Boolean
-    Dim strGetHwndAppName$
+    Dim strAppNameCurrent$
     Dim strHwnd
     
     strAppName = LCase$(strAppName)
@@ -785,18 +801,23 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
         Do While currWnd <> 0
-            If CheckWindowVisible(currWnd, windowVisible) Then
-                strGetHwndAppName = LCase$(AppName(currWnd))  '根据句柄得到进程名字，都转换成小写
-                If Not isUseRegExp Then '如果不用正则就包含关系匹配
-                    isMatch = (InStr(strGetHwndAppName, strAppName) > 0)
+            If CheckWindowVisible(currWnd, windowVisible) Then   '窗口可见度检查，符合条件则继续下面的检查
+                strAppNameCurrent = LCase$(AppName(currWnd))  '根据句柄得到进程名字，都转换成小写
+                If strAppNameCurrent <> "" Then
+                    If Not isUseRegExp Then '如果不用正则就包含关系匹配
+                        isMatch = InStr(strAppNameCurrent, strAppName) > 0
+                    Else
+                        isMatch = regTest(strAppNameCurrent, strAppName)
+                    End If
                 Else
-                    isMatch = regTest(strGetHwndAppName, strAppName)
+                    isMatch = (strAppName = "") '用户可能就需要获取窗口标题为空的呢
                 End If
-                strCaption = GetTextByHwnd(currWnd)
+                strCaption = GetWindowTextByHwnd(currWnd)
                 If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 And isMatch Then '过滤掉输入法相关的窗口
                     strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
                 End If
             End If
+            
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
             DoEvents
         Loop
@@ -841,7 +862,7 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
                 currentPID = ProcessID(currWnd) '得到pid
                 isMatch = (currentPID = pid)
                 If isMatch Then
-                    strCaption = GetTextByHwnd(currWnd)
+                    strCaption = GetWindowTextByHwnd(currWnd)
     
                     If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 Then '过滤掉输入法相关的窗口
                         strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
