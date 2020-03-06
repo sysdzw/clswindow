@@ -857,7 +857,6 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
         writeToFile "DEBUG.txt", Now & " 函数GetWindowByPID被调用" & vbCrLf & "参数为 PID=" & pid & vbTab & " hWndAll=" & hWndAll, False
     End If
     strHwndAllTmp = ""
-    Dim aaa&, bbb&
     Do '循环找几遍
         currWnd = GetDesktopWindow()
         currWnd = GetWindow(currWnd, GW_CHILD)
@@ -881,7 +880,6 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
         Wait DelayOneTime
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
-        Exit Do
     Loop
     strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
