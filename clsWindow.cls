@@ -511,7 +511,11 @@ Public Function AppPath(Optional ByVal hwn1) As String
     Dim dwProcessId As Long, hProcess As Long, hModule As Long, i&, sTmp2 As String * 255, sTmp$
     Dim nSize As Long
     If IsMissing(hwn1) Then '如果没写则表示处理当前存储的句柄
-        If hWnd_ <> 0 Then dwProcessId = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
+        If hWnd_ <> 0 Then
+            dwProcessId = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
+        Else
+            Exit Function
+        End If
     Else
         dwProcessId = ProcessID(hwn1)
     End If
