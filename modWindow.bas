@@ -17,6 +17,7 @@ Option Explicit
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
 Private Declare Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hWnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
+Private Const lMaxLength& = 500
 Public strControlInfo$ '保存容器内所有控件的信息
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '功能：和api函数EnumChildWindows结合使用得到一个窗体容器内的所有child控件
@@ -61,19 +62,17 @@ Public Function GetText(ByVal hWnd As Long) As String
 
     '方案2 混合方案，尽量减少api调用（本代码由网友小凡提供）
     Dim Txt2() As Byte, i&
-    Const lMaxLength& = 500
-    Const WM_GETTEXT = &HD
     ReDim Txt2(lMaxLength&) '须比实际内容多设一个字节来装结束符0
-    SendMessage hWnd, WM_GETTEXT, lMaxLength& + 1, Txt2(0)
+    SendMessage hWnd, &HD, lMaxLength& + 1, Txt2(0)
     If Txt2(0) = 0 Then Exit Function  '没有内容
     For i = 1 To lMaxLength&
         If Txt2(i) = 0 Then Exit For '结束
     Next
-    If i >= lMaxLength& Then  '如果已取内容不完整
+    If i >= lMaxLength - 2& Then '如果接近就视为取内容不完整，直接用api计算长度取
         i = SendMessage(hWnd, &HE, 0&, 0&)
         If i = 0 Then Exit Function '没有内容
         ReDim Txt2(i) '须比实际内容多设一个字节来装结束符0
-        SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
+        SendMessage hWnd, &HD, i + 1, Txt2(0)
     End If
     ReDim Preserve Txt2(i - 1) '去掉多的字节
     GetText = StrConv(Txt2, vbUnicode) '转ASI字串为宽字串
