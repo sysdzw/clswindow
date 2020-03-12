@@ -87,6 +87,8 @@ Attribute VB_Exposed = False
 '               增加函数：IsTopmost 判断窗口是否为置顶                          2020/02/20
 '               增加函数：GetWindowTextByHwnd 获得窗口标题，给窗口句柄专用       2020/02/28
 '               修正函数：Focus 旧方法使用后会改变置顶窗口属性                   2020/03/02
+'               增加函数：IsWin64 网友小凡提供                               2020/03/12
+'               修正函数：AppPath 网友小凡提供兼容64系统的方法
 '==============================================================================================
 Option Explicit
 
@@ -213,8 +215,8 @@ Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) A
 Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
 
 Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
-Private Declare Function OpenProcess Lib "kernel32" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessID As Long) As Long
-Private Declare Function GetModuleFileNameEx Lib "psapi.dll" Alias "GetModuleFileNameExW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
+Private Declare Function OpenProcess Lib "kernel32" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessId As Long) As Long
+Private Declare Function GetModuleFileNameEx Lib "PSAPI.DLL" Alias "GetModuleFileNameExW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
 Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
 Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, ByRef lpdwProcessId As Long) As Long
 Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hwnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
@@ -250,10 +252,13 @@ Private Declare Function UpdateWindow Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function BringWindowToTop Lib "user32" (ByVal hWnd As Long) As Long
 
 Private Declare Function QueryFullProcessImageName Lib "Kernel32.dll" Alias "QueryFullProcessImageNameW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
-Private Declare Function GetProcessImageFileName Lib "Kernel32.dll" Alias "GetProcessImageFileNameW" (ByVal hProcess As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
+Private Declare Function GetProcessImageFileName Lib "PSAPI.DLL" Alias "GetProcessImageFileNameA" (ByVal hProcess As Long, ByVal lpImageName As String, nSize As Long) As Long
 Private Declare Function GetParent Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function GetDesktopWindow Lib "user32" () As Long
 Private Declare Function timeGetTime Lib "winmm.dll" () As Long
+Private Declare Function IsWow64Process Lib "kernel32" (ByVal hProcess As Long, ByRef Wow64Process As Long) As Long
+Private Declare Function QueryDosDevice Lib "kernel32" Alias "QueryDosDeviceA" (ByVal lpDeviceName As String, ByVal lpTargetPath As String, ByVal ucchMax As Long) As Long
+Private Declare Function GetCurrentProcess Lib "kernel32" () As Long
 
 Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Long, ByVal dx As Long, ByVal dy As Long, ByVal cButtons As Long, ByVal dwExtraInfo As Long)
 
@@ -369,39 +374,14 @@ Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
 End Function
 '根据句柄获得窗口内容
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
-    '方案1 性能一般
-'    Dim Txt2() As Byte, i&
-'    i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
-'    If i = 0 Then Exit Function '没有内容
-'    ReDim Txt2(i)
-'    SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
-'    ReDim Preserve Txt2(i - 1)
-'    GetTextByHwnd = StrConv(Txt2, vbUnicode)
-
-    '方案2 混合方案，尽量减少api调用（本代码由网友小凡提供）
-    Dim Txt2() As Byte, i&
-    Const lMaxLength& = 500
-    ReDim Txt2(lMaxLength&)
-    SendMessage hWnd, WM_GETTEXT, lMaxLength&, Txt2(0)
-    If Txt2(0) = 0 Then Exit Function  '没有内容
-    For i = 1 To lMaxLength&
-        If Txt2(i) = 0 Then Exit For '结束
-    Next
-    If i >= lMaxLength& - 1 Then '如果已取内容不完整
-        i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
-        If i = 0 Then Exit Function '没有内容
-        ReDim Txt2(i) '须比实际内容多设一个字节来装结束符0
-        SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
-    End If
-    ReDim Preserve Txt2(i - 1) '去掉多的字节
-    GetTextByHwnd = StrConv(Txt2, vbUnicode) '转ASI字串为宽字串
+    GetTextByHwnd = GetText(hWnd)
 End Function
 '根据句柄获得窗口内容 窗口专用
-Public Function GetWindowTextByHwnd(ByVal hwn As Long) As String
+Public Function GetWindowTextByHwnd(ByVal hWnd As Long) As String
     Dim l&, strCaption$
-    l = GetWindowTextLength(hwn)
+    l = GetWindowTextLength(hWnd)
     strCaption = Space(l)
-    GetWindowText hwn, strCaption, l + 1
+    GetWindowText hWnd, strCaption, l + 1
     GetWindowTextByHwnd = strCaption
 End Function
 '设置当前窗口的标题栏文字
@@ -516,19 +496,42 @@ Public Function pid(Optional ByVal hWnd) As Long
         pid = ProcessID(hWnd)
     End If
 End Function
+'判断64位系统
+Public Function IsWin64() As Boolean
+    Dim lngReturn As Long
+    Call IsWow64Process(GetCurrentProcess, lngReturn)
+    If lngReturn = 0 Then
+        IsWin64 = False 'IsWin64'MsgBox "非64位OS"
+    Else
+        IsWin64 = True 'MsgBox "64位OS"
+    End If
+End Function
 '根据窗口句柄得到应用程序的路径
 Public Function AppPath(Optional ByVal hwn1) As String
-    Dim dwProcessID As Long, hProcess As Long, hModule As Long, strAppPath As String
+    Dim dwProcessId As Long, hProcess As Long, hModule As Long, i&, sTmp2 As String * 255, sTmp$
     Dim nSize As Long
     If IsMissing(hwn1) Then '如果没写则表示处理当前存储的句柄
-        If hWnd_ <> 0 Then dwProcessID = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
+        If hWnd_ <> 0 Then dwProcessId = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
     Else
-        dwProcessID = ProcessID(hwn1)
+        dwProcessId = ProcessID(hwn1)
     End If
-    hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwProcessID)
-    strAppPath = Space$(255)
-    nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(strAppPath), 255) 'win7x64下获取为空，暂无解决方案 2020-2-5
-    AppPath = Mid$(strAppPath, 1, nSize)
+    hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwProcessId)
+    AppPath = Space$(255)
+    If Not IsWin64 Then    '非64位系统
+        nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255)
+        AppPath = Split(AppPath, Chr(0), 2)(0)
+    Else
+        nSize = GetProcessImageFileName(hProcess, AppPath, 255)
+        AppPath = Split(AppPath, Chr(0), 2)(0)
+        For i = Asc("A") To Asc("Z")
+            Call QueryDosDevice(Chr(i) & ":", sTmp2, 255)
+            sTmp = Split(sTmp2, Chr(0), 2)(0) & "\"
+            If Len(sTmp) > 1 And InStr(1, AppPath, sTmp, vbTextCompare) = 1 Then
+                AppPath = Chr(i) & ":" & Mid$(AppPath, Len(sTmp))
+                Exit For
+            End If
+        Next
+    End If
     Call CloseHandle(hProcess)
 End Function
 '得到exe名字,如果缺省就获取自己的exe名称
