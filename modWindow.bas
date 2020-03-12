@@ -11,6 +11,7 @@ Attribute VB_Name = "modWindow"
 '          V1.1 将类中的api函数以及部分变量挪到此模块         2013/05/28
 '          V1.2 将EnumChildProc中获取控件文字函数修改了      2013/06/13
 '          V1.3 将本模块中能移到类模块中的都移过去了          2020/01/19
+'               将GetText函数放到这儿来了                   2020/03/12
 '=====================================================================================
 Option Explicit
 Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
@@ -25,7 +26,6 @@ Public strControlInfo$ '保存容器内所有控件的信息
 '备注：sysdzw 于 2010-11-13 提供
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
-    Dim Txt2(64000) As Byte
     Dim strClassName As String * 255
     Dim strText As String
     Dim lngCtlId As Long
@@ -36,8 +36,7 @@ Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     lngCtlId = GetWindowLong(hWnd, (-12))
     lRet = GetClassName(hWnd, strClassName, 255)
     
-    SendMessage hWnd, &HD, 64000, Txt2(0)
-    strText = Split(StrConv(Split(Txt2, Chr$(0), 2)(0), vbUnicode) & Chr$(0), Chr$(0), 2)(0)
+    strText = GetText(hWnd)
     strText = Replace(strText, vbCrLf, " ") '强制将文本框中内容回车替换成空格，以防止影响正则获取
     
     strHwnd$ = CStr(hWnd) & vbTab
@@ -48,4 +47,34 @@ Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
                     strCtlId$ & _
                     strClass$ & _
                     strText & vbCrLf
+End Function
+'根据句柄获得窗口内容
+Public Function GetText(ByVal hWnd As Long) As String
+    '方案1 性能一般
+'    Dim Txt2() As Byte, i&
+'    i = SendMessage(hWnd, WM_GETTEXTLENGTH, 0&, 0&)
+'    If i = 0 Then Exit Function '没有内容
+'    ReDim Txt2(i)
+'    SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
+'    ReDim Preserve Txt2(i - 1)
+'    GetTextByHwnd = StrConv(Txt2, vbUnicode)
+
+    '方案2 混合方案，尽量减少api调用（本代码由网友小凡提供）
+    Dim Txt2() As Byte, i&
+    Const lMaxLength& = 500
+    Const WM_GETTEXT = &HD
+    ReDim Txt2(lMaxLength&) '须比实际内容多设一个字节来装结束符0
+    SendMessage hWnd, WM_GETTEXT, lMaxLength& + 1, Txt2(0)
+    If Txt2(0) = 0 Then Exit Function  '没有内容
+    For i = 1 To lMaxLength&
+        If Txt2(i) = 0 Then Exit For '结束
+    Next
+    If i >= lMaxLength& Then  '如果已取内容不完整
+        i = SendMessage(hWnd, &HE, 0&, 0&)
+        If i = 0 Then Exit Function '没有内容
+        ReDim Txt2(i) '须比实际内容多设一个字节来装结束符0
+        SendMessage hWnd, WM_GETTEXT, i + 1, Txt2(0)
+    End If
+    ReDim Preserve Txt2(i - 1) '去掉多的字节
+    GetText = StrConv(Txt2, vbUnicode) '转ASI字串为宽字串
 End Function
