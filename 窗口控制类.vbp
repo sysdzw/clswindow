@@ -4,7 +4,6 @@ Reference=*\G{1B45A1FF-B7A8-4D8D-9221-427693E491B2}#1.0#0#D:\Tools\vb6mousewheel
 Form=frmMain.frm
 Module=modWindow; modWindow.bas
 Class=clsWindow; clsWindow.cls
-Module=待整合代码; 待整合代码.bas
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""
