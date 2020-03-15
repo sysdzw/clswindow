@@ -31,19 +31,18 @@ Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
     Dim strText As String
     Dim lngCtlId As Long
     Dim strHwnd$, strCtlId$, strClass$, lRet&
-    
+
     EnumChildProc = True
-    
+
     lngCtlId = GetWindowLong(hWnd, (-12))
     lRet = GetClassName(hWnd, strClassName, 255)
-    
+
     strText = GetText(hWnd)
     strText = Replace(strText, vbCrLf, " ") '强制将文本框中内容回车替换成空格，以防止影响正则获取
-    
+
     strHwnd$ = CStr(hWnd) & vbTab
     strCtlId$ = CStr(lngCtlId) & vbTab
     strClass$ = Left$(strClassName, lRet) & vbTab
-    
     strControlInfo = strControlInfo & strHwnd$ & _
                     strCtlId$ & _
                     strClass$ & _

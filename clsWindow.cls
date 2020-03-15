@@ -366,7 +366,7 @@ Public Property Let Caption(ByVal strNewText As String)
 End Property
 '得到当前窗口的标题栏文字 使用GetWindowTextByHwnd函数
 Public Property Get Caption() As String
-    Caption = GetWindowTextByHwnd(hWnd_)
+    Caption = GetText(hWnd_)
 End Property
 '根据句柄获得窗口内容
 Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
@@ -506,9 +506,8 @@ Public Function AppPath(Optional ByVal hwn1&) As String
 
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwProcessId)
     AppPath = String$(255, vbNullChar)
-    If IsWin64 Then         '非64位系统
-        Call GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255)
-    Else
+    
+    If IsWin64 Then '64位系统
         Call GetProcessImageFileName(hProcess, AppPath, 255)
         For i = 65 To 90 'Asc("A") To Asc("Z")
             Call QueryDosDevice(Chr$(i) & ":", sTmp2, 255)
@@ -518,6 +517,8 @@ Public Function AppPath(Optional ByVal hwn1&) As String
                 Exit For
             End If
         Next
+    Else
+        Call GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255)
     End If
     AppPath = Split(AppPath, vbNullChar, 2)(0)
     Call CloseHandle(hProcess)
@@ -541,7 +542,7 @@ Public Function AppCommandLine(Optional ByVal lPid&) As String
     For Each objProcess In colProcessList
         For Each objProType In objProcess.Properties_
             If objProType.Name = "CommandLine" Then
-                AppCommandLine = objProType.Value & ""  '防止Value为Null时须连接空字符串才不会出错
+                AppCommandLine = objProType.Value & ""  'Value为Null时须连接空字符串才不会出错
                 Exit For
             End If
         Next
