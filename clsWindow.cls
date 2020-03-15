@@ -87,8 +87,9 @@ Attribute VB_Exposed = False
 '               增加函数：IsTopmost 判断窗口是否为置顶                          2020/02/20
 '               增加函数：GetWindowTextByHwnd 获得窗口标题，给窗口句柄专用       2020/02/28
 '               修正函数：Focus 旧方法使用后会改变置顶窗口属性                   2020/03/02
-'               增加函数：IsWin64 网友小凡提供                               2020/03/12
+'               增加函数：IsWin64 网友小凡提供                                  2020/03/12
 '               修正函数：AppPath 网友小凡提供兼容64系统的方法
+'               修正函数：CommandLine 网友小凡做了兼容64位系统处理及其他代码优化  2020/03/15
 '==============================================================================================
 Option Explicit
 
@@ -189,8 +190,8 @@ Public Enum enumShift
 End Enum
 
 Public Enum enumPositionMode
-    absolute
-    relative
+    ABSOLUTE
+    RELATIVE
 End Enum
 '过滤窗口是否可见
 Public Enum enumWindowVisible
@@ -219,7 +220,7 @@ Private Declare Function OpenProcess Lib "kernel32" (ByVal dwDesiredAccess As Lo
 Private Declare Function GetModuleFileNameEx Lib "PSAPI.DLL" Alias "GetModuleFileNameExW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
 Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
 Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, ByRef lpdwProcessId As Long) As Long
-Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hwnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
 Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
 Private Declare Function GetWindowTextLength Lib "user32" Alias "GetWindowTextLengthA" (ByVal hWnd As Long) As Long
 Private Declare Function TerminateProcess Lib "kernel32" (ByVal hProcess As Long, ByVal uExitCode As Long) As Long
@@ -271,7 +272,6 @@ Public DebugMe As Boolean '表示是否启用调试模式
 '自定义变量声明
 Private strWindowInfo$ '保存所有窗口的信息，格式为 句柄 文本内容
 Private strWindowKeyWord$ '要参与的过滤的窗口的关键字，如果不需要过滤就留空
-Private strTmp$, isWholeEx As Boolean
 '移动和设置窗口到指定位置，以及设置窗口的宽高。
 Public Function Move(Optional ByVal X, Optional ByVal Y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
     If IsMissing(X) Then X = Left
@@ -479,114 +479,77 @@ Public Sub SetFocus()
     Call Focus
 End Sub
 '得到进程标识
-Public Function ProcessID(Optional ByVal hWnd) As Long
-    Dim l&
-    If IsMissing(hWnd) Then
-        If hWnd_ <> 0 Then GetWindowThreadProcessId hWnd_, l
-    Else
-        GetWindowThreadProcessId hWnd, l
-    End If
-    ProcessID = l
+Public Function ProcessID(Optional ByVal hWnd1&) As Long
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+    GetWindowThreadProcessId hWnd1, ProcessID
 End Function
 '得到进程标识
-Public Function pid(Optional ByVal hWnd) As Long
-    If IsMissing(hWnd) Then
-        pid = ProcessID
-    Else
-        pid = ProcessID(hWnd)
-    End If
+Public Function pid(Optional ByVal hWnd1&) As Long
+    pid = ProcessID(hWnd1)
 End Function
 '判断64位系统
 Public Function IsWin64() As Boolean
     Dim lngReturn As Long
     Call IsWow64Process(GetCurrentProcess, lngReturn)
     If lngReturn = 0 Then
-        IsWin64 = False 'IsWin64'MsgBox "非64位OS"
+        IsWin64 = False '非64位系统
     Else
-        IsWin64 = True 'MsgBox "64位OS"
+        IsWin64 = True '64位系统
     End If
 End Function
 '根据窗口句柄得到应用程序的路径
-Public Function AppPath(Optional ByVal hwn1) As String
-    Dim dwProcessId As Long, hProcess As Long, hModule As Long, i&, sTmp2 As String * 255, sTmp$
-    Dim nSize As Long
-    If IsMissing(hwn1) Then '如果没写则表示处理当前存储的句柄
-        If hWnd_ <> 0 Then
-            dwProcessId = ProcessID() 'GetWindowThreadProcessId hWnd_, dwProcessID
-        Else
-            Exit Function
-        End If
-    Else
-        dwProcessId = ProcessID(hwn1)
-    End If
+Public Function AppPath(Optional ByVal hwn1&) As String
+    Dim dwProcessId As Long, hProcess As Long, i&, sTmp2 As String * 255, sTmp$
+    If hwn1 = 0 Then hwn1 = hWnd_ '如果没写则表示处理当前存储的句柄
+    dwProcessId = ProcessID(hwn1)
+    If dwProcessId = 0 Then Exit Function
+
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwProcessId)
-    AppPath = Space$(255)
-    If Not IsWin64 Then    '非64位系统
-        nSize = GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255)
-        AppPath = Split(AppPath, Chr(0), 2)(0)
+    AppPath = String$(255, vbNullChar)
+    If IsWin64 Then         '非64位系统
+        Call GetModuleFileNameEx(hProcess, 0, StrPtr(AppPath), 255)
     Else
-        nSize = GetProcessImageFileName(hProcess, AppPath, 255)
-        AppPath = Split(AppPath, Chr(0), 2)(0)
-        For i = Asc("A") To Asc("Z")
-            Call QueryDosDevice(Chr(i) & ":", sTmp2, 255)
-            sTmp = Split(sTmp2, Chr(0), 2)(0) & "\"
+        Call GetProcessImageFileName(hProcess, AppPath, 255)
+        For i = 65 To 90 'Asc("A") To Asc("Z")
+            Call QueryDosDevice(Chr$(i) & ":", sTmp2, 255)
+            sTmp = Split(sTmp2, vbNullChar, 2)(0) & "\"
             If Len(sTmp) > 1 And InStr(1, AppPath, sTmp, vbTextCompare) = 1 Then
-                AppPath = Chr(i) & ":" & Mid$(AppPath, Len(sTmp))
+                AppPath = Chr$(i) & ":" & Mid$(AppPath, Len(sTmp))
                 Exit For
             End If
         Next
     End If
+    AppPath = Split(AppPath, vbNullChar, 2)(0)
     Call CloseHandle(hProcess)
 End Function
 '得到exe名字,如果缺省就获取自己的exe名称
-Public Function AppName(Optional ByVal hwnd1) As String
+Public Function AppName(Optional ByVal hWnd1&) As String
     Dim v
-    Static i%
-    If IsMissing(hwnd1) Then
-        If hWnd_ <> 0 Then v = Split(AppPath, "\")
-    Else
-        v = Split(AppPath(hwnd1), "\")
-    End If
-    i = i + 1
-    If UBound(v) >= 0 Then AppName = v(UBound(v))
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+    v = Split(AppPath(hWnd1) & "\", "\")
+    AppName = v(UBound(v) - 1)
 End Function
 '得到exe文件的启动参数
-Public Function AppCommandLine(Optional ByVal strAppName) As String
-    If hWnd_ <> 0 Then
-        Dim objWMIService As Object
-        Dim colProcessList As Object
-        Dim objProcess As Object
-        Dim objProType As Object
-        Dim strResult As String
-        Set objWMIService = GetObject("winmgmts=" & "{impersonationlevel=impersonate}!//./root/cimv2")
-        If IsMissing(strAppName) Then
-            Set colProcessList = objWMIService.ExecQuery("Select * from Win32_Process Where Name='" & AppName() & "'")
-        Else
-            Set colProcessList = objWMIService.ExecQuery("Select * from Win32_Process Where Name='" & strAppName & "'")
-        End If
-         
-        If colProcessList.Count <> 0 Then
-            For Each objProcess In colProcessList
-                For Each objProType In objProcess.Properties_
-                    If objProType.Name = "CommandLine" Then
-                        strResult = strResult & objProType.Value & vbCrLf
-                        Exit For
-                    End If
-                Next
-            Next
-        End If
-        If strResult <> "" Then
-            AppCommandLine = strResult
-        End If
-    End If
+Public Function AppCommandLine(Optional ByVal lPid&) As String
+    Dim objWMIService As Object
+    Dim colProcessList As Object
+    Dim objProcess As Object
+    Dim objProType As Object
+    Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
+    If lPid = 0 Then lPid = Me.pid '如果没写则表示处理当前存储的PID
+    Set colProcessList = objWMIService.ExecQuery("Select * from Win32_Process Where ProcessId='" & lPid & "'")
+    For Each objProcess In colProcessList
+        For Each objProType In objProcess.Properties_
+            If objProType.Name = "CommandLine" Then
+                AppCommandLine = objProType.Value & ""  '防止Value为Null时须连接空字符串才不会出错
+                Exit For
+            End If
+        Next
+    Next
 End Function
 '得到exe文件的启动参数
-Public Function CommandLine(Optional ByVal strAppName) As String
-    If IsMissing(strAppName) Then
-        If hWnd_ <> 0 Then CommandLine = AppCommandLine
-    Else
-        CommandLine = AppCommandLine(strAppName)
-    End If
+Public Function CommandLine(Optional ByVal lPid&) As String
+    CommandLine = AppCommandLine(lPid&)
 End Function
 '设置根据窗体标题得到窗口句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待10秒
 Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -595,7 +558,7 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetWindowByTitle被调用" & vbCrLf & "参数为 strTitle=" & strTitle & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
-            
+
     Do
         hWnd_ = FindWindow(vbNullString, strTitle)
         If CheckWindowVisible(hWnd_, windowVisible) Then Exit Do '窗口可见度检查，符合条件表示找到了即退出
@@ -603,10 +566,10 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '未发现关键字为 strTitle
         Wait DelayOneTime
-        
+
         hWnd_ = 0
     Loop
-    
+
     wReturn.hWnd = hWnd_
     Set GetWindowByTitle = wReturn
 End Function
@@ -628,7 +591,7 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     Dim strCaption As String
     Dim strHwndAllTmp$
     Dim isMatch As Boolean
-    
+
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetWindowByTitleEx被调用" & vbCrLf & "参数为 strTitle=" & strTitle & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
@@ -679,7 +642,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetWindowByClassName被调用" & vbCrLf & "参数为 strClassName=" & strClassName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
     End If
-            
+
     Do
         hWnd_ = FindWindow(strClassName, vbNullString)
         If CheckWindowVisible(hWnd_, windowVisible) Then Exit Do '窗口可见度检查，符合条件表示找到了即退出
@@ -687,7 +650,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
         lngDelayCount = lngDelayCount + DelayOneTime
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strClassName
         Wait DelayOneTime
-        
+
         hWnd_ = 0
     Loop
 
@@ -737,7 +700,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     Loop
     strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
-    
+
     If strHwndAllTmp <> "" Then
         wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
     Else
@@ -754,7 +717,7 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
     Dim isMatch As Boolean
     Dim strGetHwndAppName$
     Dim strHwnd
-    
+
     strAppName = LCase$(strAppName)
     writeToFile "DEBUG_exe.txt", ""
     hWnd_ = 0
@@ -779,7 +742,7 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
                 End If
             End If
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
-            
+
             DoEvents
         Loop
         If hWnd_ <> 0 Then Exit Do
@@ -800,9 +763,9 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     Dim isMatch As Boolean
     Dim strAppNameCurrent$
     Dim strHwnd
-    
+
     strAppName = LCase$(strAppName)
-    
+
     hWnd_ = 0
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetWindowByAppNameEx被调用" & vbCrLf & "参数为 strAppName=" & strAppName & vbTab & " intWaitSeconds=" & intWaitSeconds, False
@@ -828,7 +791,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
                     strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
                 End If
             End If
-            
+
             currWnd = GetWindow(currWnd, GW_HWNDNEXT)
             DoEvents
         Loop
@@ -840,7 +803,7 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     Loop
     strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
-    
+
     If strHwndAllTmp <> "" Then
         wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
     Else
@@ -858,7 +821,7 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
     Dim isMatch As Boolean
     Dim currentPID$
     Dim strHwnd
-    
+
     hWnd_ = 0
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数GetWindowByPID被调用" & vbCrLf & "参数为 PID=" & pid & vbTab & " hWndAll=" & hWndAll, False
@@ -873,7 +836,7 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
                 isMatch = (currentPID = pid)
                 If isMatch Then
                     strCaption = GetWindowTextByHwnd(currWnd)
-    
+
                     If InStr("|MSCTFIME UI|Program Manager|M|Default IME|", strCaption) = 0 Then '过滤掉输入法相关的窗口
                         strHwndAllTmp = strHwndAllTmp & CStr(currWnd) & " "
                     End If
@@ -890,7 +853,7 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
     Loop
     strHwndAllTmp = Trim$(strHwndAllTmp)
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
-    
+
     If strHwndAllTmp <> "" Then
         Dim vHwnd
         vHwnd = Split(strHwndAllTmp, " ")
@@ -908,8 +871,8 @@ End Function
 '       AlphaBlend, Enabled, Refresh, TransparentColor, ZOrder
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '检查当前窗口句柄是否还有效
-Private Function CheckWindow(Optional ByVal lngHwnd) As Long
-    If IsMissing(lngHwnd) Then lngHwnd = hWnd_
+Private Function CheckWindow(Optional ByVal lngHwnd&) As Long
+    If lngHwnd = 0 Then lngHwnd = hWnd_ '如果没写则表示处理当前存储的句柄
     CheckWindow = IsWindow(lngHwnd)
 End Function
 'Load 窗口载入的入口
@@ -968,7 +931,7 @@ Public Function SetElementTextByClassName(ByVal strClassName$, ByVal strNewText$
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
-    
+
     If lngControlsHwnd <> 0 Then
         SendMessage lngControlsHwnd, WM_SETTEXT, 0&, ByVal strNewText
         SetElementTextByClassName = True
@@ -990,7 +953,7 @@ Public Function AppendElementTextByClassName(ByVal strClassName$, ByVal strAppen
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
-    
+
     If lngControlsHwnd <> 0 Then
         strAppendText = RTrim$(GetElementTextByClassName(strClassName, intIndex, UseRegExp)) & strAppendText
         AppendElementTextByClassName = SendMessage(lngControlsHwnd, WM_SETTEXT, 0&, ByVal strAppendText)
@@ -1012,7 +975,7 @@ Public Function GetElementTextByClassName(ByVal strClassName$, Optional ByVal in
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strClassName, intIndex, UseRegExp, True) '最后的true可以省略，默认为类名，否则就是文本
     End If
-    
+
     If lngControlsHwnd <> 0 Then
         GetElementTextByClassName = GetTextByHwnd(lngControlsHwnd)
     Else
@@ -1033,7 +996,7 @@ Public Function GetElementTextByText(ByVal strText$, Optional ByVal intIndex = 1
     Else
         lngControlsHwnd = GetMatchHwndFromWindow(strText, intIndex, UseRegExp, False) 'False表示使用文本，默认是true表示类名
     End If
-    
+
     If lngControlsHwnd <> 0 Then
         GetElementTextByText = GetTextByHwnd(lngControlsHwnd)
     Else
@@ -1126,7 +1089,7 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
     Dim matchs As Object, match As Object
     Dim strControlsInfo As String
     Dim intGet As Integer
-    
+
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数getMatchHwndFromWindow被调用" & vbCrLf & "参数为 Pattern=" & Pattern & vbTab & " intIndex=" & intIndex, False
         writeToFile "DEBUG.txt", Now & " 函数getMatchHwndFromWindow中调用函数ControlsInfo，参数为 hWnd_=" & hWnd_, False
@@ -1136,7 +1099,7 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
     reg.Global = True
     reg.IgnoreCase = True
     reg.MultiLine = True
-    
+
     If Not UseRegExp Then
         reg.Pattern = Pattern
         Set matchs = reg.Execute(strControlsInfo)
@@ -1171,10 +1134,10 @@ Public Function CloseApp() As Long
     CloseApp = TerminateProcess(hProcess, 0)
     CloseHandle hProcess
 End Function
-Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
-    If PositionMod = absolute Then
+Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = RELATIVE, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If PositionMod = ABSOLUTE Then
         SetCursorPos x1, y1
-    ElseIf PositionMod = relative Then
+    ElseIf PositionMod = RELATIVE Then
         SetCursorPos Left + x1, Top + y1
     Else
         MsgBox "函数ClickPoint执行一次。未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
@@ -1194,12 +1157,12 @@ Public Sub ClickCurrentPoint()
     mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
 End Sub
 '移动鼠标到指定点
-Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
-    If PositionMod = absolute Then
+Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If PositionMod = ABSOLUTE Then
         Wait delayMilliSecondsBefore
         SetCursorPos x1, y1
         Wait delayMilliSecondsAfter
-    ElseIf PositionMod = relative Then
+    ElseIf PositionMod = RELATIVE Then
         Wait delayMilliSecondsBefore
         SetCursorPos Left + x1, Top + y1
         Wait delayMilliSecondsAfter
@@ -1209,15 +1172,15 @@ Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal Position
     End If
 End Sub
 '同SetCursor
-Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '直接获得当前鼠标下的窗口或控件的句柄
@@ -1234,7 +1197,7 @@ End Function
 '特效1：窗体抖动
 Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal shakeRepeats = 30, Optional ByVal shakePads = 10, Optional ByVal shakeInterval = 25)
     Dim i%
-    
+
     If CheckWindow() = 0 Then Exit Sub
     Select Case shakeShift
         Case Horizontal
@@ -1274,12 +1237,12 @@ End Sub
 Public Sub FadeIn(Optional ByVal speed = 10, Optional ByVal intPercentTansparent)
     Dim sty As Long, i As Long
     Dim intMaxTrans As Integer
-    
+
     If CheckWindow() = 0 Then Exit Sub
     sty = GetWindowLong(hWnd_, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong hWnd_, GWL_EXSTYLE, sty
-    
+
     If IsMissing(intPercentTansparent) Then
         intMaxTrans = 255
     ElseIf intPercentTansparent < 0 Or intPercentTansparent > 255 Then
@@ -1287,7 +1250,7 @@ Public Sub FadeIn(Optional ByVal speed = 10, Optional ByVal intPercentTansparent
     Else
         intMaxTrans = (intPercentTansparent / 100) * 255
     End If
-    
+
 '    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
     If speed > 255 Then speed = 255
     If speed < 1 Then speed = 1
@@ -1302,12 +1265,12 @@ End Sub
 '可以选择是否关闭窗口或者经常
 Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = False, Optional ByVal isCloseApp = False)
     Dim sty As Long, i As Long
-    
+
     If CheckWindow() = 0 Then Exit Sub
     sty = GetWindowLong(hWnd_, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong hWnd_, GWL_EXSTYLE, sty
-    
+
 '    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
     If speed > 255 Then speed = 255
     If speed < 1 Then speed = 1
@@ -1320,12 +1283,12 @@ Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = Fal
     If isCloseApp Then CloseApp
 End Sub
 '窗体设置透明，Percent 只接受：0到100的数、0%到100%、以及介于0到1的小数
-Public Function Transparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
+Public Function Transparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd&) As Long
     Dim sty As Long
-    
-    If IsMissing(lngHwnd) Then lngHwnd = hWnd_
+
+    If lngHwnd = 0 Then lngHwnd = hWnd_ '如果没写则表示处理当前存储的句柄
     If CheckWindow(lngHwnd) = 0 Then Exit Function
-    
+
     Percent = Trim$(CStr(Percent))
     If regTest(Percent, "^0?\.\d+$") Then '例如：0.5
         Percent = Val(Percent) * 255
@@ -1337,10 +1300,10 @@ Public Function Transparent(Optional ByVal Percent = "50", Optional ByVal lngHwn
 '        MsgBox "参数值：Percent=" & Percent & " 不合法，只接受：0到100的整数、0%到100%、以及介于0到1的小数。", vbExclamation
         Exit Function
     End If
-    
+
     If Percent > 255 Then Percent = 255
     If Percent < 0 Then Percent = 0
-    
+
     sty = GetWindowLong(lngHwnd, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong lngHwnd, GWL_EXSTYLE, sty
@@ -1477,8 +1440,8 @@ Public Sub SetTop(Optional ByVal isSetTop As Boolean = True)
     SetWindowPos hWnd, IIf(isSetTop, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOSIZE + SWP_NOMOVE
 End Sub
 '判断窗口置顶函数
-Public Function IsTopmost(Optional ByVal hWnd) As Boolean
-    If IsMissing(hWnd) Then hWnd = hWnd_
+Public Function IsTopmost(Optional ByVal hWnd&) As Boolean
+    If hWnd = 0 Then hWnd = hWnd_ '如果没写则表示处理当前存储的句柄
     Dim Ret As Long, t1 As Long, t2 As Long
     Ret = GetWindowLong(hWnd, GWL_EXSTYLE)
     t1 = Ret Or WS_EX_TOPMOST
