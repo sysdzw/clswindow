@@ -27,7 +27,7 @@ Public strControlInfo$ '保存容器内所有控件的信息
 '备注：sysdzw 于 2010-11-13 提供
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function EnumChildProc(ByVal hWnd As Long, ByVal lParam As Long) As Long
-    Dim strClassName As String * 255
+    Dim strClassName As String * 256
     Dim strText As String
     Dim lngCtlId As Long
     Dim strHwnd$, strCtlId$, strClass$, lRet&
@@ -63,7 +63,7 @@ Public Function GetText(ByVal hWnd As Long) As String
     '方案2 混合方案，尽量减少api调用（本代码由网友小凡提供）
     Dim Txt2() As Byte, i&
     ReDim Txt2(lMaxLength&) '须比实际内容多设一个字节来装结束符0
-    SendMessage hWnd, &HD, lMaxLength& + 1, Txt2(0)
+    SendMessage hWnd, &HD, lMaxLength&, Txt2(0)
     If Txt2(0) = 0 Then Exit Function  '没有内容
     For i = 1 To lMaxLength&
         If Txt2(i) = 0 Then Exit For '结束
