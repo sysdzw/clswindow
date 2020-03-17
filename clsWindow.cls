@@ -90,6 +90,10 @@ Attribute VB_Exposed = False
 '               增加函数：IsWin64 网友小凡提供                                  2020/03/12
 '               修正函数：AppPath 网友小凡提供兼容64系统的方法
 '               修正函数：AppCommandLine 网友小凡做了兼容64位处理及其他代码优化  2020/03/15
+'               增加函数：IsForegroundWindow 判断窗口是否为活动窗口             2020/03/17
+'               增加函数：GetClassNameByHwnd 根据句柄得到类名
+'               增加属性：ClassName(Get) 返回窗口的类名
+'               更新函数：CheckWindow 返回值由Long改成Boolean了，并且公开
 '==============================================================================================
 Option Explicit
 
@@ -370,11 +374,17 @@ Public Property Get Caption() As String
 End Property
 '根据句柄获得窗口内容
 Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
-    GetCaptionByHwnd = GetTextByHwnd(hWnd_)
+    GetCaptionByHwnd = GetTextByHwnd(hWnd)
 End Function
 '根据句柄获得窗口内容
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
     GetTextByHwnd = GetText(hWnd)
+End Function
+'根据句柄获得窗口内容
+Public Function GetClassNameByHwnd(ByVal hWnd As Long) As String
+    Dim lngHwnd&, strClassNameCurrent As String * 255
+    GetClassName hWnd, strClassNameCurrent, 255  '获得窗口类
+    GetClassNameByHwnd = Replace(strClassNameCurrent, Chr$(0), "")
 End Function
 '根据句柄获得窗口内容 窗口专用
 Public Function GetWindowTextByHwnd(ByVal hWnd As Long) As String
@@ -384,6 +394,10 @@ Public Function GetWindowTextByHwnd(ByVal hWnd As Long) As String
     GetWindowText hWnd, strCaption, l + 1
     GetWindowTextByHwnd = strCaption
 End Function
+'得到当前窗口的类名
+Public Property Get ClassName() As String
+    ClassName = GetClassNameByHwnd(hWnd_)
+End Property
 '设置当前窗口的标题栏文字
 Public Property Let Text(ByVal strNewText As String)
     Caption = strNewText
@@ -662,7 +676,7 @@ End Function
 Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal checkPid = "", Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
     Dim lngHwnd&, l&, lngDelayCount&
     Dim strCaption As String
-    Dim strClassNameCurrent As String * 255
+    Dim strClassNameCurrent As String
     Dim strHwndAllTmp$
     Dim isMatch As Boolean
 
@@ -674,8 +688,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
         Do
             lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
             If CheckWindowVisible(lngHwnd, windowVisible) Then
-                GetClassName lngHwnd, strClassNameCurrent, 255  '获得窗口类
-                strClassNameCurrent = Replace(strClassNameCurrent, Chr$(0), "")
+                strClassNameCurrent = GetWindowTextByHwnd(lngHwnd)
                 If strClassNameCurrent <> "" Then
                     If Not isUseRegExp Then
                         isMatch = InStr(strClassNameCurrent, strClassName) > 0
@@ -872,9 +885,9 @@ End Function
 '       AlphaBlend, Enabled, Refresh, TransparentColor, ZOrder
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '检查当前窗口句柄是否还有效
-Private Function CheckWindow(Optional ByVal lngHwnd&) As Long
+Public Function CheckWindow(Optional ByVal lngHwnd&) As Boolean
     If lngHwnd = 0 Then lngHwnd = hWnd_ '如果没写则表示处理当前存储的句柄
-    CheckWindow = IsWindow(lngHwnd)
+    CheckWindow = (IsWindow(lngHwnd) = 1)
 End Function
 'Load 窗口载入的入口
 Public Function Load(WindowHwnd As Variant) As clsWindow
@@ -1199,7 +1212,7 @@ End Function
 Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal shakeRepeats = 30, Optional ByVal shakePads = 10, Optional ByVal shakeInterval = 25)
     Dim i%
 
-    If CheckWindow() = 0 Then Exit Sub
+    If Not CheckWindow() Then Exit Sub
     Select Case shakeShift
         Case Horizontal
             For i = 1 To shakeRepeats
@@ -1239,7 +1252,7 @@ Public Sub FadeIn(Optional ByVal speed = 10, Optional ByVal intPercentTansparent
     Dim sty As Long, i As Long
     Dim intMaxTrans As Integer
 
-    If CheckWindow() = 0 Then Exit Sub
+    If Not CheckWindow() Then Exit Sub
     sty = GetWindowLong(hWnd_, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong hWnd_, GWL_EXSTYLE, sty
@@ -1267,7 +1280,7 @@ End Sub
 Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = False, Optional ByVal isCloseApp = False)
     Dim sty As Long, i As Long
 
-    If CheckWindow() = 0 Then Exit Sub
+    If Not CheckWindow() Then Exit Sub
     sty = GetWindowLong(hWnd_, GWL_EXSTYLE)
     sty = sty Or WS_EX_LAYERED
     SetWindowLong hWnd_, GWL_EXSTYLE, sty
@@ -1288,7 +1301,7 @@ Public Function Transparent(Optional ByVal Percent = "50", Optional ByVal lngHwn
     Dim sty As Long
 
     If lngHwnd = 0 Then lngHwnd = hWnd_ '如果没写则表示处理当前存储的句柄
-    If CheckWindow(lngHwnd) = 0 Then Exit Function
+    If Not CheckWindow(lngHwnd) Then Exit Function
 
     Percent = Trim$(CStr(Percent))
     If regTest(Percent, "^0?\.\d+$") Then '例如：0.5
@@ -1332,7 +1345,7 @@ Public Function SetTransparent(Optional ByVal Percent = "50", Optional ByVal lng
 End Function
 '得到窗口状态
 Public Property Get WindowState() As enumWindowState
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     If IsZoomed(hWnd_) Then
         WindowState = vbMaximized
     ElseIf IsIconic(hWnd_) Then
@@ -1343,7 +1356,7 @@ Public Property Get WindowState() As enumWindowState
 End Property
 '设置窗口状态
 Public Property Let WindowState(ByVal vNewValue As enumWindowState)
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     Select Case vNewValue
         Case 0
             ShowWindow hWnd_, SW_NORMAL
@@ -1355,7 +1368,7 @@ Public Property Let WindowState(ByVal vNewValue As enumWindowState)
 End Property
 
 Public Property Get Visible() As Boolean
-    If CheckWindow() = 0 Then Exit Property '检查是否是窗口
+    If Not CheckWindow() Then Exit Property '检查是否是窗口
     Visible = myIsWindowVisibled(hWnd_)
 End Property
 '检查窗口是否可见，如果长宽有一项为0也认为不可见
@@ -1378,7 +1391,7 @@ Public Property Let Visible(ByVal vNewValue As Boolean)
 End Property
 
 Public Property Get hDC() As Long
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     hDC = GetDC(hWnd_)
 End Property
 
@@ -1387,13 +1400,13 @@ Public Property Let hDC(ByVal vNewValue As Long)
 End Property
 
 Public Property Get AlphaBlend() As Byte
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     GetLayeredWindowAttributes hWnd_, vbNull, AlphaBlend, vbNull
 End Property
 
 Public Property Let AlphaBlend(ByVal vNewValue As Byte)
     Dim r As Long, v As Long
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     r = GetWindowLong(hWnd_, GWL_EXSTYLE)
     If (r And WS_EX_LAYERED) = 0 Then
         r = r Or WS_EX_LAYERED
@@ -1405,28 +1418,28 @@ Public Property Let AlphaBlend(ByVal vNewValue As Byte)
 End Property
 
 Public Property Get Enabled() As Boolean
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     Enabled = CBool(IsWindowEnabled(hWnd_) = 1)
 End Property
 
 Public Property Let Enabled(ByVal vNewValue As Boolean)
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     EnableWindow hWnd_, vNewValue
 End Property
 
 Public Sub Refresh()
-    If CheckWindow() = 0 Then Exit Sub
+    If Not CheckWindow() Then Exit Sub
     UpdateWindow hWnd_
 End Sub
 
 Public Property Get TransparentColor() As Long
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     GetLayeredWindowAttributes hWnd_, TransparentColor, vbNull, vbNull
 End Property
 
 Public Property Let TransparentColor(ByVal vNewValue As Long)
     Dim r As Long, v As Byte
-    If CheckWindow() = 0 Then Exit Property
+    If Not CheckWindow() Then Exit Property
     r = GetWindowLong(hWnd_, GWL_EXSTYLE)
     If (r And WS_EX_LAYERED) = 0 Then
         r = r Or WS_EX_LAYERED
@@ -1448,9 +1461,14 @@ Public Function IsTopmost(Optional ByVal hWnd&) As Boolean
     t1 = Ret Or WS_EX_TOPMOST
     IsTopmost = (Ret = t1)
 End Function
+'判断当前窗口是否为活动窗口
+Public Function IsForegroundWindow(Optional ByVal hWnd&) As Boolean
+    If hWnd = 0 Then hWnd = hWnd_ '如果没写则表示处理当前存储的句柄
+    IsForegroundWindow = (GetForegroundWindow() = hWnd_)
+End Function
 '此方法未经测试
 Public Sub ZOrder()
-    If CheckWindow() = 0 Then Exit Sub
+    If Not CheckWindow() Then Exit Sub
     BringWindowToTop hWnd_
 End Sub
 '得到版本信息
