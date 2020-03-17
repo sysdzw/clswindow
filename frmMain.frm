@@ -392,114 +392,13 @@ End If
 'w.ClickElementByClassName "paneClassDC"
 End Sub
 
-
 Private Sub Command1_Click()
-'Dim i%
-'Dim w As New clsWindow
-'w.GetWindowByClassName("Notepad").SetElementTextByClassName "Edit", "csdn欢迎你！"
-
-'Do While w.GetWindowByTitleEx("统计器").SetElementTextByClassName("ThunderRT6TextBox", "次序" & i + 1, i + 1)
-'    i = i + 1
-'Loop
-
-'w.GetWindowByTitle("计算器").Shake Vertical, 10, 50, 100
-'w.FadeOut , True
-'w.FadeIn
-
-'w.GetWindowByTitle("登陆").SetElementTextByClassName "WindowsForms10.EDIT.app.0.378734a", "admin", 2
-'w.SetElementTextByClassName "WindowsForms10.EDIT.app.0.378734a", "123456", 1
-'w.ClickElementByClassName "WindowsForms10.BUTTON.app.0.378734a", 2
-'w.ClickElementByText "登陆"
-
-'点出记事本关于窗口
-'w.GetWindowByTitleEx "记事本"
-'w.Focus
-'w.ClickPoint w.Left + 242, w.Top + 36
-'w.ClickPoint w.Left + 242, w.Top + 97
-'w.GetWindowByTitleEx("记事本").ClickPoint w.Left + 242, w.Top + 36
-
-'自动操作记事本打开文件
-'w.GetWindowByTitleEx("记事本").Focus
-'SendKeys "^{o}" '使用快捷键Ctrl+O打开
-'w.GetWindowByTitle("打开").SetElementTextByClassName "Edit", "c:\1.txt" '设置文件路径
-'w.ClickElementByText "打开(&O)" '点击打开按钮
-
-'w.GetWindowByTitleEx("记事本").SetElementTextByClassName "Edit", "hello world!" & vbCrLf & Now
-
-'关闭记事本窗口 通过模拟按键的办法
-'w.GetWindowByTitleEx("记事本").Focus
-'SendKeys "% "
-'SendKeys "c"
-
-'Dim hwnds$
-'w.GetWindowByClassNameEx "Notepad", , hwnds
-'MsgBox hwnds
-
-'w.GetWindowByClassNameEx("Notepad").Focus
-'w.ClickPoint w.Left + 40, w.Top + 40
-
-'2018-05-12 19:19:17
-'w.GetWindowByTitleEx "鸿柯电脑收发存统计系统", 1
-'w.hWnd = w.GetElementHwndByClassName("ThunderRT6FormDC")
-'i = 0
-'Do
-'    i = i + 1
-'    If Not w.SetElementTextByClassName("ThunderRT6TextBox", "测试" & i, i) Then Exit Do
-'Loop
-'MsgBox "填写完毕了！"
-'
-''下面开始获取
-'MsgBox w.GetElementTextByClassName("ThunderRT6TextBox", 2)
-
-'2018-05-14 21:03:11
-'w.GetWindowByTitle("有道云笔记").ClickPoint w.Left + 205, w.Top + w.Height - 130
-'Dim w As New clsWindow
-'w.GetWindowByTitle "有道云笔记"
-'w.ClickPoint w.Left + 205, w.Top + w.Height - 130
-'w.GetWindowByClassName("GeneralHtmlDialog").CloseWindow
-
-'w.GetWindowByTitleEx("自动化操作框架").ClickPoint 144, 185
-'SendMessage Combo1.hWnd, &H14E, "4324", 0
-'Combo1.Text = "4324"
-'MsgBox Combo1.ListIndex
-
-'w.SelectComboBoxIndex Combo1.hWnd, 0
-'Dim w As New clsWindow
-'w.GetWindowByTitleEx("新时代").SetElementTextByClassName "Edit", "12345678"
-'w.SetElementTextByClassName "Edit", "8888888", 2
-'MsgBox w.GetWindowByTitleEx("imm").AppName
-
-'w.WAIT 5000
-'Dim i%
-'For i = 1 To 3000
-'    w.WAIT 50
-'    w.ClickPoint2
-'Next
-'MsgBox "点击好了"
-'SetParent w.GetWindowByPID(Shell("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", 1)).hWnd, Me.hWnd
-'MsgBox w.GetWindowByClassName("ConsoleWindowClass").Caption
-'MsgBox w.GetCursorPoint
-'w.SetPoint 200, 200
-'MsgBox w.GetCursorPoint
-'SetParent
-'
-'w.GetWindowByPID(Shell("G:\Program Files\Microsoft Office\Office14\winword.exe", 1), , , DisplayedWindow).Focus
-'w.Wait 2000
-'w.Focus
-'Me.Caption = w.hWnd
-'SendKeys "love"
-'Shell "G:\Program Files\Microsoft Office\Office14\winword.exe", 1
-'w.GetWindowByClassName "NetUIHWND"
-'MsgBox w.Caption
-
-
-
-'Dim w As New clsWindow
-'w.GetWindowByPID(Shell("notepad", 1)).Caption = "改变标题 CMB666"
-'w.SetElementTextByClassName "Edit", "添加文本内容 CBM666"
 
 Dim w As New clsWindow
+MsgBox w.GetClassNameByHwnd(9245384)
 
+'w.hWnd = 9245384
+'MsgBox w.ClassName
 End Sub
 
 '调用记事本然后写入一些内容后保存到c:\test.txt
@@ -550,7 +449,7 @@ Private Sub sendQQMsg(ByVal strName$, ByVal strMsg$)
     If w.GetWindowByTitle(strName).hWnd <> 0 Then
         w.SetPosNormal
         w.Focus
-        w.ClickPoint w.Left + 35, w.Top + w.Height - 100, absolute
+        w.ClickPoint w.Left + 35, w.Top + w.Height - 100, ABSOLUTE
         w.Wait 20
         Clipboard.Clear
         Clipboard.SetText strMsg
