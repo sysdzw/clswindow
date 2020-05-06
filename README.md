@@ -128,8 +128,12 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：GetWindowTextByHwnd 获得窗口标题，给窗口句柄专用       2020/02/28
 '               修正函数：Focus 旧方法使用后会改变置顶窗口属性                   2020/03/02
 '               增加函数：IsWin64 网友小凡提供                                  2020/03/12
-'               修正函数：AppPath 网友小凡提供兼容64系统的方法
+'               修正函数：AppPath 网友小凡提供兼容64位系统的方法
 '               修正函数：AppCommandLine 网友小凡做了兼容64位处理及其他代码优化  2020/03/15
+'               增加函数：IsForegroundWindow 判断窗口是否为活动窗口             2020/03/17
+'               增加函数：GetClassNameByHwnd 根据句柄得到类名
+'               增加属性：ClassName(Get) 返回窗口的类名
+'               更新函数：CheckWindow 返回值由Long改成Boolean了，并且公开
 '==============================================================================================
 ```
 
