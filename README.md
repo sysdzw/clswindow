@@ -130,7 +130,8 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：IsForegroundWindow 判断窗口是否为活动窗口             2020/03/17
 '               增加函数：GetClassNameByHwnd 根据句柄得到类名
 '               增加属性：ClassName(Get) 返回窗口的类名
-'               更新函数：CheckWindow 返回值由Long改成Boolean了，并且公开
+'               更新函数：CheckWindow 返回值由Long改成Boolean了，并且设为Public
+'               增加函数：Click 点击当前句柄或者指定句柄                        2020/06/29
 '==============================================================================================
 ```
 
