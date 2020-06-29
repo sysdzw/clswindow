@@ -88,12 +88,13 @@ Attribute VB_Exposed = False
 '               增加函数：GetWindowTextByHwnd 获得窗口标题，给窗口句柄专用       2020/02/28
 '               修正函数：Focus 旧方法使用后会改变置顶窗口属性                   2020/03/02
 '               增加函数：IsWin64 网友小凡提供                                  2020/03/12
-'               修正函数：AppPath 网友小凡提供兼容64系统的方法
+'               修正函数：AppPath 网友小凡提供兼容64位系统的方法
 '               修正函数：AppCommandLine 网友小凡做了兼容64位处理及其他代码优化  2020/03/15
 '               增加函数：IsForegroundWindow 判断窗口是否为活动窗口             2020/03/17
 '               增加函数：GetClassNameByHwnd 根据句柄得到类名
 '               增加属性：ClassName(Get) 返回窗口的类名
-'               更新函数：CheckWindow 返回值由Long改成Boolean了，并且公开
+'               更新函数：CheckWindow 返回值由Long改成Boolean了，并且设为Public
+'               增加函数：Click 点击当前句柄或者指定句柄                        2020/06/29
 '==============================================================================================
 Option Explicit
 
@@ -1070,6 +1071,14 @@ Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional
         SetElementTextByText = False
     End If
 End Function
+'点击指定句柄
+Public Function Click(Optional ByVal hWnd1&) As Long
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+    Click = PostMessage(hWnd1, BM_CLICK, 0&, ByVal 0)
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数Click执行完毕" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
+    End If
+End Function
 '根据控件的类名点击控件
 Public Function ClickElementByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp = False) As Long
     Dim lngControlsHwnd As Long
@@ -1142,17 +1151,22 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
         writeToFile "DEBUG.txt", Now & " 函数getMatchHwndFromWindow执行完毕" & vbCrLf & "匹配数量为=" & matchs.Count, False
     End If
 End Function
-Public Function CloseWindow() As Long
-    CloseWindow = PostMessage(hWnd_, WM_CLOSE, 0, 0)
+Public Function CloseWindow(Optional ByVal hWnd1&) As Long
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+    CloseWindow = PostMessage(hWnd1, WM_CLOSE, 0, 0)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数closeWindow执行完毕" & vbCrLf & "关闭窗口，句柄为=" & hWnd_, False
+        writeToFile "DEBUG.txt", Now & " 函数closeWindow执行完毕" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
     End If
 End Function
-Public Function CloseApp() As Long
+Public Function CloseApp(Optional ByVal hWnd1&) As Long
     Dim hProcess&
-    hProcess = OpenProcess(&H1F0FFF, False, ProcessID())
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+    hProcess = OpenProcess(&H1F0FFF, False, ProcessID(hWnd1))
     CloseApp = TerminateProcess(hProcess, 0)
     CloseHandle hProcess
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数CloseApp执行完毕" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
+    End If
 End Function
 Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = RELATIVE, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If PositionMod = ABSOLUTE Then
@@ -1529,7 +1543,7 @@ End Function
 '返回值：True或False，成功则返回前者，否则返回后者
 '备注：sysdzw 于 2007-5-2 提供
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Private Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCover As Boolean = True) As Boolean
+Public Function writeToFile(ByVal strFileName$, ByVal strContent$, Optional isCover As Boolean = True) As Boolean
     On Error GoTo Err1
     Dim fileHandl%
     fileHandl = FreeFile
