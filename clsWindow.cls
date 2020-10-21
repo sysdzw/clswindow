@@ -526,15 +526,6 @@ Public Sub Focus()
         writeToFile "DEBUG.txt", Now & " 函数 Focus 被调用。", False
     End If
     
-    BringWindowToTop hWnd_
-    SetFocusAPI hWnd_
-End Sub
-'设置当前窗口为活动窗口 旧方法，保留
-Public Sub Focus2()
-    If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 Focus2 被调用。", False
-    End If
-    
     Dim hForeWnd&, dwForeID&, dwCurID&, isTopmostCurrentWindow As Boolean
     isTopmostCurrentWindow = IsTopMost()
     hForeWnd = GetForegroundWindow()
@@ -549,6 +540,15 @@ Public Sub Focus2()
     End If
     SetForegroundWindow hWnd_
     AttachThreadInput dwCurID, dwForeID, False
+End Sub
+'设置当前窗口为活动窗口，有时无效，暂且保留
+Public Sub Focus2()
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 Focus2 被调用。", False
+    End If
+    
+    BringWindowToTop hWnd_
+    SetFocusAPI hWnd_
 End Sub
 '支持和VB中通常名称的方法
 Public Sub SetFocus()
@@ -827,7 +827,6 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
     Dim strHwnd
 
     strAppName = LCase$(strAppName)
-    writeToFile "DEBUG_exe.txt", ""
     hWnd_ = 0
     Do
         currWnd = GetDesktopWindow()
