@@ -99,13 +99,21 @@ Attribute VB_Exposed = False
 Option Explicit
 
 '常量定义
-Private Const SW_MINIMIZE = 6
-Private Const SW_SHOW = 5
-Private Const SW_SHOWMAXIMIZED = 3
-Private Const SW_SHOWMINIMIZED = 2
 Private Const SW_HIDE = 0
-Private Const SW_NORMAL = 1
 Private Const SW_SHOWNORMAL = 1
+Private Const SW_NORMAL = 1
+Private Const SW_SHOWMINIMIZED = 2
+Private Const SW_SHOWMAXIMIZED = 3
+Private Const SW_MAXIMIZE = 3
+Private Const SW_SHOWNOACTIVATE = 4
+Private Const SW_SHOW = 5
+Private Const SW_MINIMIZE = 6
+Private Const SW_SHOWMINNOACTIVE = 7
+Private Const SW_SHOWNA = 8
+Private Const SW_RESTORE = 9
+Private Const SW_SHOWDEFAULT = 10
+Private Const SW_MAX = 10
+
 Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
 Private Const SWP_NOSIZE = &H1
@@ -648,7 +656,24 @@ Public Function AppCommandLine(Optional ByVal lPid&) As String
 End Function
 '得到exe文件的启动参数
 Public Function CommandLine(Optional ByVal lPid&) As String
+    If lPid = 0 Then lPid = Me.pid '如果没写则表示处理当前存储的PID
     CommandLine = AppCommandLine(lPid&)
+End Function
+'检查窗口可见是否符合指定要求
+Private Function CheckWindowVisible(ByVal lngHwnd&, ByVal windowVisible As enumWindowVisible) As Boolean
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 CheckWindowVisible 被调用。参数为 lngHwnd=" & lngHwnd & vbTab & " windowVisible=" & windowVisible, False
+    End If
+    
+    If lngHwnd <> 0 Then
+        If windowVisible = AllWindow Then
+            CheckWindowVisible = True
+        ElseIf windowVisible = DisplayedWindow Then
+            If myIsWindowVisibled(lngHwnd) Then CheckWindowVisible = True
+        ElseIf windowVisible = HiddenWindow Then
+            If Not myIsWindowVisibled(lngHwnd) Then CheckWindowVisible = True
+        End If
+    End If
 End Function
 '设置根据窗体标题得到窗口句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待10秒
 Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -671,22 +696,6 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
 
     wReturn.hWnd = hWnd_
     Set GetWindowByTitle = wReturn
-End Function
-'检查窗口可见是否符合指定要求
-Private Function CheckWindowVisible(ByVal lngHwnd&, ByVal windowVisible As enumWindowVisible) As Boolean
-    If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 CheckWindowVisible 被调用。参数为 lngHwnd=" & lngHwnd & vbTab & " windowVisible=" & windowVisible, False
-    End If
-    
-    If lngHwnd <> 0 Then
-        If windowVisible = AllWindow Then
-            CheckWindowVisible = True
-        ElseIf windowVisible = DisplayedWindow Then
-            If myIsWindowVisibled(lngHwnd) Then CheckWindowVisible = True
-        ElseIf windowVisible = HiddenWindow Then
-            If Not myIsWindowVisibled(lngHwnd) Then CheckWindowVisible = True
-        End If
-    End If
 End Function
 '和GetWindowByTitle函数功能类似，只是这个是模糊匹配
 Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp As Boolean = False, Optional ByVal checkPid = "", Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -1546,6 +1555,9 @@ Public Property Get WindowState() As enumWindowState
 End Property
 '设置窗口状态
 Public Property Let WindowState(ByVal vNewValue As enumWindowState)
+ShowWindow hWnd_, SW_HIDE
+ShowWindow hWnd_, SW_SHOWNOACTIVATE
+Exit Property
     If Not CheckWindow() Then Exit Property
     Select Case vNewValue
         Case 0
