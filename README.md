@@ -52,7 +52,7 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '名    称：windows窗体控制类v2.2
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
 '使用范例：Dim window As New clsWindow
-'          window.GetWindowByTitle("计算器").closeWindow
+'         window.GetWindowByTitle("计算器").closeWindow' ***!!!win10如果异常请用管理员权限执行***!!!
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
 '博    客：https://blog.csdn.net/sysdzw
@@ -132,6 +132,8 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加属性：ClassName(Get) 返回窗口的类名
 '               更新函数：CheckWindow 返回值由Long改成Boolean了，并且设为Public
 '               增加函数：Click 点击当前句柄或者指定句柄                        2020/06/29
+'               更新函数：为兼容win10将设置窗口最大最小化改用SendMessage实现     2021/12/10
+'               增加函数：Restore 还原窗口，比如最大最小化后需要还原
 '==============================================================================================
 ```
 
