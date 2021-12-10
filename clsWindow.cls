@@ -15,7 +15,7 @@ Attribute VB_Exposed = False
 '名    称：windows窗体控制类v2.2
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
 '使用范例：Dim window As New clsWindow
-'          window.GetWindowByTitle("计算器").closeWindow
+'         window.GetWindowByTitle("计算器").closeWindow'win10如果异常请用管理员权限执行
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
 '博    客：https://blog.csdn.net/sysdzw
@@ -95,6 +95,8 @@ Attribute VB_Exposed = False
 '               增加属性：ClassName(Get) 返回窗口的类名
 '               更新函数：CheckWindow 返回值由Long改成Boolean了，并且设为Public
 '               增加函数：Click 点击当前句柄或者指定句柄                        2020/06/29
+'               更新函数：为兼容win10将设置窗口最大最小化改用SendMessage实现     2021/12/10
+'               增加函数：Restore 还原窗口，比如最大最小化后需要还原
 '==============================================================================================
 Option Explicit
 
@@ -125,6 +127,7 @@ Private Const SM_CYSCREEN As Long = 1&
 Private Const BM_CLICK = &HF5
 Private Const GWL_ID = (-12)
 Private Const GWL_STYLE = (-16)
+Private Const WM_SYSCOMMAND = &H112
 Private Const WM_SETFOCUS = &H7
 Private Const WM_LBUTTONDOWN = &H201
 Private Const WM_LBUTTONUP = &H202
@@ -133,7 +136,9 @@ Private Const WM_SETTEXT = &HC
 Private Const WM_GETTEXT = &HD
 Private Const WM_GETTEXTLENGTH = &HE
 
-
+Private Const SC_MINIMIZE = &HF020&
+Private Const SC_MAXIMIZE = &HF030&
+Private Const SC_RESTORE = &HF120&
 Private Const SC_MOVE = &HF010&
 Private Const MF_BYCOMMAND = &H0&
 Private Const MF_ENABLED = &H0&
@@ -486,7 +491,8 @@ Public Function Minimized() As Long
     End If
     
     If hWnd_ <> 0 Then
-        Minimized = ShowWindow(hWnd_, SW_SHOWMINIMIZED)
+'        Minimized = ShowWindow(hWnd_, SW_SHOWMINIMIZED)
+        Minimized = SendMessage(hWnd_, WM_SYSCOMMAND, SC_MINIMIZE, ByVal 0&)
     End If
 End Function
 '设置窗口最大化
@@ -496,9 +502,21 @@ Public Function Maximized() As Long
     End If
     
     If hWnd_ <> 0 Then
-        Maximized = ShowWindow(hWnd_, SW_SHOWMAXIMIZED)
+'        Maximized = ShowWindow(hWnd_, SW_SHOWMAXIMIZED)
+        Maximized = SendMessage(hWnd_, WM_SYSCOMMAND, SC_MAXIMIZE, ByVal 0&)
     End If
 End Function
+'设置窗口还原
+Public Function Restore() As Long
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 Restore 被调用。", False
+    End If
+    
+    If hWnd_ <> 0 Then
+        Restore = SendMessage(hWnd_, WM_SYSCOMMAND, SC_RESTORE, ByVal 0&)
+    End If
+End Function
+
 '设置窗口位置隐藏
 Public Function Hide() As Long
     If DebugMe Then
@@ -1801,4 +1819,8 @@ Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Bool
     lRet = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
     ControlsInfo = strControlInfo
     If isDebug Then writeToFile "controls.txt", strControlInfo
+End Function
+'测试专用
+Public Function test() As String
+    test = SendMessage(hWnd_, WM_LBUTTONDOWN, 100, 100)
 End Function
