@@ -15,7 +15,7 @@ Attribute VB_Exposed = False
 '名    称：windows窗体控制类v2.2
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
 '使用范例：Dim window As New clsWindow
-'         window.GetWindowByTitle("计算器").closeWindow'win10如果异常请用管理员权限执行
+'         window.GetWindowByTitle("计算器").closeWindow' ***!!!win10如果异常请用管理员权限执行***!!!
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
 '博    客：https://blog.csdn.net/sysdzw
@@ -97,6 +97,8 @@ Attribute VB_Exposed = False
 '               增加函数：Click 点击当前句柄或者指定句柄                        2020/06/29
 '               更新函数：为兼容win10将设置窗口最大最小化改用SendMessage实现     2021/12/10
 '               增加函数：Restore 还原窗口，比如最大最小化后需要还原
+'               增加函数：SendKeys 替代VB自带的，解决win10下提示拒绝的错误       2022/05/10
+'               优化函数：GetMatchHwndFromWindow 设置搜集窗口信息最大尝试10次
 '==============================================================================================
 Option Explicit
 
@@ -291,6 +293,7 @@ Public DebugMe As Boolean '表示是否启用调试模式
 '自定义变量声明
 Private strWindowInfo$ '保存所有窗口的信息，格式为 句柄 文本内容
 Private strWindowKeyWord$ '要参与的过滤的窗口的关键字，如果不需要过滤就留空
+
 '移动和设置窗口到指定位置，以及设置窗口的宽高。
 Public Function Move(Optional ByVal X, Optional ByVal Y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
     If IsMissing(X) Then X = Left
@@ -671,6 +674,10 @@ Public Function AppCommandLine(Optional ByVal lPid&) As String
             End If
         Next
     Next
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 AppCommandLine 执行完毕。", False
+    End If
 End Function
 '得到exe文件的启动参数
 Public Function CommandLine(Optional ByVal lPid&) As String
@@ -714,6 +721,10 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
 
     wReturn.hWnd = hWnd_
     Set GetWindowByTitle = wReturn
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByTitle 执行完毕。", False
+    End If
 End Function
 '和GetWindowByTitle函数功能类似，只是这个是模糊匹配
 Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp As Boolean = False, Optional ByVal checkPid = "", Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -765,6 +776,10 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     End If
     Set GetWindowByTitleEx = wReturn
     hWnd_ = wReturn.hWnd
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByTitleEx 执行完毕。", False
+    End If
 End Function
 '设置根据窗体类名返回窗体句柄，可以指定等待几秒检测指定标题的窗体是否出现，默认是等待10秒
 Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -787,6 +802,10 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
 
     wReturn.hWnd = hWnd_
     Set GetWindowByClassName = wReturn
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByClassName 执行完毕。", False
+    End If
 End Function
 '设置根据窗体类名得到窗口句柄，可以指定等待几秒检测指定类名的窗体是否出现，默认是等待10秒，允许使用正则表达式
 Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal checkPid = "", Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -839,6 +858,10 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     End If
     Set GetWindowByClassNameEx = wReturn
     hWnd_ = wReturn.hWnd
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByClassNameEx 执行完毕。", False
+    End If
 End Function
 '设置根据进程名称返回窗体句柄，可以指定等待几秒检测指定进程名称的窗体是否出现，默认是等待10秒
 Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeconds& = 10, Optional ByVal isWholeMatch As Boolean = False, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -884,6 +907,10 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
     Loop
     wReturn.hWnd = hWnd_
     Set GetWindowByAppName = wReturn
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByAppName 执行完毕。", False
+    End If
 End Function
 '设置根据进程名称返回窗体句柄，可以指定等待几秒检测指定进程名称的窗体是否出现，默认是等待10秒，原理还是枚举所有窗体检查它们的所属进程，只不过是根据目标的进程名跟strAppName比对
 Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional isUseRegExp = False, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -943,6 +970,10 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     End If
     Set GetWindowByAppNameEx = wReturn
     hWnd_ = wReturn.hWnd
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByAppNameEx 执行完毕。", False
+    End If
 End Function
 '根据pid获得窗体
 Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds& = 10, Optional ByRef hWndAll, Optional ByVal windowVisible As enumWindowVisible = AllWindow) As clsWindow
@@ -996,6 +1027,10 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
     End If
     Set GetWindowByPID = wReturn
     hWnd_ = wReturn.hWnd
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByPID 执行完毕。", False
+    End If
 End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '以下几个方法为网友wwb（邮箱：wwbing@gmail.com）所增加
@@ -1216,7 +1251,7 @@ Public Function Click(Optional ByVal hWnd1&) As Long
     If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
     
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 Click 执行完毕" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
+        writeToFile "DEBUG.txt", Now & " 函数 Click 被调用" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
     End If
     
 '    Click = PostMessage(hWnd1, BM_CLICK, 0&, ByVal 0)
@@ -1275,7 +1310,9 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
     Dim matchs As Object, match As Object
     Dim strControlsInfo As String
     Dim intGet As Integer
-
+    Dim intRetryCount As Integer
+    
+err_retry:
     strControlsInfo = ControlsInfo(hWnd_, DebugMe)
     Set reg = CreateObject("vbscript.regexp")
     reg.Global = True
@@ -1300,17 +1337,25 @@ Private Function GetMatchHwndFromWindow(ByVal Pattern As String, Optional ByVal 
             End If
         Next
     End If
+    
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " >> 函数 getMatchHwndFromWindow 执行完毕。匹配数量为=" & matchs.Count, False
     End If
+
+    '如果获取结果为0，那么可能是执行太快，目标窗口还没渲染好，所以我们延时50ms再检测下，最多重复执行10次
+    If matchs.Count = 0 And intRetryCount < 9 Then
+        Wait 50
+        intRetryCount = intRetryCount + 1
+        GoTo err_retry
+    End If
 End Function
 Public Function CloseWindow(Optional ByVal hWnd1&) As Long
-    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
-
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 closeWindow 执行完毕。参数为 hWnd1=" & hWnd1, False
+        writeToFile "DEBUG.txt", Now & " 函数 closeWindow 被调用。参数为 hWnd1=" & hWnd1, False
     End If
     
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+
     CloseWindow = PostMessage(hWnd1, WM_CLOSE, 0, 0)
 End Function
 Public Function CloseApp(Optional ByVal hWnd1&) As Long
@@ -1323,10 +1368,10 @@ Public Function CloseApp(Optional ByVal hWnd1&) As Long
         writeToFile "DEBUG.txt", Now & " 函数CloseApp执行完毕" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
     End If
 End Function
-'
+'点击具体的某个点
 Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = RELATIVE, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 ClickPoint 执行完毕。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " clickTimes=" & clickTimes & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+        writeToFile "DEBUG.txt", Now & " 函数 ClickPoint 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " clickTimes=" & clickTimes & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
     If PositionMod = ABSOLUTE Then
@@ -1348,7 +1393,7 @@ End Sub
 '点击当前坐标
 Public Sub ClickCurrentPoint()
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 ClickCurrentPoint 执行完毕。", False
+        writeToFile "DEBUG.txt", Now & " 函数 ClickCurrentPoint 被调用。", False
     End If
     
     mouse_event MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0
@@ -1357,7 +1402,7 @@ End Sub
 '移动鼠标到指定点
 Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 SetCursor 执行完毕。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+        writeToFile "DEBUG.txt", Now & " 函数 SetCursor 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
     If PositionMod = ABSOLUTE Then
@@ -1388,7 +1433,7 @@ End Sub
 '直接获得当前鼠标下的窗口或控件的句柄
 Public Function GetCursorPosCurrent() As String
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 GetCursorPosCurrent 执行完毕。", False
+        writeToFile "DEBUG.txt", Now & " 函数 GetCursorPosCurrent 被调用。", False
     End If
     
     Dim tPoint As POINTAPI
@@ -1403,7 +1448,7 @@ End Function
 '特效1：窗体抖动
 Public Sub Shake(Optional ByVal shakeShift As enumShift = Both, Optional ByVal shakeRepeats = 30, Optional ByVal shakePads = 10, Optional ByVal shakeInterval = 25)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 Shake 执行完毕。参数为 shakeShift=" & shakeShift & vbTab & " shakeRepeats=" & shakeRepeats & vbTab & " shakePads=" & shakePads & vbTab & " shakeInterval=" & shakeInterval, False
+        writeToFile "DEBUG.txt", Now & " 函数 Shake 被调用。参数为 shakeShift=" & shakeShift & vbTab & " shakeRepeats=" & shakeRepeats & vbTab & " shakePads=" & shakePads & vbTab & " shakeInterval=" & shakeInterval, False
     End If
     
     Dim i%
@@ -1462,7 +1507,7 @@ Public Sub FadeIn(Optional ByVal speed = 10, Optional ByVal intPercentTansparent
     End If
     
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 FadeIn 执行完毕。参数为 speed=" & speed & vbTab & " intPercentTansparentRemains~=" & intMaxTrans, False
+        writeToFile "DEBUG.txt", Now & " 函数 FadeIn 被调用。参数为 speed=" & speed & vbTab & " intPercentTansparentRemains~=" & intMaxTrans, False
     End If
 
 '    SetLayeredWindowAttributes hWnd_, 0, 100, LWA_ALPHA
@@ -1479,7 +1524,7 @@ End Sub
 '可以选择是否关闭窗口或者经常
 Public Sub FadeOut(Optional ByVal speed = 10, Optional ByVal isCloseWindow = False, Optional ByVal isCloseApp = False)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 FadeOut 执行完毕。参数为 speed=" & speed & vbTab & " isCloseWindow=" & isCloseWindow & vbTab & " isCloseApp=" & isCloseApp, False
+        writeToFile "DEBUG.txt", Now & " 函数 FadeOut 被调用。参数为 speed=" & speed & vbTab & " isCloseWindow=" & isCloseWindow & vbTab & " isCloseApp=" & isCloseApp, False
     End If
     
     Dim sty As Long, i As Long
@@ -1503,7 +1548,7 @@ End Sub
 '窗体设置透明，Percent 只接受：0到100的数、0%到100%、以及介于0到1的小数
 Public Function Transparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd&) As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 Transparent 执行完毕。参数为 Percent=" & Percent & vbTab & " lngHwnd=" & lngHwnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 Transparent 被调用。参数为 Percent=" & Percent & vbTab & " lngHwnd=" & lngHwnd, False
     End If
     
     If lngHwnd = 0 Then lngHwnd = hWnd_ '如果没写则表示处理当前存储的句柄
@@ -1535,7 +1580,7 @@ End Function
 '同Transparent
 Public Function MakeTransparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 MakeTransparent 执行完毕。参数为 Percent=" & Percent & vbTab & " lngHwnd=" & lngHwnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 MakeTransparent 被调用。参数为 Percent=" & Percent & vbTab & " lngHwnd=" & lngHwnd, False
     End If
     
     If IsMissing(Percent) And IsMissing(lngHwnd) Then
@@ -1549,7 +1594,7 @@ End Function
 '同Transparent
 Public Function SetTransparent(Optional ByVal Percent = "50", Optional ByVal lngHwnd) As Long
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 SetTransparent 执行完毕。参数为 Percent=" & Percent & vbTab & " lngHwnd=" & lngHwnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 SetTransparent 被调用。参数为 Percent=" & Percent & vbTab & " lngHwnd=" & lngHwnd, False
     End If
     
     If IsMissing(Percent) And IsMissing(lngHwnd) Then
@@ -1594,7 +1639,7 @@ End Property
 '检查窗口是否可见，如果长宽有一项为0也认为不可见
 Private Function myIsWindowVisibled(ByVal hWnd_ As Long) As Boolean
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 myIsWindowVisibled 执行完毕。参数为 hWnd_=" & hWnd_, False
+        writeToFile "DEBUG.txt", Now & " 函数 myIsWindowVisibled 被调用。参数为 hWnd_=" & hWnd_, False
     End If
     
     myIsWindowVisibled = CBool(IsWindowVisible(hWnd_) = 1) '用api函数判断窗口是否可见
@@ -1653,7 +1698,7 @@ End Property
 
 Public Sub Refresh()
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 Refresh 执行完毕。", False
+        writeToFile "DEBUG.txt", Now & " 函数 Refresh 被调用。", False
     End If
     
     If Not CheckWindow() Then Exit Sub
@@ -1680,7 +1725,7 @@ End Property
 '设置窗体置顶
 Public Sub SetTop(Optional ByVal isSetTop As Boolean = True)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 SetTop 执行完毕。参数为 isSetTop=" & isSetTop, False
+        writeToFile "DEBUG.txt", Now & " 函数 SetTop 被调用。参数为 isSetTop=" & isSetTop, False
     End If
     
     SetWindowPos hWnd, IIf(isSetTop, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOSIZE + SWP_NOMOVE
@@ -1688,7 +1733,7 @@ End Sub
 '判断窗口置顶函数
 Public Function IsTopMost(Optional ByVal hWnd&) As Boolean
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 IsTopMost 执行完毕。参数为 hWnd=" & hWnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 IsTopMost 被调用。参数为 hWnd=" & hWnd, False
     End If
     
     If hWnd = 0 Then hWnd = hWnd_ '如果没写则表示处理当前存储的句柄
@@ -1702,7 +1747,7 @@ Public Function IsForegroundWindow(Optional ByVal hWnd&) As Boolean
     If hWnd = 0 Then hWnd = hWnd_ '如果没写则表示处理当前存储的句柄
     
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 IsForegroundWindow 执行完毕。参数为 hWnd=" & hWnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 IsForegroundWindow 被调用。参数为 hWnd=" & hWnd, False
     End If
     
     IsForegroundWindow = (GetForegroundWindow() = hWnd_)
@@ -1710,7 +1755,7 @@ End Function
 '此方法未经测试
 Public Sub ZOrder()
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 ZOrder 执行完毕。", False
+        writeToFile "DEBUG.txt", Now & " 函数 ZOrder 被调用。", False
     End If
     
     If Not CheckWindow() Then Exit Sub
@@ -1724,7 +1769,7 @@ End Property
 '根据指定的index选择下拉框中内容
 Public Sub SelectComboBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 过程 SelectComboBoxIndex 执行完毕。参数为 hWnd=" & hWnd & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " 过程 SelectComboBoxIndex 被调用。参数为 hWnd=" & hWnd & vbTab & " intIndex=" & intIndex, False
     End If
     
     SendMessage hWnd, CB_SETCURSEL, intIndex, 0
@@ -1732,7 +1777,7 @@ End Sub
 '延时，单位为毫秒
 Public Function Wait(ByVal MilliSeconds As Long)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 过程 Wait 执行完毕。参数为 MilliSeconds=" & MilliSeconds, False
+        writeToFile "DEBUG.txt", Now & " 过程 Wait 被调用。参数为 MilliSeconds=" & MilliSeconds, False
     End If
     
     Dim dSavetime As Double
@@ -1743,7 +1788,7 @@ Public Function Wait(ByVal MilliSeconds As Long)
 End Function
 Private Function replaceReg(ByVal str1$, ByVal strPattern$, ByVal strNew$) As String
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 过程 replaceReg 执行完毕。参数为 str1=" & str1 & vbTab & " strPattern=" & strPattern & vbTab & " strNew=" & strNew, False
+        writeToFile "DEBUG.txt", Now & " 过程 replaceReg 被调用。参数为 str1=" & str1 & vbTab & " strPattern=" & strPattern & vbTab & " strNew=" & strNew, False
     End If
     
     Dim strData As String
@@ -1760,7 +1805,7 @@ Private Function replaceReg(ByVal str1$, ByVal strPattern$, ByVal strNew$) As St
 End Function
 Private Function regTest(ByVal str1$, ByVal strPattern$) As Boolean
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 过程 regTest 执行完毕。参数为 str1=" & str1 & vbTab & " strPattern=" & strPattern, False
+        writeToFile "DEBUG.txt", Now & " 过程 regTest 被调用。参数为 str1=" & str1 & vbTab & " strPattern=" & strPattern, False
     End If
     
     Dim strData As String
@@ -1810,16 +1855,24 @@ End Function
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Public Function ControlsInfo(ByVal lngMainHwnd As Long, Optional isDebug As Boolean = False) As String
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 过程 ControlsInfo 执行完毕。参数为 lngMainHwnd=" & lngMainHwnd & vbTab & " isDebug=" & isDebug, False
+        writeToFile "DEBUG.txt", Now & " 过程 ControlsInfo 被调用。参数为 lngMainHwnd=" & lngMainHwnd & vbTab & " isDebug=" & isDebug, False
     End If
     
     Dim lRet&
     strControlInfo = ""
+'    Wait 1000
     lRet = EnumChildProc(lngMainHwnd, 0&)
     lRet = EnumChildWindows(lngMainHwnd, AddressOf EnumChildProc, 0&)
     ControlsInfo = strControlInfo
     If isDebug Then writeToFile "controls.txt", strControlInfo
 End Function
+'替代vb自带的sendkeys，可以解决win10下提示拒绝的问题
+Public Sub SendKeys(ByVal strKeys As String)
+    Dim ws As Object
+    Set ws = CreateObject("wscript.shell")
+    ws.SendKeys strKeys
+    Set ws = Nothing
+End Sub
 '测试专用
 Public Function test() As String
     test = SendMessage(hWnd_, WM_LBUTTONDOWN, 100, 100)

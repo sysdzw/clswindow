@@ -10,6 +10,10 @@ Begin VB.Form frmMain
    ScaleHeight     =   6975
    ScaleWidth      =   8550
    StartUpPosition =   2  '屏幕中心
+   Begin VB.Timer Timer1 
+      Left            =   5160
+      Top             =   5520
+   End
    Begin VB.HScrollBar HScroll1 
       Height          =   375
       Left            =   3600
@@ -393,17 +397,84 @@ End If
 End Sub
 
 Private Sub Command1_Click()
+    Dim w As New clsWindow
+''    If w.GetWindowByClassName("Notepad").hwnd <> 0 Then
+''        w.Focus
+''        w.Shake '默认抖动
+''    End If
+''
+'Dim s$
+''w.GetWindowByClassNameEx "DirectUIHWND", 1, s
+''MsgBox s
+'
+'If w.GetWindowByTitle("Internet Explorer", 0).hwnd > 0 Then
+'    w.GetWindowByHwnd(w.GetElementHwndByClassName("DirectUIHWND")).CloseWindow
+'End If
+'
+''    w.GetWindowByClassName("DirectUIHWND", 0).CloseWindow
+'
+'
+'GetWindowByTitle
+'Dim w As New clsWindow
+'If w.GetWindowByTitle("计算器", 0).hwnd <> 0 Then
+'    Do
+'        If Not w.CheckWindow Then
+'            MsgBox "计算器已关闭"
+'            Exit Do
+'        End If
+'        DoEvents
+'    Loop
+'Else
+'    MsgBox "计算器未打开"
+'End If
 
-Dim w As New clsWindow
-MsgBox w.GetClassNameByHwnd(9245384)
+'    Dim s$, strTmp$
+''    w.hwnd = 65962
+''    w.Visible = True
+''    Exit Sub
+'
+'    w.GetWindowByTitleEx "", 0, s, , , HiddenWindow
+''    MsgBox s
+'    Dim i%, v
+'    v = Split(s, " ")
+'    s = ""
+'    For i = 0 To UBound(v)
+'        strTmp = w.GetWindowTextByHwnd(v(i))
+'        If strTmp = "WeNote" Then w.GetWindowByHwnd(v(i)).Visible = True
+''        If strTmp <> "" Then s = s & v(i) & " " & strTmp & vbCrLf
+'    Next
+''    w.writeToFile "结果.txt", s
 
-'w.hWnd = 9245384
-'MsgBox w.ClassName
+'w.DebugMe = True
+'Dim w As New clsWindow
+'If w.GetWindowByTitle("转到指定行", 0).hWnd <> 0 Then
+'        w.SetElementTextByClassName "Edit", 999 '将行号改成999
+'        w.ClickElementByClassName "Button" '点击“转到”按钮，如果要点击“取消”按钮可以用w.ClickElementByClassName "Button", 1
+'    End If
+
+'w.hWnd = Me.hWnd
+'w.WindowState = vbMaximized
+
+'If w.GetWindowByTitleEx("计算器").hWnd <> 0 Then
+'    Dim hwndButton As Long
+'    hwndButton = w.GetElementHwndByText("8")
+'    w.GetWindowByHwnd(hwndButton).Focus
+'End If
+
+'MsgBox w.GetWindowByPID(12132).CommandLine
+'MsgBox w.CommandLine(5504)
+'MsgBox w.GetWindowByTitleEx("记事本").CommandLine
+w.GetWindowByTitleEx "记事本"
+w.Focus
+w.Wait 1000
+w.Focus
+w.test
+Me.Caption = Now
 End Sub
-
 '调用记事本然后写入一些内容后保存到c:\test.txt
 Private Sub Command8_Click()
     Dim w As New clsWindow
+'    w.DebugMe = True
     w.GetWindowByPID(Shell("notepad", 1)).Focus '根据pid直接获取窗口并设置为当前活动窗口
     w.Caption = "看到记事本打开了吗？" & Now '设置应用程序标题内容
     w.Shake '抖动窗口，可以通过参数调节抖动方向、速度、幅度、次数
@@ -418,7 +489,7 @@ Private Sub Command8_Click()
     
     w.Focus
     w.Wait 500
-    SendKeys "^{s}" '设置焦点后按快捷键保存
+    w.SendKeys "^{s}" '设置焦点后按快捷键保存
     Dim w2 As New clsWindow
     w2.GetWindowByTitleEx("另存为").SetElementTextByClassName "Edit", "c:\test" & Format(Now, "yyyymmddhhnnss") & ".txt"
     w2.ClickElementByText "保存(&S)"
@@ -492,3 +563,4 @@ End Sub
 Private Sub HScroll1_Scroll()
     Call HScroll1_Change
 End Sub
+
