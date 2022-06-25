@@ -12,7 +12,7 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '==============================================================================================
-'名    称：windows窗体控制类v2.2
+'名    称：windows窗体控制类v2.3
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
 '使用范例：Dim window As New clsWindow
 '         window.GetWindowByTitle("计算器").closeWindow' ***!!!win10如果异常请用管理员权限执行***!!!
@@ -22,22 +22,22 @@ Attribute VB_Exposed = False
 '用户手册：https://www.kancloud.cn/sysdzw/clswindow/
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
-'版    本：V1.0 初版                                                           2012/12/03
+'版    本：V1.0 初版                                                             2012/12/03
 '          V1.1 修正了几个正则相关的函数，调整了部分类结构                       2013/05/28
 '          V1.2 增加属性Caption，可以获取或设置当前标题栏                        2013/05/29
-'          V1.3 增加了方法Focus，可以激活当前窗口                               2013/06/01
+'          V1.3 增加了方法Focus，可以激活当前窗口                                2013/06/01
 '               增加了方法Left,Top,Width,Height,Move，处理窗口位置等
-'          V1.4 增加了窗口位置调整的几个函数                                    2013/06/04
+'          V1.4 增加了窗口位置调整的几个函数                                     2013/06/04
 '               增加了得到应用程序路径的函数AppName
 '               增加了得到应用程序启动参数的函数AppCommandLine
 '          V1.5 增加了窗口最大最小化，隐藏显示正常的几个函数                     2013/06/06
 '               增加了获取控件相关函数是否使用正则的参数UseRegExp默认F
-'          V1.6 将Left，Top函数改为属性，可获得可设置                           2013/06/10
-'          V1.7 增加函数：CloseApp 结束进程                                    2013/06/13
+'          V1.6 将Left，Top函数改为属性，可获得可设置                            2013/06/10
+'          V1.7 增加函数：CloseApp 结束进程                                      2013/06/13
 '               修正了部分跟正则匹配相关的函数
 '               增加函数：GetElementTextByText
 '               增加函数：GetElementHwndByText
-'          V1.8 增加函数：GetWindowByClassName                                 2013/06/26
+'          V1.8 增加函数：GetWindowByClassName                                   2013/06/26
 '               增加函数：GetWindowByClassNameEx
 '               增加函数：GetWindowByAppName
 '               增加私有变量hWnd_
@@ -50,55 +50,57 @@ Attribute VB_Exposed = False
 '                 CheckWindow, Load, WindowState, Visible, hDC, ZOrder
 '                 AlphaBlend, Enabled, Refresh, TransparentColor
 '               采纳wwb网友的部分意见，将句柄变量改为hWnd_，但是hWnd作为公共属性
-'          V1.9 修正函数：GetMatchHwndFromWindow 正则表达式的错误               2013/08/07
-'               修正函数：GetMatchHwndFromWindow 函数中的一些错误               2014/09/23
+'          V1.9 修正函数：GetMatchHwndFromWindow 正则表达式的错误                2013/08/07
+'               修正函数：GetMatchHwndFromWindow 函数中的一些错误                2014/09/23
 '               增加函数：GetWindowByClassNameEx
 '               增加函数：GetWindowByPID 根据PID取窗口句柄
 '               增加函数：GetCaptionByHwnd 根据句柄取得标题
 '               增加函数：SetTop设置窗体置顶，传入参数false则取消                2014/09/24
 '               增加函数：Shake、FadeIn、FadeOut 抖动、淡入、淡出特效
-'          V2.0 修正函数：GetWindowByPID 遍历窗体Win7下有一些问题               2015/09/29
+'          V2.0 修正函数：GetWindowByPID 遍历窗体Win7下有一些问题                2015/09/29
 '               修正函数：GetWindowByAppName 遍历窗体Win7下有一些问题
 '               修正函数：GetWindowByAppNameEx 遍历窗体Win7下有一些问题
 '          V2.1 修正函数：ClickPoint 增加位置模式参数相对和绝对，默认相对        2018/06/05
 '               增加函数：SelectComboBoxIndex 根据指定的index选择下拉框中的项
 '                         上述方法得到网友Chen8013的不少帮助，特此感谢
-'               增加函数：GetWindowByHwnd 根据指定的句柄确定窗口                2018/07/22
+'               增加函数：GetWindowByHwnd 根据指定的句柄确定窗口                 2018/07/22
 '               增加函数：GetWindowByCursorPos 根据当前光标获取窗口（控件）
 '               增加函数：GetWindowByPoint 根据指定的位置获取窗口（控件）
 '               升级ClickPoint函数，支持点击前后分别延时，默认延时为0            2018/07/23
 '          V2.2 修正正则：网友小凡反应了句柄和id存在负数的情况                   2020/01/08
 '               优化属性：Caption(Get)，根据网友小凡的建议改成可获得文本框内容
 '               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
-'               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
+'               增加方法：ClickCurrentPoint 点击当前点                           2020/01/10
 '               增加方法：SetCursor(别名:SetPoint MoveCursor MoveCursorTo)
 '               更新函数：将所有默认等待超时60秒的函数中默认等待时间都改为10秒
-'               增加属性：Text、Value、Title（均为Caption别名）                 2020/01/12
+'               增加属性：Text、Value、Title（均为Caption别名）                  2020/01/12
 '               优化代码：GetCaptionByHwnd采用原Caption(Get)代码，后者也做了调整
 '               增加函数：GetCursorPosCurrent(别名：GetCursorPoint)得到当前坐标
-'               优化函数：所有窗口获取的函数增加了是否过滤可见的参数              2020/01/16
+'               优化函数：所有窗口获取的函数增加了是否过滤可见的参数             2020/01/16
 '               增加函数：GetTextByHwnd（同GetCaptionByHwnd）
-'               优化代码结构。将模块中能移过来的都移到类模块中了                  2020/01/19
+'               优化代码结构。将模块中能移过来的都移到类模块中了                 2020/01/19
 '               增加函数：myIsWindowVisibled 判断窗体可见，长宽为0也认为不可见   2020/01/31
-'               优化函数：GetTextByHwnd 网友小凡提供                            2020/02/03
-'               增加函数：CommandLine（同AppCommandLine）                      2020/02/05
-'               增加函数：MakeTransparent 设置窗口透明度                        2020/02/18
+'               优化函数：GetTextByHwnd 网友小凡提供                             2020/02/03
+'               增加函数：CommandLine（同AppCommandLine）                        2020/02/05
+'               增加函数：MakeTransparent 设置窗口透明度                         2020/02/18
 '               增加函数：MoveToCenter 移动窗口到屏幕中心
-'               增加函数：IsTopmost 判断窗口是否为置顶                          2020/02/20
+'               增加函数：IsTopmost 判断窗口是否为置顶                           2020/02/20
 '               增加函数：GetWindowTextByHwnd 获得窗口标题，给窗口句柄专用       2020/02/28
 '               修正函数：Focus 旧方法使用后会改变置顶窗口属性                   2020/03/02
-'               增加函数：IsWin64 网友小凡提供                                  2020/03/12
+'               增加函数：IsWin64 网友小凡提供                                   2020/03/12
 '               修正函数：AppPath 网友小凡提供兼容64位系统的方法
 '               修正函数：AppCommandLine 网友小凡做了兼容64位处理及其他代码优化  2020/03/15
-'               增加函数：IsForegroundWindow 判断窗口是否为活动窗口             2020/03/17
+'               增加函数：IsForegroundWindow 判断窗口是否为活动窗口              2020/03/17
 '               增加函数：GetClassNameByHwnd 根据句柄得到类名
 '               增加属性：ClassName(Get) 返回窗口的类名
 '               更新函数：CheckWindow 返回值由Long改成Boolean了，并且设为Public
-'               增加函数：Click 点击当前句柄或者指定句柄                        2020/06/29
+'               增加函数：Click 点击当前句柄或者指定句柄                         2020/06/29
 '               更新函数：为兼容win10将设置窗口最大最小化改用SendMessage实现     2021/12/10
 '               增加函数：Restore 还原窗口，比如最大最小化后需要还原
-'               增加函数：SendKeys 替代VB自带的，解决win10下提示拒绝的错误       2022/05/10
-'               优化函数：GetMatchHwndFromWindow 设置搜集窗口信息最大尝试10次
+'          V2.3 增加函数：SendKeys 替代VB自带的，解决win10下提示拒绝的错误       2022/05/10
+'               优化函数：GetMatchHwndFromWindow 设置搜集窗口信息最多尝试10次
+'               增加函数：FileToClipboard 设置指定文件到剪切板                   2022/06/26
+'               增加函数：Paste 粘贴内容，可以是字符串或文件
 '==============================================================================================
 Option Explicit
 
@@ -190,6 +192,10 @@ Private Const QS_ALLINPUT& = (QS_SENDMESSAGE Or QS_PAINT Or QS_TIMER Or QS_POSTM
 Private Const UNITS = 4294967296#
 Private Const MAX_LONG = -2147483648#
 
+Private Const GMEM_MOVEABLE = &H2
+Private Const GMEM_ZEROINIT = &H40
+Private Const CF_HDROP = &HF
+
 '结构体定义
 Private Type rect
     Left As Long
@@ -201,6 +207,13 @@ End Type
 Private Type POINTAPI
     X As Long
     Y As Long
+End Type
+
+Private Type DROPFILES
+    pFiles As Long
+    pT As POINTAPI
+    fNC As Long
+    fWide As Long
 End Type
 
 Public Enum enumShift
@@ -281,6 +294,15 @@ Private Declare Function timeGetTime Lib "winmm.dll" () As Long
 Private Declare Function IsWow64Process Lib "kernel32" (ByVal hProcess As Long, ByRef Wow64Process As Long) As Long
 Private Declare Function QueryDosDevice Lib "kernel32" Alias "QueryDosDeviceA" (ByVal lpDeviceName As String, ByVal lpTargetPath As String, ByVal ucchMax As Long) As Long
 Private Declare Function GetCurrentProcess Lib "kernel32" () As Long
+
+Private Declare Function OpenClipboard Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function EmptyClipboard Lib "user32" () As Long
+Private Declare Function CloseClipboard Lib "user32" () As Long
+Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function SetClipboardData Lib "user32" (ByVal wFormat As Long, ByVal hMem As Long) As Long
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
 Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Long, ByVal dx As Long, ByVal dy As Long, ByVal cButtons As Long, ByVal dwExtraInfo As Long)
 
@@ -1873,6 +1895,44 @@ Public Sub SendKeys(ByVal strKeys As String)
     ws.SendKeys strKeys
     Set ws = Nothing
 End Sub
+'粘贴内容，可以是一个字符串也可以是一个文件，默认为字符串形式，如果是文件请传递第二个参数为true
+Public Sub Paste(ByVal strKeys As String, Optional isFile As Boolean = False)
+    If isFile Then
+        FileToClipboard strKeys
+    Else
+        Clipboard.Clear
+        Clipboard.SetText strKeys
+    End If
+    
+    SendKeys "^v"
+End Sub
+'拷贝指定目录的文件
+Public Function FileToClipboard(ByVal FileName As String)
+    Dim dFiles As DROPFILES
+    Dim hMem As Long, MemPtr As Long, Len1 As Long, Len2 As Long
+    
+    If Dir(FileName) = "" Then
+        FileToClipboard = "error:file not exits"
+        Clipboard.Clear
+        Clipboard.SetText FileToClipboard
+        Exit Function
+    End If
+    
+    FileName = FileName & vbNullChar & vbNullChar
+      
+    If OpenClipboard(Me.hWnd) = 0 Then Exit Function
+    Call EmptyClipboard
+    Len1 = Len(dFiles)
+    Len2 = LenB(StrConv(FileName, vbFromUnicode))
+    hMem = GlobalAlloc(GMEM_MOVEABLE Or GMEM_ZEROINIT, Len1 + Len2)
+    MemPtr = GlobalLock(hMem)
+    dFiles.pFiles = Len1
+    Call CopyMemory(ByVal MemPtr, dFiles, Len1)
+    Call CopyMemory(ByVal (MemPtr + Len1), ByVal FileName, Len2)
+    Call GlobalUnlock(hMem)
+    Call SetClipboardData(CF_HDROP, hMem)
+    Call CloseClipboard
+End Function
 '测试专用
 Public Function test() As String
     test = SendMessage(hWnd_, WM_LBUTTONDOWN, 100, 100)
