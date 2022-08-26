@@ -101,6 +101,8 @@ Attribute VB_Exposed = False
 '               优化函数：GetMatchHwndFromWindow 设置搜集窗口信息最多尝试10次
 '               增加函数：FileToClipboard 设置指定文件到剪切板                   2022/06/26
 '               增加函数：Paste 粘贴内容，可以是字符串或文件
+'               修正函数：GetWindowByClassNameEx 修复了do里面取类名的错误        2022/08/26
+'               增加函数：GetWindowClassNameByHwnd  同GetClassNameByHwnd
 '==============================================================================================
 Option Explicit
 
@@ -429,7 +431,11 @@ End Function
 Public Function GetTextByHwnd(ByVal hWnd As Long) As String
     GetTextByHwnd = GetText(hWnd)
 End Function
-'根据句柄获得窗口内容
+'根据句柄获得窗口类名
+Public Function GetWindowClassNameByHwnd(ByVal hWnd As Long) As String
+    GetWindowClassNameByHwnd = GetClassNameByHwnd(hWnd)
+End Function
+'根据句柄获得窗口类名
 Public Function GetClassNameByHwnd(ByVal hWnd As Long) As String
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 GetClassNameByHwnd 被调用。参数为 hWnd=" & hWnd, False
@@ -846,7 +852,7 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
         Do
             lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
             If CheckWindowVisible(lngHwnd, windowVisible) Then
-                strClassNameCurrent = GetWindowTextByHwnd(lngHwnd)
+                strClassNameCurrent = GetWindowClassNameByHwnd(lngHwnd)
                 If strClassNameCurrent <> "" Then
                     If Not isUseRegExp Then
                         isMatch = InStr(strClassNameCurrent, strClassName) > 0
@@ -1906,12 +1912,12 @@ Public Sub Paste(ByVal strKeys As String, Optional isFile As Boolean = False)
     
     SendKeys "^v"
 End Sub
-'拷贝指定目录的文件
+'拷贝指定文件或者文件夹到剪切板，等同于右击文件或者文件夹选择复制
 Public Function FileToClipboard(ByVal FileName As String)
     Dim dFiles As DROPFILES
     Dim hMem As Long, MemPtr As Long, Len1 As Long, Len2 As Long
     
-    If Dir(FileName) = "" Then
+    If Dir(FileName) = "" And Dir(FileName, vbDirectory) = "" Then
         FileToClipboard = "error:file not exits"
         Clipboard.Clear
         Clipboard.SetText FileToClipboard
@@ -1932,6 +1938,7 @@ Public Function FileToClipboard(ByVal FileName As String)
     Call GlobalUnlock(hMem)
     Call SetClipboardData(CF_HDROP, hMem)
     Call CloseClipboard
+    FileToClipboard = "ok"
 End Function
 '测试专用
 Public Function test() As String
