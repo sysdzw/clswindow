@@ -138,6 +138,8 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               优化函数：GetMatchHwndFromWindow 设置搜集窗口信息最多尝试10次
 '               增加函数：FileToClipboard 设置指定文件到剪切板                   2022/06/26
 '               增加函数：Paste 粘贴内容，可以是字符串或文件
+'               修正函数：GetWindowByClassNameEx 修复了do里面取类名的错误        2022/08/26
+'               增加函数：GetWindowClassNameByHwnd  同GetClassNameByHwnd
 '==============================================================================================
 ```
 
