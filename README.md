@@ -140,6 +140,7 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：Paste 粘贴内容，可以是字符串或文件
 '               修正函数：GetWindowByClassNameEx 修复了do里面取类名的错误        2022/08/26
 '               增加函数：GetWindowClassNameByHwnd  同GetClassNameByHwnd
+'               增加函数：ClickPointBackground 后台点击某窗口中的某个坐标        2022/09/07
 '==============================================================================================
 ```
 
