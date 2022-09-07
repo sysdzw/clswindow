@@ -136,6 +136,7 @@ Private Const GWL_ID = (-12)
 Private Const GWL_STYLE = (-16)
 Private Const WM_SYSCOMMAND = &H112
 Private Const WM_SETFOCUS = &H7
+Private Const WM_MOUSEMOVE = &H200
 Private Const WM_LBUTTONDOWN = &H201
 Private Const WM_LBUTTONUP = &H202
 Private Const WM_CLOSE = &H10
@@ -226,8 +227,8 @@ Public Enum enumShift
 End Enum
 
 Public Enum enumPositionMode
-    ABSOLUTE
-    RELATIVE
+    absolute
+    relative
 End Enum
 '过滤窗口是否可见
 Public Enum enumWindowVisible
@@ -1399,14 +1400,14 @@ Public Function Click(Optional ByVal hWnd1&) As Long
 
 End Function
 '点击具体的某个点
-Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = RELATIVE, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 ClickPoint 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " clickTimes=" & clickTimes & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
-    If PositionMod = ABSOLUTE Then
+    If PositionMod = absolute Then
         SetCursorPos x1, y1
-    ElseIf PositionMod = RELATIVE Then
+    ElseIf PositionMod = relative Then
         SetCursorPos Left + x1, Top + y1 '1034 1129
     Else
         MsgBox "函数ClickPoint执行一次。未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
@@ -1430,8 +1431,8 @@ Public Sub ClickPointBackground(x1 As Long, y1 As Long, Optional ByVal hWnd1&, O
 
     Do While clickTimes > 0
         Wait delayMilliSecondsBefore
-        PostMessage hWnd_, WM_LBUTTONDOWN, 0, ByVal (x1 + y1 * 65536)
-        PostMessage hWnd_, WM_LBUTTONUP, 0, ByVal (x1 + y1 * 65536)
+        PostMessage hWnd1, WM_LBUTTONDOWN, 1, ByVal x1 + y1 * 65536
+        PostMessage hWnd1, WM_LBUTTONUP, 0, ByVal x1 + y1 * 65536
         Wait delayMilliSecondsAfter
         clickTimes = clickTimes - 1
     Loop
@@ -1446,16 +1447,16 @@ Public Sub ClickCurrentPoint()
     mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
 End Sub
 '移动鼠标到指定点
-Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 SetCursor 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
-    If PositionMod = ABSOLUTE Then
+    If PositionMod = absolute Then
         Wait delayMilliSecondsBefore
         SetCursorPos x1, y1
         Wait delayMilliSecondsAfter
-    ElseIf PositionMod = RELATIVE Then
+    ElseIf PositionMod = relative Then
         Wait delayMilliSecondsBefore
         SetCursorPos Left + x1, Top + y1
         Wait delayMilliSecondsAfter
@@ -1465,15 +1466,15 @@ Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal Position
     End If
 End Sub
 '同SetCursor
-Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '直接获得当前鼠标下的窗口或控件的句柄
