@@ -141,8 +141,10 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               修正函数：GetWindowByClassNameEx 修复了do里面取类名的错误        2022/08/26
 '               增加函数：GetWindowClassNameByHwnd  同GetClassNameByHwnd
 '               增加函数：ClickPointBackground 后台点击某窗口中的某个坐标        2022/09/07
-'               增加函数：MouseDown 在指定位置鼠标左击                           2022/11/02
-'               增加函数：MouseUp 鼠标抬起
+'               增加函数：MouseLeftDown 在指定位置鼠标“左”键按下               2022/11/02
+'               增加函数：MouseLeftUp 鼠标“左”键松开
+'               增加函数：MouseRightDown 在指定位置鼠标“右”键按下
+'               增加函数：MouseRightUp 鼠标“右”键松开
 '               增加函数：DragTo 鼠标拖动某个点到另一个点
 '               增加函数：DragToEx 对上个函数的增强，可以执行一组坐标
 '==============================================================================================
