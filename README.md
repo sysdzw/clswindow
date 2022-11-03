@@ -152,6 +152,9 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 
 
 ![](https://img-blog.csdn.net/20180423135213794)
+![演示-录制鼠标拖动](https://user-images.githubusercontent.com/7876919/199826256-b27ab575-29dd-436d-9e07-ddcbe24812ea.gif)
+![演示-播放鼠标拖动](https://user-images.githubusercontent.com/7876919/199826294-cb19f354-eab1-48a0-aee6-a36f408bccb0.gif)
+
 
 
 **应用案例（均附源码）：**
