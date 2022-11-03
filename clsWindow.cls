@@ -104,8 +104,10 @@ Attribute VB_Exposed = False
 '               修正函数：GetWindowByClassNameEx 修复了do里面取类名的错误        2022/08/26
 '               增加函数：GetWindowClassNameByHwnd  同GetClassNameByHwnd
 '               增加函数：ClickPointBackground 后台点击某窗口中的某个坐标        2022/09/07
-'               增加函数：MouseDown 在指定位置鼠标左击                           2022/11/02
-'               增加函数：MouseUp 鼠标抬起
+'               增加函数：MouseLeftDown 在指定位置鼠标“左”键按下               2022/11/02
+'               增加函数：MouseLeftUp 鼠标“左”键松开
+'               增加函数：MouseRightDown 在指定位置鼠标“右”键按下
+'               增加函数：MouseRightUp 鼠标“右”键松开
 '               增加函数：DragTo 鼠标拖动某个点到另一个点
 '               增加函数：DragToEx 对上个函数的增强，可以执行一组坐标
 '==============================================================================================
@@ -162,6 +164,11 @@ Private Const MF_GRAYED = &H1&
 Private Const MOUSEEVENTF_MOVE = &H1 '  mouse move
 Private Const MOUSEEVENTF_LEFTDOWN = &H2 '  left button down
 Private Const MOUSEEVENTF_LEFTUP = &H4 '  left button up
+Private Const MOUSEEVENTF_MIDDLEDOWN = &H20 '  middle button down
+Private Const MOUSEEVENTF_MIDDLEUP = &H40 '  middle button up
+Private Const MOUSEEVENTF_RIGHTDOWN = &H8 '  right button down
+Private Const MOUSEEVENTF_RIGHTUP = &H10 '  right button up
+
 
 Private Const GWL_EXSTYLE = -20
 Private Const WS_EX_TOPMOST = &H8
@@ -1411,14 +1418,7 @@ Public Sub ClickPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal Positio
         writeToFile "DEBUG.txt", Now & " 函数 ClickPoint 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " clickTimes=" & clickTimes & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
-    If PositionMod = absolute Then
-        SetCursorPos x1, y1
-    ElseIf PositionMod = relative Then
-        SetCursorPos Left + x1, Top + y1 '1034 1129
-    Else
-        MsgBox "函数ClickPoint执行一次。未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
-        Exit Sub
-    End If
+    SetCursorPosEx x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
     Do While clickTimes > 0
         Wait delayMilliSecondsBefore
         mouse_event MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0
@@ -1427,23 +1427,60 @@ Public Sub ClickPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal Positio
         clickTimes = clickTimes - 1
     Loop
 End Sub
-'在指定位置鼠标左击
-Public Sub MouseDown(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+'鼠标左键按下
+Public Sub MouseLeftDown(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 MouseDown 被调用。参数为：x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+        writeToFile "DEBUG.txt", Now & " 函数 MouseLeftDown 被调用。参数为：x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
-    If PositionMod = absolute Then
-        SetCursorPos x1, y1
-    ElseIf PositionMod = relative Then
-        SetCursorPos Left + x1, Top + y1
-    Else
-        MsgBox "未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
-        Exit Sub
-    End If
+    SetCursorPosEx x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
     Wait delayMilliSecondsBefore
     mouse_event MOUSEEVENTF_LEFTDOWN, 1, 1, 0, 0
     Wait delayMilliSecondsAfter
+End Sub
+'鼠标左键松开
+Public Sub MouseLeftUp(Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 MouseLeftUp 被调用。参数为：delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+    End If
+
+    Wait delayMilliSecondsBefore
+    mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0
+    mouse_event MOUSEEVENTF_LEFTUP, 1, 1, 0, 0
+    Wait delayMilliSecondsAfter
+End Sub
+'鼠标右键按下
+Public Sub MouseRightDown(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 MouseRightDown 被调用。参数为：x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+    End If
+    
+    SetCursorPosEx x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+    Wait delayMilliSecondsBefore
+    mouse_event MOUSEEVENTF_RIGHTDOWN, 1, 1, 0, 0
+    Wait delayMilliSecondsAfter
+End Sub
+'鼠标右键松开
+Public Sub MouseRightUp(Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 MouseRightUp 被调用。参数为：delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+    End If
+
+    Wait delayMilliSecondsBefore
+    mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0
+    mouse_event MOUSEEVENTF_RIGHTUP, 1, 1, 0, 0
+    Wait delayMilliSecondsAfter
+End Sub
+'鼠标拖动某个点到另一个点
+Public Sub DragTo(ByVal x1 As Long, ByVal y1 As Long, x2 As Long, y2 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 DragTo 被调用。参数为：x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " x2=" & x2 & vbTab & " y2=" & y2 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+    End If
+    
+    SetCursorPosEx x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+    MouseLeftDown x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+    SetCursorPosEx x2, y2, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+    MouseLeftUp
 End Sub
 '可以执行录制的代码，例如：DragToEx("1068,641:1068,641:1063,641:1056,641:1051,641")
 Public Sub DragToEx(ByVal strRecordCode As String, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 30, Optional ByVal delayMilliSecondsAfter As Long = 30)
@@ -1451,56 +1488,29 @@ Public Sub DragToEx(ByVal strRecordCode As String, Optional ByVal PositionMod As
         writeToFile "DEBUG.txt", Now & " 函数 MouseMoveToEx 被调用。参数为：strRecordCode=" & strRecordCode & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
-    Dim vLine, i&, j&, vCol, vPoint
+    Dim vLine, i&, j&, vCol, vPoint, isRightButtonMode As Boolean
     vLine = Split(strRecordCode, vbCrLf)
     For i = 0 To UBound(vLine)
+        isRightButtonMode = (UCase(Left(vLine(i), 1)) = "R") '开头字母如果是R那么就是右键模式
         vCol = Split(vLine(i), ":")
         For j = 0 To UBound(vCol)
             vPoint = Split(vCol(j), ",")
             If j = 0 Then
-                MouseDown vPoint(0), vPoint(1), PositionMod, 100, 20 '这里的延时固定
+                If isRightButtonMode Then
+                    MouseRightDown Mid(vPoint(0), 2), vPoint(1), PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+                Else
+                    MouseLeftDown vPoint(0), vPoint(1), PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+                End If
             Else
-                SetCursor vPoint(0), vPoint(1), PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
-                mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0 '不加这个不行
+                SetCursorPosEx vPoint(0), vPoint(1), PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
             End If
         Next
-        MouseUp delayMilliSecondsBefore, delayMilliSecondsAfter
+        If isRightButtonMode Then
+            MouseRightUp delayMilliSecondsBefore, delayMilliSecondsAfter
+        Else
+            MouseLeftUp delayMilliSecondsBefore, delayMilliSecondsAfter
+        End If
     Next
-End Sub
-'鼠标抬起
-Public Sub MouseUp(Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
-    If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 MouseUp 被调用。参数为：delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
-    End If
-
-    Wait delayMilliSecondsBefore
-    mouse_event MOUSEEVENTF_LEFTUP, 1, 1, 0, 0
-    Wait delayMilliSecondsAfter
-End Sub
-'鼠标拖动某个点到另一个点
-Public Sub DragTo(ByVal x1 As Long, ByVal y1 As Long, x2 As Long, y2 As Long, Optional ByVal PositionMod As enumPositionMode = relative)
-    If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 DragTo 被调用。参数为：x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " x2=" & x2 & vbTab & " y2=" & y2 & vbTab & " PositionMod=" & PositionMod, False
-    End If
-    
-    If PositionMod = absolute Then
-        SetCursorPos x1, y1
-        MouseDown x1, y1, PositionMod, 500, 500
-        mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0
-        SetCursor x2, y2, PositionMod, 500, 500
-        mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0
-        MouseUp
-    ElseIf PositionMod = relative Then
-        SetCursorPos Left + x1, Top + y1
-        MouseDown Left + x1, Top + y1, PositionMod, 500, 500
-        mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0
-        SetCursor Left + x2, Top + y2, PositionMod, 500, 500
-        mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0
-        MouseUp
-    Else
-        MsgBox "未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
-        Exit Sub
-    End If
 End Sub
 '后台点击某个点。注意这个点只能是相对于指定句柄窗口的位置。如果要点击屏幕上任意一点只能通过ClickPoint来点击了
 Public Sub ClickPointBackground(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal hWnd1&, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
@@ -1527,36 +1537,32 @@ Public Sub ClickCurrentPoint()
     mouse_event MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0
     mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
 End Sub
-'移动鼠标到指定点
-Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+'移动鼠标到指定点，这个比系统api函数功能更全点，就是加了延迟和移动事件，以及相对和绝对控制
+Public Sub SetCursorPosEx(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 SetCursor 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
+    Wait delayMilliSecondsBefore
     If PositionMod = absolute Then
-        Wait delayMilliSecondsBefore
         SetCursorPos x1, y1
-        Wait delayMilliSecondsAfter
     ElseIf PositionMod = relative Then
-        Wait delayMilliSecondsBefore
         SetCursorPos Left + x1, Top + y1
-        Wait delayMilliSecondsAfter
-    Else
-        MsgBox "函数SetCursor执行一次。未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
-        Exit Sub
     End If
+    mouse_event MOUSEEVENTF_MOVE, 1, 1, 0, 0 '这个很重要，触发移动事件
+    Wait delayMilliSecondsAfter
 End Sub
 '同SetCursor
 Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
-    SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+    SetCursorPosEx x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
 Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
-    SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+    SetCursorPosEx x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
 Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
-    SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
+    SetCursorPosEx x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '直接获得当前鼠标下的窗口或控件的句柄
 Public Function GetCursorPosCurrent() As String
