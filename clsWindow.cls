@@ -212,7 +212,14 @@ Private Const MAX_LONG = -2147483648#
 
 Private Const GMEM_MOVEABLE = &H2
 Private Const GMEM_ZEROINIT = &H40
+
 Private Const CF_HDROP = &HF
+Private Const CF_TEXT = &H1
+Private Const CF_BITMAP = &H2
+Private Const CF_METAFILEPICT = &H3
+Private Const CF_SYLK = &H4
+Private Const CF_UNICODETEXT = 13
+Private Const GHND = &H42
 
 '结构体定义
 Private Type rect
@@ -319,6 +326,7 @@ Private Declare Function CloseClipboard Lib "user32" () As Long
 Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
 Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
 Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
 Private Declare Function SetClipboardData Lib "user32" (ByVal wFormat As Long, ByVal hMem As Long) As Long
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
@@ -2012,8 +2020,8 @@ Public Sub Paste(ByVal strKeys As String, Optional isFile As Boolean = False)
     If isFile Then
         FileToClipboard strKeys
     Else
-        Clipboard.Clear
-        Clipboard.SetText strKeys
+        EmptyClipboard
+        ClipboardSetText strKeys
     End If
     
     SendKeys "^v"
@@ -2025,8 +2033,7 @@ Public Function FileToClipboard(ByVal FileName As String)
     
     If Dir(FileName) = "" And Dir(FileName, vbDirectory) = "" Then
         FileToClipboard = "error:file not exits"
-        Clipboard.Clear
-        Clipboard.SetText FileToClipboard
+        ClipboardSetText FileToClipboard
         Exit Function
     End If
     
@@ -2046,5 +2053,31 @@ Public Function FileToClipboard(ByVal FileName As String)
     Call CloseClipboard
     FileToClipboard = "ok"
 End Function
-
-
+'复制文本内容
+Public Function ClipboardSetText(ByVal sText$) As Boolean
+    Dim hMem As Long, pMem As Long, s$, hWnd As Long
+    Dim bOk As Boolean
+    hWnd = 0 'Me.hWnd
+    If OpenClipboard(hWnd) = 0 Then Exit Function
+    EmptyClipboard
+    
+    ' ANSI
+    s = StrConv(sText, vbFromUnicode)
+    hMem = GlobalAlloc(GHND, LenB(s) + 1)
+    pMem = GlobalLock(hMem)
+    CopyMemory ByVal pMem, ByVal StrPtr(s), LenB(s)
+    GlobalUnlock hMem
+    bOk = SetClipboardData(CF_TEXT, hMem) <> 0
+    If Not bOk Then GlobalFree hMem
+    
+    ' UNICODE:
+    hMem = GlobalAlloc(GHND, LenB(sText) + 2)
+    pMem = GlobalLock(hMem)
+    CopyMemory ByVal pMem, ByVal StrPtr(sText), LenB(sText)
+    GlobalUnlock hMem
+    bOk = SetClipboardData(CF_UNICODETEXT, hMem) <> 0
+    If Not bOk Then GlobalFree hMem
+    
+    CloseClipboard
+    ClipboardSetText = bOk
+End Function
