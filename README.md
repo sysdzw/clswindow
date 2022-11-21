@@ -147,6 +147,8 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：MouseRightUp 鼠标“右”键松开
 '               增加函数：DragTo 鼠标拖动某个点到另一个点
 '               增加函数：DragToEx 对上个函数的增强，可以执行一组坐标
+'               增加函数：ClipboardSetText 复制文本内容，兼容VBA                 2022/11/22
+'               修正函数：FileToClipboard 替换Clipboard对象，改用api实现兼容VBA
 '==============================================================================================
 ```
 
