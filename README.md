@@ -149,6 +149,7 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：DragToEx 对上个函数的增强，可以执行一组坐标
 '               增加函数：ClipboardSetText 复制文本内容，兼容VBA                 2022/11/22
 '               修正函数：FileToClipboard 替换Clipboard对象，改用api实现兼容VBA
+'               修正函数：GetWindowByClassName 修复取不到窗口时返回隐藏窗口的bug  2023-12-26
 '==============================================================================================
 ```
 
