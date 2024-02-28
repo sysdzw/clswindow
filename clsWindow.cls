@@ -110,6 +110,9 @@ Attribute VB_Exposed = False
 '               增加函数：MouseRightUp 鼠标“右”键松开
 '               增加函数：DragTo 鼠标拖动某个点到另一个点
 '               增加函数：DragToEx 对上个函数的增强，可以执行一组坐标
+'               增加函数：ClipboardSetText 复制文本内容，兼容VBA                 2022/11/22
+'               修正函数：FileToClipboard 替换Clipboard对象，改用api实现兼容VBA
+'               修正函数：GetWindowByClassName 修复取不到窗口时返回隐藏窗口的bug  2023-12-26
 '==============================================================================================
 Option Explicit
 
@@ -183,6 +186,8 @@ Private Const GW_HWNDFIRST = 0
 Private Const GW_HWNDNEXT = 2
 Private Const GW_CHILD = 5
 Private Const CB_SETCURSEL = &H14E
+Private Const CB_SHOWDROPDOWN = &H14F
+Private Const LB_SETCURSEL = &H186
 Private Const PROCESS_ALL_ACCESS As Long = &H1F0FFF
 
 Private Const WAIT_ABANDONED& = &H80&
@@ -840,13 +845,15 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
     End If
     
     Dim lngDelayCount&
-    hWnd_ = 0
     Do
         hWnd_ = FindWindow(strClassName, vbNullString)
         If CheckWindowVisible(hWnd_, windowVisible) Then Exit Do '窗口可见度检查，符合条件表示找到了即退出
 
         lngDelayCount = lngDelayCount + DelayOneTime
-        If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strClassName
+        If lngDelayCount >= intWaitSeconds * 1000 Then '超时未发现关键字strClassName，但是要把hWnd_设置为0，因为默认会找到隐藏的，这个隐藏的不算
+            hWnd_ = 0
+            Exit Do
+        End If
         Wait DelayOneTime
 
         hWnd_ = 0
@@ -2081,3 +2088,14 @@ Public Function ClipboardSetText(ByVal sText$) As Boolean
     CloseClipboard
     ClipboardSetText = bOk
 End Function
+'【20230319新增方法】此方法未确定是否可用。根据指定的index选择下拉框多选框内容。改写自 网友：莫&聪（QQ175140289）
+Public Sub SelectComboMutiBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 过程 SelectComboMutiBoxIndex 被调用。参数为 hWnd=" & hWnd & vbTab & " intIndex=" & intIndex, False
+    End If
+'    SendMessage hWnd, CB_SETSEL, intIndex, 0 '显示下拉列表 Me.hWnd ＝ hwnd＇设定下拉框为当前窗体
+    SendMessage hWnd, CB_SHOWDROPDOWN, True, ByVal 0& '此方法为Cursor生成
+    
+    SendMessage hWnd, LB_SETCURSEL, 1, ByVal 0& '此方法为Cursor生成。功能是选择第几项
+    ClickPoint 5, 20 * intIndex + 30
+End Sub
