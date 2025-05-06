@@ -1,4 +1,4 @@
-# clswindow v2.3
+# clswindow v2.4
 #### VB6操作外部程序窗口的类clsWindow2.3使用说明
 详细使用说明文档：https://www.kancloud.cn/sysdzw/clswindow
 
@@ -49,7 +49,7 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 
 ```vb
 '==============================================================================================
-'名    称：windows窗体控制类v2.3
+'名    称：windows窗体控制类v2.4
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
 '使用范例：Dim window As New clsWindow
 '         window.GetWindowByTitle("计算器").closeWindow' ***!!!win10如果异常请用管理员权限执行***!!!
@@ -150,6 +150,10 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：ClipboardSetText 复制文本内容，兼容VBA                 2022/11/22
 '               修正函数：FileToClipboard 替换Clipboard对象，改用api实现兼容VBA
 '               修正函数：GetWindowByClassName 修复取不到窗口时返回隐藏窗口的bug  2023-12-26
+'          V2.4 增加函数：CaptureScreen 屏幕截图                                 2025-04-19
+'               增加函数：CaptureScreenRegion 屏幕区域截图
+'               增加函数：CaptureWindow 窗口截图
+'               增加函数：CaptureWindowRegion 窗口区域截图
 '==============================================================================================
 ```
 
