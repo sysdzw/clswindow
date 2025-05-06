@@ -12,10 +12,10 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '==============================================================================================
-'名    称：windows窗体控制类v2.3
+'名    称：windows窗体控制类v2.4
 '描    述：一个操作windows窗口的类，可对窗口进行很多常用的操作(类名为clsWindow)
 '使用范例：Dim window As New clsWindow
-'         window.GetWindowByTitle("计算器").closeWindow' ***!!!win10如果异常请用管理员权限执行***!!!
+'          window.GetWindowByTitle("计算器").closeWindow' ***!!!win10如果异常请用管理员权限执行***!!!
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
 '博    客：https://blog.csdn.net/sysdzw
@@ -97,14 +97,14 @@ Attribute VB_Exposed = False
 '               增加函数：Click 点击当前句柄或者指定句柄                         2020/06/29
 '               更新函数：为兼容win10将设置窗口最大最小化改用SendMessage实现     2021/12/10
 '               增加函数：Restore 还原窗口，比如最大最小化后需要还原
-'          V2.3 增加函数：SendKeys 替代VB自带的，解决win10下提示拒绝的错误       2022/05/10
+'          V2.3 增加函数：SendKeys 替代VB自带的，解决win10下拒绝的问题，加w.调用 2022/05/10
 '               优化函数：GetMatchHwndFromWindow 设置搜集窗口信息最多尝试10次
 '               增加函数：FileToClipboard 设置指定文件到剪切板                   2022/06/26
 '               增加函数：Paste 粘贴内容，可以是字符串或文件
 '               修正函数：GetWindowByClassNameEx 修复了do里面取类名的错误        2022/08/26
 '               增加函数：GetWindowClassNameByHwnd  同GetClassNameByHwnd
 '               增加函数：ClickPointBackground 后台点击某窗口中的某个坐标        2022/09/07
-'               增加函数：MouseLeftDown 在指定位置鼠标“左”键按下               2022/11/02
+'               增加函数：MouseLeftDown 在指定位置鼠标“左”键按下                 2022/11/02
 '               增加函数：MouseLeftUp 鼠标“左”键松开
 '               增加函数：MouseRightDown 在指定位置鼠标“右”键按下
 '               增加函数：MouseRightUp 鼠标“右”键松开
@@ -112,7 +112,11 @@ Attribute VB_Exposed = False
 '               增加函数：DragToEx 对上个函数的增强，可以执行一组坐标
 '               增加函数：ClipboardSetText 复制文本内容，兼容VBA                 2022/11/22
 '               修正函数：FileToClipboard 替换Clipboard对象，改用api实现兼容VBA
-'               修正函数：GetWindowByClassName 修复取不到窗口时返回隐藏窗口的bug  2023-12-26
+'               修正函数：GetWindowByClassName 修复取不到窗口时返回隐藏窗口的bug 2023-12-26
+'          V2.4 增加函数：CaptureScreen 屏幕截图                                 2025-04-19
+'               增加函数：CaptureScreenRegion 屏幕区域截图
+'               增加函数：CaptureWindow 窗口截图
+'               增加函数：CaptureWindowRegion 窗口区域截图
 '==============================================================================================
 Option Explicit
 
@@ -235,8 +239,8 @@ Private Type rect
 End Type
 
 Private Type POINTAPI
-    X As Long
-    Y As Long
+    x As Long
+    y As Long
 End Type
 
 Private Type DROPFILES
@@ -269,63 +273,93 @@ Public Enum enumWindowState
     vbMaximized = 2
 End Enum
 
+'截屏相关的
+Private Type GUID
+    Data1 As Long
+    Data2 As Integer
+    Data3 As Integer
+    Data4(0 To 7) As Byte
+End Type
+Private Type GdiplusStartupInput
+    GdiplusVersion As Long
+    DebugEventCallback As Long
+    SuppressBackgroundThread As Long
+    SuppressExternalCodecs As Long
+End Type
+Private Type EncoderParameter
+    GUID As GUID
+    NumberOfValues As Long
+    Type As Long
+    Value As Long
+End Type
+Private Type EncoderParameters
+    Count As Long
+    Parameter As EncoderParameter
+End Type
+Private Type PicBmp
+    Size As Long
+    Type As Long
+    hbmp As Long
+    hPal As Long
+    Reserved As Long
+End Type
+
 Private Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
 Private Declare Function GetForegroundWindow Lib "user32" () As Long
 Private Declare Function GetCurrentThreadId Lib "kernel32" () As Long
 Private Declare Function AttachThreadInput Lib "user32" (ByVal idAttach As Long, ByVal idAttachTo As Long, ByVal fAttach As Long) As Long
-Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
-Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
-Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+Private Declare Function SetForegroundWindow Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hwnd As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
 
 Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
 Private Declare Function OpenProcess Lib "kernel32" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessId As Long) As Long
 Private Declare Function GetModuleFileNameEx Lib "PSAPI.DLL" Alias "GetModuleFileNameExW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
 Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
-Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, ByRef lpdwProcessId As Long) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hwnd As Long, ByRef lpdwProcessId As Long) As Long
 Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
-Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
-Private Declare Function GetWindowTextLength Lib "user32" Alias "GetWindowTextLengthA" (ByVal hWnd As Long) As Long
+Private Declare Function GetWindow Lib "user32" (ByVal hwnd As Long, ByVal wCmd As Long) As Long
+Private Declare Function GetWindowTextLength Lib "user32" Alias "GetWindowTextLengthA" (ByVal hwnd As Long) As Long
 Private Declare Function TerminateProcess Lib "kernel32" (ByVal hProcess As Long, ByVal uExitCode As Long) As Long
 Private Declare Function GetSystemMetrics Lib "user32.dll" (ByVal nIndex As Long) As Long
 
-Private Declare Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hWnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
-Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
-Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
+Private Declare Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hwnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
+Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hwnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
+Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
 Private Declare Function EnumWindows Lib "user32" (ByVal lpfn As Long, ByVal lParam As Long) As Long
 Private Declare Function EnumChildWindows Lib "user32" (ByVal hWndParent As Long, ByVal lpEnumFunc As Long, ByVal lParam As Long) As Long
-Private Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
-Private Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
+Private Declare Function IsWindowVisible Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
+Private Declare Function PostMessage Lib "user32" Alias "PostMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
 
 Private Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
-Private Declare Function SetCursorPos Lib "user32" (ByVal X As Long, ByVal Y As Long) As Long
-Private Declare Function GetSystemMenu Lib "user32" (ByVal hWnd As Long, ByVal bRevert As Long) As Long
+Private Declare Function SetCursorPos Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
+Private Declare Function GetSystemMenu Lib "user32" (ByVal hwnd As Long, ByVal bRevert As Long) As Long
 Private Declare Function ModifyMenu Lib "user32" Alias "ModifyMenuA" (ByVal hMenu As Long, ByVal nPosition As Long, ByVal wFlags As Long, ByVal wIDNewItem As Long, ByVal lpString As Any) As Long
-Private Declare Function GetWindowRect Lib "user32" (ByVal hWnd As Long, lpRect As rect) As Long
-Private Declare Function IsWindow Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function IsZoomed Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function IsIconic Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function GetLayeredWindowAttributes Lib "user32.dll" (ByVal hWnd As Long, ByRef crKey As Long, ByRef bAlpha As Byte, ByRef dwFlags As Long) As Long
-Private Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
-Private Declare Function SetLayeredWindowAttributes Lib "user32" (ByVal hWnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
-Private Declare Function IsWindowEnabled Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function EnableWindow Lib "user32" (ByVal hWnd As Long, ByVal fEnable As Long) As Long
-Private Declare Function UpdateWindow Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function BringWindowToTop Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function SetFocusAPI Lib "user32" Alias "SetFocus" (ByVal hWnd As Long) As Long
+Private Declare Function GetWindowRect Lib "user32" (ByVal hwnd As Long, lpRect As rect) As Long
+Private Declare Function IsWindow Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function IsZoomed Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function IsIconic Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function GetLayeredWindowAttributes Lib "user32.dll" (ByVal hwnd As Long, ByRef crKey As Long, ByRef bAlpha As Byte, ByRef dwFlags As Long) As Long
+Private Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetLayeredWindowAttributes Lib "user32" (ByVal hwnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
+Private Declare Function IsWindowEnabled Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function EnableWindow Lib "user32" (ByVal hwnd As Long, ByVal fEnable As Long) As Long
+Private Declare Function UpdateWindow Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function BringWindowToTop Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function SetFocusAPI Lib "user32" Alias "SetFocus" (ByVal hwnd As Long) As Long
 
 Private Declare Function QueryFullProcessImageName Lib "Kernel32.dll" Alias "QueryFullProcessImageNameW" (ByVal hProcess As Long, ByVal hModule As Long, ByVal lpFilename As Any, ByVal nSize As Long) As Long
 Private Declare Function GetProcessImageFileName Lib "PSAPI.DLL" Alias "GetProcessImageFileNameA" (ByVal hProcess As Long, ByVal lpImageName As String, nSize As Long) As Long
-Private Declare Function GetParent Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function GetParent Lib "user32" (ByVal hwnd As Long) As Long
 Private Declare Function GetDesktopWindow Lib "user32" () As Long
 Private Declare Function timeGetTime Lib "winmm.dll" () As Long
 Private Declare Function IsWow64Process Lib "kernel32" (ByVal hProcess As Long, ByRef Wow64Process As Long) As Long
 Private Declare Function QueryDosDevice Lib "kernel32" Alias "QueryDosDeviceA" (ByVal lpDeviceName As String, ByVal lpTargetPath As String, ByVal ucchMax As Long) As Long
 Private Declare Function GetCurrentProcess Lib "kernel32" () As Long
 
-Private Declare Function OpenClipboard Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function OpenClipboard Lib "user32" (ByVal hwnd As Long) As Long
 Private Declare Function EmptyClipboard Lib "user32" () As Long
 Private Declare Function CloseClipboard Lib "user32" () As Long
 Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
@@ -336,6 +370,23 @@ Private Declare Function SetClipboardData Lib "user32" (ByVal wFormat As Long, B
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
 Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Long, ByVal dx As Long, ByVal dy As Long, ByVal cButtons As Long, ByVal dwExtraInfo As Long)
+'截屏相关
+Private Declare Function GdiplusStartup Lib "GDIPlus" (token As Long, inputbuf As GdiplusStartupInput, ByVal outputbuf As Long) As Long
+Private Declare Function GdiplusShutdown Lib "GDIPlus" (ByVal token As Long) As Long
+Private Declare Function GdipCreateBitmapFromHBITMAP Lib "GDIPlus" (ByVal hbm As Long, ByVal hPal As Long, Bitmap As Long) As Long
+Private Declare Function GdipDisposeImage Lib "GDIPlus" (ByVal Image As Long) As Long
+Private Declare Function GdipSaveImageToFile Lib "GDIPlus" (ByVal Image As Long, ByVal FileName As Long, clsidEncoder As GUID, encoderParams As Any) As Long
+Private Declare Function CLSIDFromString Lib "ole32" (ByVal str As Long, id As GUID) As Long
+Private Declare Function GdipCreateBitmapFromFile Lib "GDIPlus" (ByVal FileName As Long, Bitmap As Long) As Long
+Private Declare Function GetDC Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As Long, ByVal hdc As Long) As Long
+Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As Long) As Long
+Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
+Private Declare Function SelectObject Lib "gdi32" (ByVal hdc As Long, ByVal hObject As Long) As Long
+Private Declare Function OleCreatePictureIndirect Lib "olepro32.dll" (PicDesc As PicBmp, RefIID As GUID, ByVal fPictureOwnsHandle As Long, IPic As IPicture) As Long
+Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
+Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hdc As Long, ByVal nIndex As Long) As Long
 
 Private Const DelayOneTime = 300
 Private hWnd_ As Long '窗口句柄
@@ -348,17 +399,17 @@ Private strWindowInfo$ '保存所有窗口的信息，格式为 句柄 文本内容
 Private strWindowKeyWord$ '要参与的过滤的窗口的关键字，如果不需要过滤就留空
 
 '移动和设置窗口到指定位置，以及设置窗口的宽高。
-Public Function Move(Optional ByVal X, Optional ByVal Y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
-    If IsMissing(X) Then X = Left
-    If IsMissing(Y) Then Y = Top
+Public Function Move(Optional ByVal x, Optional ByVal y, Optional ByVal nWidth, Optional ByVal nHeight) As Long
+    If IsMissing(x) Then x = Left
+    If IsMissing(y) Then y = Top
     If IsMissing(nWidth) Then nWidth = Width
     If IsMissing(nHeight) Then nHeight = Height
     
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 Move 被调用。参数为 x=" & X & vbTab & " y=" & Y & vbTab & " nWidth=" & nWidth & vbTab & " nHeight=" & nHeight, False
+        writeToFile "DEBUG.txt", Now & " 函数 Move 被调用。参数为 x=" & x & vbTab & " y=" & y & vbTab & " nWidth=" & nWidth & vbTab & " nHeight=" & nHeight, False
     End If
     
-    Move = MoveWindow(hWnd_, X, Y, nWidth, nHeight, True)
+    Move = MoveWindow(hWnd_, x, y, nWidth, nHeight, True)
 End Function
 '移动窗口到屏幕中心
 Public Function MoveToCenter() As Long
@@ -366,21 +417,21 @@ Public Function MoveToCenter() As Long
         writeToFile "DEBUG.txt", Now & " 函数 MoveToCenter 被调用。", False
     End If
     
-    Dim X&, Y&, nWidth&, nHeight&
+    Dim x&, y&, nWidth&, nHeight&
     nWidth = Width
     nHeight = Height
-    X = (GetSystemMetrics(SM_CXSCREEN) - nWidth) \ 2
-    Y = (GetSystemMetrics(SM_CYSCREEN) - nHeight) \ 2
-    MoveToCenter = MoveWindow(hWnd_, X, Y, nWidth, nHeight, True)
+    x = (GetSystemMetrics(SM_CXSCREEN) - nWidth) \ 2
+    y = (GetSystemMetrics(SM_CYSCREEN) - nHeight) \ 2
+    MoveToCenter = MoveWindow(hWnd_, x, y, nWidth, nHeight, True)
 End Function
 '得到当前窗口的句柄
-Public Property Get hWnd() As Long
-    hWnd = hWnd_
+Public Property Get hwnd() As Long
+    hwnd = hWnd_
 End Property
 '设置类的句柄
-Public Property Let hWnd(ByVal hWnd As Long)
-    If IsWindow(hWnd) Then
-        hWnd_ = hWnd
+Public Property Let hwnd(ByVal hwnd As Long)
+    If IsWindow(hwnd) Then
+        hWnd_ = hwnd
     Else
         hWnd_ = 0
     End If
@@ -453,37 +504,37 @@ Public Property Get Caption() As String
     Caption = GetText(hWnd_)
 End Property
 '根据句柄获得窗口内容
-Public Function GetCaptionByHwnd(ByVal hWnd As Long) As String
-    GetCaptionByHwnd = GetTextByHwnd(hWnd)
+Public Function GetCaptionByHwnd(ByVal hwnd As Long) As String
+    GetCaptionByHwnd = GetTextByHwnd(hwnd)
 End Function
 '根据句柄获得窗口内容
-Public Function GetTextByHwnd(ByVal hWnd As Long) As String
-    GetTextByHwnd = GetText(hWnd)
+Public Function GetTextByHwnd(ByVal hwnd As Long) As String
+    GetTextByHwnd = GetText(hwnd)
 End Function
 '根据句柄获得窗口类名
-Public Function GetWindowClassNameByHwnd(ByVal hWnd As Long) As String
-    GetWindowClassNameByHwnd = GetClassNameByHwnd(hWnd)
+Public Function GetWindowClassNameByHwnd(ByVal hwnd As Long) As String
+    GetWindowClassNameByHwnd = GetClassNameByHwnd(hwnd)
 End Function
 '根据句柄获得窗口类名
-Public Function GetClassNameByHwnd(ByVal hWnd As Long) As String
+Public Function GetClassNameByHwnd(ByVal hwnd As Long) As String
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 GetClassNameByHwnd 被调用。参数为 hWnd=" & hWnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 GetClassNameByHwnd 被调用。参数为 hWnd=" & hwnd, False
     End If
     
     Dim lngHwnd&, strClassNameCurrent As String * 255
-    GetClassName hWnd, strClassNameCurrent, 255  '获得窗口类
+    GetClassName hwnd, strClassNameCurrent, 255  '获得窗口类
     GetClassNameByHwnd = Replace(strClassNameCurrent, Chr$(0), "")
 End Function
 '根据句柄获得窗口内容 窗口专用
-Public Function GetWindowTextByHwnd(ByVal hWnd As Long) As String
+Public Function GetWindowTextByHwnd(ByVal hwnd As Long) As String
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 GetWindowTextByHwnd 被调用。参数为 hWnd=" & hWnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowTextByHwnd 被调用。参数为 hWnd=" & hwnd, False
     End If
     
     Dim l&, strCaption$
-    l = GetWindowTextLength(hWnd)
+    l = GetWindowTextLength(hwnd)
     strCaption = Space(l)
-    GetWindowText hWnd, strCaption, l + 1
+    GetWindowText hwnd, strCaption, l + 1
     GetWindowTextByHwnd = strCaption
 End Function
 '得到当前窗口的类名
@@ -776,7 +827,7 @@ Public Function GetWindowByTitle(ByVal strTitle$, Optional ByVal intWaitSeconds&
         hWnd_ = 0
     Loop
 
-    wReturn.hWnd = hWnd_
+    wReturn.hwnd = hWnd_
     Set GetWindowByTitle = wReturn
     
     If DebugMe Then
@@ -827,12 +878,12 @@ Public Function GetWindowByTitleEx(ByVal strTitle$, Optional ByVal intWaitSecond
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
 
     If strHwndAllTmp <> "" Then
-        wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
+        wReturn.hwnd = Split(strHwndAllTmp, " ")(0)
     Else
-        wReturn.hWnd = 0
+        wReturn.hwnd = 0
     End If
     Set GetWindowByTitleEx = wReturn
-    hWnd_ = wReturn.hWnd
+    hWnd_ = wReturn.hwnd
     
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 GetWindowByTitleEx 执行完毕。", False
@@ -859,7 +910,7 @@ Public Function GetWindowByClassName(ByVal strClassName$, Optional ByVal intWait
         hWnd_ = 0
     Loop
 
-    wReturn.hWnd = hWnd_
+    wReturn.hwnd = hWnd_
     Set GetWindowByClassName = wReturn
     
     If DebugMe Then
@@ -911,12 +962,12 @@ Public Function GetWindowByClassNameEx(ByVal strClassName$, Optional ByVal intWa
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
 
     If strHwndAllTmp <> "" Then
-        wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
+        wReturn.hwnd = Split(strHwndAllTmp, " ")(0)
     Else
-        wReturn.hWnd = 0
+        wReturn.hwnd = 0
     End If
     Set GetWindowByClassNameEx = wReturn
-    hWnd_ = wReturn.hWnd
+    hWnd_ = wReturn.hwnd
     
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 GetWindowByClassNameEx 执行完毕。", False
@@ -964,7 +1015,7 @@ Public Function GetWindowByAppName(ByVal strAppName$, Optional ByVal intWaitSeco
         lngDelayCount = lngDelayCount + DelayOneTime '计算累计延时了多少，然后和用户设置的延时时间对比
         If lngDelayCount >= intWaitSeconds * 1000 Then Exit Do '超时未发现关键字strTitle
     Loop
-    wReturn.hWnd = hWnd_
+    wReturn.hwnd = hWnd_
     Set GetWindowByAppName = wReturn
     
     If DebugMe Then
@@ -1023,12 +1074,12 @@ Public Function GetWindowByAppNameEx(ByVal strAppName$, Optional ByVal intWaitSe
     If Not IsMissing(hWndAll) Then hWndAll = strHwndAllTmp '如果需要搜集所有句柄，那么则使用这个参数返回
 
     If strHwndAllTmp <> "" Then
-        wReturn.hWnd = Split(strHwndAllTmp, " ")(0)
+        wReturn.hwnd = Split(strHwndAllTmp, " ")(0)
     Else
-        wReturn.hWnd = 0
+        wReturn.hwnd = 0
     End If
     Set GetWindowByAppNameEx = wReturn
-    hWnd_ = wReturn.hWnd
+    hWnd_ = wReturn.hwnd
     
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 GetWindowByAppNameEx 执行完毕。", False
@@ -1080,12 +1131,12 @@ Public Function GetWindowByPID(ByVal pid As Long, Optional ByVal intWaitSeconds&
     If strHwndAllTmp <> "" Then
         Dim vHwnd
         vHwnd = Split(strHwndAllTmp, " ")
-        wReturn.hWnd = vHwnd(UBound(vHwnd))
+        wReturn.hwnd = vHwnd(UBound(vHwnd))
     Else
-        wReturn.hWnd = 0
+        wReturn.hwnd = 0
     End If
     Set GetWindowByPID = wReturn
-    hWnd_ = wReturn.hWnd
+    hWnd_ = wReturn.hwnd
     
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 GetWindowByPID 执行完毕。", False
@@ -1116,7 +1167,7 @@ Public Function Load(WindowHwnd As Variant) As clsWindow
     If IsNumeric(WindowHwnd) Then
         hWnd_ = CLng(WindowHwnd)
         If CheckWindow Then
-            wReturn.hWnd = hWnd_
+            wReturn.hwnd = hWnd_
             Set Load = wReturn
         Else
             MsgBox "类初始化错误！句柄“" & WindowHwnd & "”对应的窗口不存在！", vbExclamation
@@ -1134,7 +1185,7 @@ Public Function GetWindowByHwnd(WindowHwnd As Variant) As clsWindow
     If IsNumeric(WindowHwnd) Then
         hWnd_ = CLng(WindowHwnd)
         If CheckWindow Then
-            wReturn.hWnd = hWnd_
+            wReturn.hwnd = hWnd_
             Set GetWindowByHwnd = wReturn
         Else
             MsgBox "类初始化错误！句柄“" & WindowHwnd & "”对应的窗口不存在！", vbExclamation
@@ -1151,18 +1202,18 @@ Public Function GetWindowByCursorPos() As clsWindow
     
     Dim tPoint As POINTAPI
     GetCursorPos tPoint '获得当前鼠标位置
-    hWnd_ = WindowFromPoint(tPoint.X, tPoint.Y)
-    wReturn.hWnd = hWnd_
+    hWnd_ = WindowFromPoint(tPoint.x, tPoint.y)
+    wReturn.hwnd = hWnd_
     Set GetWindowByCursorPos = wReturn
 End Function
 '根据指定的点获取窗口或控件的句柄
-Public Function GetWindowByPoint(ByVal X As Long, ByVal Y As Long) As clsWindow
+Public Function GetWindowByPoint(ByVal x As Long, ByVal y As Long) As clsWindow
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByPoint 被调用。参数为 X=" & X & vbTab & " Y=" & Y, False
+        writeToFile "DEBUG.txt", Now & " 函数 GetWindowByPoint 被调用。参数为 X=" & x & vbTab & " Y=" & y, False
     End If
     
-    hWnd_ = WindowFromPoint(X, Y)
-    wReturn.hWnd = hWnd_
+    hWnd_ = WindowFromPoint(x, y)
+    wReturn.hwnd = hWnd_
     Set GetWindowByPoint = wReturn
 End Function
 '根据控件的类名设置控件的显示文字
@@ -1587,7 +1638,7 @@ Public Function GetCursorPosCurrent() As String
     
     Dim tPoint As POINTAPI
     GetCursorPos tPoint  '获得当前鼠标位置
-    GetCursorPosCurrent = tPoint.X & "," & tPoint.Y
+    GetCursorPosCurrent = tPoint.x & "," & tPoint.y
 End Function
 '直接获得当前鼠标下的窗口或控件的句柄
 Public Function GetCursorPoint() As String
@@ -1808,12 +1859,12 @@ Public Property Let Visible(ByVal vNewValue As Boolean)
     End If
 End Property
 
-Public Property Get hDC() As Long
+Public Property Get hdc() As Long
     If Not CheckWindow() Then Exit Property
-    hDC = GetDC(hWnd_)
+    hdc = GetDC(hWnd_)
 End Property
 
-Public Property Let hDC(ByVal vNewValue As Long)
+Public Property Let hdc(ByVal vNewValue As Long)
 '
 End Property
 
@@ -1877,26 +1928,26 @@ Public Sub SetTop(Optional ByVal isSetTop As Boolean = True)
         writeToFile "DEBUG.txt", Now & " 函数 SetTop 被调用。参数为 isSetTop=" & isSetTop, False
     End If
     
-    SetWindowPos hWnd, IIf(isSetTop, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOSIZE + SWP_NOMOVE
+    SetWindowPos hwnd, IIf(isSetTop, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOSIZE + SWP_NOMOVE
 End Sub
 '判断窗口置顶函数
-Public Function IsTopMost(Optional ByVal hWnd&) As Boolean
+Public Function IsTopMost(Optional ByVal hwnd&) As Boolean
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 IsTopMost 被调用。参数为 hWnd=" & hWnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 IsTopMost 被调用。参数为 hWnd=" & hwnd, False
     End If
     
-    If hWnd = 0 Then hWnd = hWnd_ '如果没写则表示处理当前存储的句柄
+    If hwnd = 0 Then hwnd = hWnd_ '如果没写则表示处理当前存储的句柄
     Dim Ret As Long, t1 As Long, t2 As Long
-    Ret = GetWindowLong(hWnd, GWL_EXSTYLE)
+    Ret = GetWindowLong(hwnd, GWL_EXSTYLE)
     t1 = Ret Or WS_EX_TOPMOST
     IsTopMost = (Ret = t1)
 End Function
 '判断当前窗口是否为活动窗口
-Public Function IsForegroundWindow(Optional ByVal hWnd&) As Boolean
-    If hWnd = 0 Then hWnd = hWnd_ '如果没写则表示处理当前存储的句柄
+Public Function IsForegroundWindow(Optional ByVal hwnd&) As Boolean
+    If hwnd = 0 Then hwnd = hWnd_ '如果没写则表示处理当前存储的句柄
     
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 IsForegroundWindow 被调用。参数为 hWnd=" & hWnd, False
+        writeToFile "DEBUG.txt", Now & " 函数 IsForegroundWindow 被调用。参数为 hWnd=" & hwnd, False
     End If
     
     IsForegroundWindow = (GetForegroundWindow() = hWnd_)
@@ -1916,12 +1967,12 @@ Public Property Get Version() As String
     Version = strVersion
 End Property
 '根据指定的index选择下拉框中内容
-Public Sub SelectComboBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
+Public Sub SelectComboBoxIndex(ByVal hwnd As Long, ByVal intIndex As Integer)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 过程 SelectComboBoxIndex 被调用。参数为 hWnd=" & hWnd & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " 过程 SelectComboBoxIndex 被调用。参数为 hWnd=" & hwnd & vbTab & " intIndex=" & intIndex, False
     End If
     
-    SendMessage hWnd, CB_SETCURSEL, intIndex, 0
+    SendMessage hwnd, CB_SETCURSEL, intIndex, 0
 End Sub
 '延时，单位为毫秒
 Public Function Wait(ByVal MilliSeconds As Long)
@@ -2046,7 +2097,7 @@ Public Function FileToClipboard(ByVal FileName As String)
     
     FileName = FileName & vbNullChar & vbNullChar
       
-    If OpenClipboard(Me.hWnd) = 0 Then Exit Function
+    If OpenClipboard(Me.hwnd) = 0 Then Exit Function
     Call EmptyClipboard
     Len1 = Len(dFiles)
     Len2 = LenB(StrConv(FileName, vbFromUnicode))
@@ -2062,10 +2113,10 @@ Public Function FileToClipboard(ByVal FileName As String)
 End Function
 '复制文本内容
 Public Function ClipboardSetText(ByVal sText$) As Boolean
-    Dim hMem As Long, pMem As Long, s$, hWnd As Long
+    Dim hMem As Long, pMem As Long, s$, hwnd As Long
     Dim bOk As Boolean
-    hWnd = 0 'Me.hWnd
-    If OpenClipboard(hWnd) = 0 Then Exit Function
+    hwnd = 0 'Me.hWnd
+    If OpenClipboard(hwnd) = 0 Then Exit Function
     EmptyClipboard
     
     ' ANSI
@@ -2089,13 +2140,109 @@ Public Function ClipboardSetText(ByVal sText$) As Boolean
     ClipboardSetText = bOk
 End Function
 '【20230319新增方法】此方法未确定是否可用。根据指定的index选择下拉框多选框内容。改写自 网友：莫&聪（QQ175140289）
-Public Sub SelectComboMutiBoxIndex(ByVal hWnd As Long, ByVal intIndex As Integer)
+Public Sub SelectComboMutiBoxIndex(ByVal hwnd As Long, ByVal intIndex As Integer)
     If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 过程 SelectComboMutiBoxIndex 被调用。参数为 hWnd=" & hWnd & vbTab & " intIndex=" & intIndex, False
+        writeToFile "DEBUG.txt", Now & " 过程 SelectComboMutiBoxIndex 被调用。参数为 hWnd=" & hwnd & vbTab & " intIndex=" & intIndex, False
     End If
 '    SendMessage hWnd, CB_SETSEL, intIndex, 0 '显示下拉列表 Me.hWnd ＝ hwnd＇设定下拉框为当前窗体
-    SendMessage hWnd, CB_SHOWDROPDOWN, True, ByVal 0& '此方法为Cursor生成
+    SendMessage hwnd, CB_SHOWDROPDOWN, True, ByVal 0& '此方法为Cursor生成
     
-    SendMessage hWnd, LB_SETCURSEL, 1, ByVal 0& '此方法为Cursor生成。功能是选择第几项
+    SendMessage hwnd, LB_SETCURSEL, 1, ByVal 0& '此方法为Cursor生成。功能是选择第几项
     ClickPoint 5, 20 * intIndex + 30
 End Sub
+'全屏截图
+Public Sub CaptureScreen(ByVal strSavePath As String)
+    CaptureScreenRegion strSavePath
+End Sub
+'屏幕区域截图。默认可以省略后面4个参数，表示截图整个屏幕
+Public Sub CaptureScreenRegion(ByVal strSavePath As String, Optional ByVal lngX As Long = 0, Optional ByVal lngY As Long = 0, Optional ByVal lngWidth As Long, Optional ByVal lngHeight As Long, Optional ByVal lngHwndSource As Long = 0)
+    Dim pPicture As New StdPicture
+
+    Dim screenDc As Long
+    Dim lPicDc As Long, lPicBmp As Long
+    Dim G As GUID, p As PicBmp
+    
+    screenDc = GetDC(lngHwndSource) '可以指定，默认0表示当前桌面
+    lPicDc = CreateCompatibleDC(screenDc)
+    lPicBmp = CreateCompatibleBitmap(screenDc, lngWidth, lngHeight)
+    SelectObject lPicDc, lPicBmp
+    If lngWidth = 0 Then lngWidth = Screen.Width / Screen.TwipsPerPixelX '这里有问题，没法得到原始分辨率，只能得到缩放后的
+    If lngHeight = 0 Then lngHeight = Screen.Height / Screen.TwipsPerPixelY
+    BitBlt lPicDc, 0, 0, lngWidth, lngHeight, screenDc, lngX, lngY, vbSrcCopy
+    With G
+        .Data1 = &H20400
+        .Data4(0) = &HC0&
+        .Data4(7) = &H46&
+    End With
+    With p
+        .Size = Len(p)
+        .Type = vbPicTypeBitmap
+        .hbmp = lPicBmp
+        .hPal = &H0&
+    End With
+    OleCreatePictureIndirect p, G, True, pPicture
+    ReleaseDC 0, screenDc
+    DeleteObject lPicBmp
+
+    PictureBoxSaveJPG pPicture, strSavePath
+End Sub
+'窗口截图
+Public Sub CaptureWindow(ByVal strSavePath As String)
+    CaptureScreenRegion strSavePath, Left, Top, Width, Height, hWnd_
+End Sub
+'窗口区域截图
+Public Sub CaptureWindowRegion(ByVal strSavePath As String, Optional ByVal lngX As Long = 0, Optional ByVal lngY As Long = 0, Optional ByVal lngWidth As Long, Optional ByVal lngHeight As Long)
+    If lngWidth = 0 Then lngWidth = Width
+    If lngHeight = 0 Then lngHeight = Height
+    CaptureScreenRegion strSavePath, Left + lngX, Top + lngY, lngWidth, lngHeight, hWnd_
+End Sub
+'保存jpg图
+Private Function PictureBoxSaveJPG(ByVal pict As StdPicture, ByVal FileName As String, Optional ByVal quality As Byte = 80) As Boolean
+    Dim tSI As GdiplusStartupInput
+    Dim lRes As Long
+    Dim lGDIP As Long
+    Dim lBitmap As Long
+    
+    '初始化 GDI+
+    tSI.GdiplusVersion = 1
+    lRes = GdiplusStartup(lGDIP, tSI, 0)
+    
+    If lRes = 0 Then
+        '从句柄创建 GDI+ 图像
+        lRes = GdipCreateBitmapFromHBITMAP(pict.Handle, 0, lBitmap)
+        
+        If lRes = 0 Then
+        Dim tJpgEncoder As GUID
+        Dim tParams As EncoderParameters
+        
+        '初始化解码器的GUID标识
+        CLSIDFromString StrPtr("{557CF401-1A04-11D3-9A73-0000F81EF32E}"), tJpgEncoder
+        
+        '设置解码器参数
+        tParams.Count = 1
+        With tParams.Parameter ' Quality
+            '得到Quality参数的GUID标识
+            CLSIDFromString StrPtr("{1D5BE4B5-FA4A-452D-9CDD-5DB35105E7EB}"), .GUID
+            .NumberOfValues = 1
+            .Type = 4
+            .Value = VarPtr(quality)
+        End With
+        
+        '保存图像
+        lRes = GdipSaveImageToFile(lBitmap, StrPtr(FileName), tJpgEncoder, tParams)
+        
+        '销毁GDI+图像
+        GdipDisposeImage lBitmap
+    End If
+    
+    '销毁 GDI+
+    GdiplusShutdown lGDIP
+    End If
+    
+    If lRes Then
+        PictureBoxSaveJPG = False
+    Else
+        PictureBoxSaveJPG = True
+    End If
+End Function
+
